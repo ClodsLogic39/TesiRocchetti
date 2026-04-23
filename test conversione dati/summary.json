@@ -1,0 +1,31 @@
+{
+  "sport": "running",
+  "duration_seconds": 4.368587970733643,
+  "start_time": "2026-04-20T14:37:40.318202",
+  "end_time": "2026-04-20T14:37:44.686790",
+  "metric_averages": {
+    "Trunk Lean": 3.674006511898332
+  },
+  "metric_mins": {
+    "Trunk Lean": 0.5390974434453851
+  },
+  "metric_maxs": {
+    "Trunk Lean": 9.952471301681474
+  },
+  "alert_counts": {
+    "R01": 0,
+    "R02": 0,
+    "R03": 0,
+    "R04": 0,
+    "R06": 0,
+    "R07": 0,
+    "R10": 1
+  },
+  "total_alerts": 1,
+  "marker_mode_used": false,
+  "marker_quality_avg": null,
+  "markers_tracked": null,
+  "marker_stats": null,
+  "marker_impact": null,
+  "view": "lateral_left"
+}

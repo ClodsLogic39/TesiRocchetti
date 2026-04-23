@@ -1,0 +1,228 @@
+# Documentazione Conversione Dati Motion Capture
+# Sessione: running_20260420_143730
+# Data: 21 Aprile 2026
+
+================================================================================
+# 1. PANORAMICA DEL PROCESSO
+================================================================================
+
+Obbiettivo: Convertire i dati Motion Capture da MediaPipe in un formato standard (C3D)
+         con quaternioni, velocità e accelerazione angolare enhanced.
+
+Input:  segments_frames.json (dati MediaPipe - formato proprietario JSON)
+Output: running_20260420_143730_processed.c3d (formato C3D standard biomeccanico)
+
+================================================================================
+# 2. PIPELINE DI ELABORAZIONE
+================================================================================
+
+Step 1: PARSING
+- Leggere segments_frames.json
+- Estrarre posizioni start/end point per ogni segmento
+- Identificare segmenti con coverage > 0%
+
+Step 2: SELEZIONE SEGMENTI VALIDI
+- head_neck: 100.0% coverage
+- shoulder_width: 100.0% coverage
+- humerus_left: 99.4% coverage
+- forearm_left: 97.7% coverage
+- humerus_right: 73.7% coverage
+- forearm_right: 73.7% coverage
+- pelvis_center: 2.3% coverage
+- pelvis_width: 2.3% coverage
+- torso: 2.3% coverage
+
+N.B.: I segmenti con coverage 0% sono stati esclusi (femur, tibia, foot, heel, stride)
+      per via della vista laterale (lateral_left) che non cattura il lato controlaterale.
+
+Step 3: COSTRUZIONE LOCAL FRAME
+- Per ogni segmento: y-axis = end_point - start_point (direzione)
+- Costruire assi ortogonali x, z con cross product
+- Ottenere rotation matrix 3x3
+
+Step 4: CONVERSIONE A QUATERNIONI
+- Rotation matrix → unit quaternione (w, x, y, z)
+- Libreria: scipy.spatial.transform.Rotation
+
+Step 5: SMOOTHING
+- Aplicare Gaussian filter (sigma=1.5) per ridurre rumore
+- Libreria: scipy.ndimage.gaussian_filter1d
+
+Step 6: CALCOLO VELOCITÀ ANGOLARE
+- Derivata quaternion: q_dot = dq/dt
+- Formula: omega = 2 * q_dot * q_conjugate
+- Ottenere velocità angolare (rad/s)
+
+Step 7: CALCOLO ACCELERAZIONE ANGOLARE
+- Derivata della velocità angolare: alpha = domega/dt
+- Ottenere accelerazione angolare (rad/s²)
+
+Step 8: SCRITTURA C3D
+- Libreria: ezc3d (versione 1.7.0)
+- Formato: (3, n_markers, n_frames)
+- Canali analogici: omega + alpha per ogni segmento
+
+================================================================================
+# 3. LIBRERIE E PROGRAMMI UTILIZZATI
+================================================================================
+
+Python 3.13 (via Miniconda3)
+├── numpy 1.17.1
+├── scipy 1.17.1
+├── ezc3d 1.7.0          <-- Per scrittura C3D
+└-- kineticstoolkit 0.17.0  <-- NON USATO (vedi sezione 4)
+
+
+================================================================================
+# 3b. NOTE SU QMT
+================================================================================
+
+LIBRERIA CONSIDERATA: qmt (Quaternion MoCap Toolbox)
+-----------------------------------------------------
+QMT è una libreria specializzata per motion capture che supporta:
+- Calcolo quaternioni da marker positions
+- Decomposizione angoli articolari secondo ISB
+- Heading correction e alignment
+
+PERCHÉ NON È STATA UTILIZZATA:
+-------------------------------
+1. API complessa per il nostro caso d'uso specifico
+2. Richiede struttura dati specifica 
+3. La conversione manuale con scipy è risultata più diretta
+
+COME SI POTREBBE USARE QMT:
+---------------------------
+  import qmt
+  
+  # Rotation matrix → quaternion
+  q = qmt.rotmat2quat(R_matrix)
+  
+  # Angoli relativi (joint angles)
+  q_relative = qmt.qmult(q_parent_inv, q_child)
+  
+  # Decomposizione Euler ISB
+  euler_angles = qmt.quat2euler(q_relative, seq='zxy')
+
+================================================================================
+# 4. PROBLEMA CON KINETICS TOOLKIT (KTK)
+================================================================================
+
+PROBLEMA RISCONTRATO:
+-----------------
+Durante l'esecuzione dello script, Kinetics Toolkit ha fallito la
+scrittura del file C3D con questo errore:
+
+  ValueError: Point head_neck is not a Nx4 series of points.
+
+ANALISI DEL CAUSA:
+--------------
+1. Kinetics Toolkit si aspetta coordinate omogenee Nx4 (x, y, z, 1)
+   I nostri dati erano in formato Nx3.
+
+2. L'API per le rotazioni in KTK prevede matrices 3x3 appiattite,
+   ma il formato richiesto era incompatibile con i nostri quaternioni.
+
+3. La funzione write_c3d() di KTK ha delle righe di conversione
+   che causano shape mismatch con arrays di NumPy 2.0+.
+
+SOLUZIONE ADOTTATA:
+-----------------
+Si è utilizzata la libreria ezc3d direttamente, bypassando KTK.
+
+CODICE FUNZIONANTE CON KTK (possibile):
+---------------------------------
+Se si desidera usare KTK in futuro, ecco la soluzione:
+
+  # 1. Convertire posizioni a coordinate omogenee (Nx4)
+  pos_homogeneous = np.ones((n_frames, 4))
+  pos_homogeneous[:, :3] = positions
+  
+  # 2. Creare TimeSeries con coordinate corrette
+  points_ts = ktk.TimeSeries(time=time, data={seg: pos_homogeneous})
+  
+  # 3. Usare write_c3d con points=points_ts (senza rotations)
+  ktk.write_c3d(output_path, points=points_ts)
+
+N.B.: Le rotazioni (quaternioni) non sono supportate nativamente
+      da KTK senza ulteriori conversioni. Meglio usare ezc3d direttamente.
+
+================================================================================
+# 5. STRUTTURA FILE INPUT/OUTPUT
+================================================================================
+
+INPUT (dati grezzi):
+├── segments_frames.json      - Posizioni 3D segmenti per frame
+├── data.json             - Metriche temporali
+├── summary.json          - Metadata sessione
+├── segments_summary.json - Statistiche coverage
+└-- alerts.json           - Avvisi tracking
+
+OUTPUT (dati convertiti):
+├── running_20260420_143730_processed.c3d   - Formato C3D binario
+├── running_20260420_143730_processed.json - Backup testuale
+└-- process_session.py                 - Script elaborazione
+
+================================================================================
+# 6. FORMATO C3D GENERATO
+================================================================================
+
+Struttura:
+- Header:
+  - POINT:USED = 9 (segmenti)
+  - POINT:RATE = 30.0 fps
+  - POINT:FRAMES = 350
+  - ANALOG:USED = 54 canali
+
+- Point Labels:
+  head_neck, shoulder_width, humerus_left, forearm_left,
+  humerus_right, forearm_right, pelvis_center,
+  pelvis_width, torso
+
+- Analog Labels (54 totali):
+  {segment}_omega_x, {segment}_omega_y, {segment}_omega_z,
+  {segment}_alpha_x, {segment}_alpha_y, {segment}_alpha_z
+  (per ognuno dei 9 segmenti)
+
+Dati:
+- Points: shape (3, 9, 350) - coordinate XYZ
+- Analogs: shape (1, 54, 350) - velocità + accelerazione
+
+================================================================================
+# 7. NOTE E LIMITAZIONI
+================================================================================
+
+1. COVERAGE PARZIALE
+   - Solo 9/21 segmenti hanno coverage > 0%
+   - I segmenti degli arti inferiori (lato non visibile) sono esclusi
+   - Questo è una limitazione della vista laterale (lateral_left)
+
+2. CALCOLO VELOCITÀ/ACCELERAZIONE
+   - Derivate numeriche (finite differences)
+   - Gaussian smoothing applicato per ridurre rumore
+   - Ordine: quaternioni → derive (più accurato di posizioni → derive)
+
+3. FORZE REAZIONE AL SUOLO (GRF)
+   - NON calcolate (richiederebbero force plates o modello muscoloscheletrico)
+   - I dati originali non contengono misure di forza
+
+4. FORMATO C3D
+   - Standard industriale per biomeccanica
+   - Leggibile da Visual3D, KTK, OpenSim, etc.
+
+================================================================================
+# 8. RIUTILIZZO DELLO SCRIPT
+================================================================================
+
+Per processare altre sessioni:
+
+1. Modificare SESSION_DIR in process_session.py:
+   SESSION_DIR = "running_20260220_121922"
+
+2. Eseguire:
+   ~/miniconda3/bin/python process_session.py
+
+3. Output generato nella cartella corrente.
+
+================================================================================
+# FINE DOCUMENTAZIONE
+================================================================================
