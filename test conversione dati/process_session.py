@@ -181,8 +181,11 @@ def process_session():
     print(f"\nProcessing {len(available_segments)} segments with valid data")
     
     # Step 1: Extract positions and build quaternions
+    # Modifica: ora salviamo start_points, end_points e midpoints separatamente
+    # invece di usare solo midpoints. I punti (articolazioni/giunture) sono gli
+    # estremi dei segmenti, non il centro.
     segment_quaternions = {}
-    segment_positions = {}  # For midpoint
+    segment_data = {}  # Contains start_points, end_points, midpoints
     
     for seg_name in available_segments:
         print(f"Processing segment: {seg_name}")
@@ -192,31 +195,47 @@ def process_session():
         
         # Build local frames and convert to quaternions
         quaternions = []
+        starts = []
+        ends = []
         midpoints = []
         
         for i, pos in enumerate(positions):
             if pos is None:
                 quaternions.append(None)
+                starts.append(None)
+                ends.append(None)
                 midpoints.append(None)
             else:
                 R = build_local_frame(pos[0], pos[1])
                 if R is not None:
                     q = rotation_matrix_to_quaternion(R)
                     quaternions.append(q)
+                    # Start and end points as segment extremities (joint positions)
+                    starts.append(pos[0])
+                    ends.append(pos[1])
                     # Midpoint as marker position
                     mid = [(pos[0][j] + pos[1][j]) / 2 for j in range(3)]
                     midpoints.append(mid)
                 else:
                     quaternions.append(None)
+                    starts.append(None)
+                    ends.append(None)
                     midpoints.append(None)
         
         # Convert to arrays, handle missing data
+        # Identity quaternion [0,0,0,1] = w,x,y,z for missing frames
         q_array = np.array([q if q is not None else [0, 0, 0, 1] for q in quaternions])
+        starts_array = np.array([s if s is not None else [0, 0, 0] for s in starts])
+        ends_array = np.array([e if e is not None else [0, 0, 0] for e in ends])
         mid_array = np.array([m if m is not None else [0, 0, 0] for m in midpoints])
         
-        # Store
+        # Store all three point types
         segment_quaternions[seg_name] = q_array
-        segment_positions[seg_name] = mid_array
+        segment_data[seg_name] = {
+            'start_points': starts_array,
+            'end_points': ends_array,
+            'midpoints': mid_array
+        }
     
     # Step 2: Smooth data before differentiation
     print("\nSmoothing data...")
@@ -288,20 +307,21 @@ def process_session():
     output_dir = f"{SESSION_DIR}_processed"
     
     # Try C3D export using ezc3d directly
+    # Modifica: usiamo midpoints per C3D (formato standard usa un punto per segmento)
     c3d_success = False
     
     if KTK_AVAILABLE:
         try:
             import ezc3d
             
-            # Prepare point data
-            point_labels = list(segment_positions.keys())
+            # Prepare point data - usando midpoints per C3D
+            point_labels = list(segment_data.keys())
             n_points = len(point_labels)
             
             # Build points array: (3, n_points, n_frames)
             points_array = np.zeros((3, n_points, n_frames))
             for i, seg_name in enumerate(point_labels):
-                pos = segment_positions[seg_name]  # (n_frames, 3)
+                pos = segment_data[seg_name]['midpoints']  # (n_frames, 3) - usiamo midpoints
                 points_array[0, i, :] = pos[:, 0]  # x
                 points_array[1, i, :] = pos[:, 1]  # y
                 points_array[2, i, :] = pos[:, 2]  # z
@@ -352,6 +372,7 @@ def process_session():
             traceback.print_exc()
     
     # Fallback: Save as JSON (universal, portable)
+    # Modifica: ora salviamo start_points, end_points e midpoints separatamente
     if not c3d_success:
         print(f"Saving as JSON and CSV formats...")
         
@@ -368,10 +389,12 @@ def process_session():
             "angular_acceleration": {},
         }
         
-        for seg_name in segment_positions:
-            # Positions as list
+        # Modifica: includiamo start_points, end_points e midpoints invece di un singolo positions
+        for seg_name in segment_data:
             output_data["segments"][seg_name] = {
-                "positions": segment_positions[seg_name].tolist(),
+                "start_points": segment_data[seg_name]['start_points'].tolist(),
+                "end_points": segment_data[seg_name]['end_points'].tolist(),
+                "midpoints": segment_data[seg_name]['midpoints'].tolist(),
                 "quaternions": segment_quaternions[seg_name].tolist(),
                 "angular_velocity": segment_angular_velocity[seg_name].tolist(),
                 "angular_acceleration": segment_angular_accel[seg_name].tolist(),
@@ -384,15 +407,18 @@ def process_session():
         print(f"JSON saved: {json_path}")
         
         # Save time series as CSV (one file per segment)
+        # Modifica: includiamo start_points, end_points e midpoints invece di un singolo pos
         import csv
-        for seg_name in segment_positions:
+        for seg_name in segment_data:
             csv_path = f"{output_dir}_{seg_name}.csv"
             with open(csv_path, 'w', newline='') as f:
                 writer = csv.writer(f)
-                # Header
+                # Header - now includes start, end, and mid points
                 writer.writerow([
                     "time", 
-                    "pos_x", "pos_y", "pos_z",
+                    "start_x", "start_y", "start_z",
+                    "end_x", "end_y", "end_z",
+                    "mid_x", "mid_y", "mid_z",
                     "quat_w", "quat_x", "quat_y", "quat_z",
                     "omega_x", "omega_y", "omega_z",
                     "alpha_x", "alpha_y", "alpha_z"
@@ -401,7 +427,9 @@ def process_session():
                 for i in range(n_frames):
                     row = [
                         time[i],
-                        *segment_positions[seg_name][i],
+                        *segment_data[seg_name]['start_points'][i],
+                        *segment_data[seg_name]['end_points'][i],
+                        *segment_data[seg_name]['midpoints'][i],
                         *segment_quaternions[seg_name][i],
                         *segment_angular_velocity[seg_name][i],
                         *segment_angular_accel[seg_name][i],
@@ -426,8 +454,11 @@ def process_session():
         for seg in available_segments:
             print(f"  - {output_dir}_{seg}.csv")
     
+    # Modifica: restituiamo anche start_points e end_points oltre a midpoints
     return {
-        'positions': segment_positions,
+        'start_points': {seg: segment_data[seg]['start_points'] for seg in segment_data},
+        'end_points': {seg: segment_data[seg]['end_points'] for seg in segment_data},
+        'midpoints': {seg: segment_data[seg]['midpoints'] for seg in segment_data},
         'quaternions': segment_quaternions,
         'angular_velocity': segment_angular_velocity,
         'angular_acceleration': segment_angular_accel,
