@@ -26,6 +26,10 @@ Per salvare ed esportare i dati, le opzioni principali sono:
 - JSON / CSV:                      Formati testuali semplici e compatibili con ogni sistema. Ideali per servizi web o strumenti 
                                    di visualizzazione moderni, ma meno efficienti su grandi volumi di dati.
 
+- GLB (GL Binary) è il formato binario di glTF 2.0 - contiene geometrie 3D pre-costruite (mesh di cilindri per i segmenti corporei) pronte per il rendering senza elaborazione aggiuntiva.
+Il vantaggio è l'interfacciamento diretto con Three.js: Three.js integra nativamente GLTFLoader, quindi il file GLB viene caricato con una singola chiamata GLTFLoader.load() e le mesh compaiono nella scena immediatamente. Il viewer HTML sfrutta questo meccanismo per visualizzare i segmenti senza ricostruire la geometria da zero.
+Contemporaneamente si può creare un file JSON con tutti i dati per frame (start_points, end_points, quaternions) che alimenta l'animazione temporale: il viewer legge il JSON per iterare i frame e posizionare/ruotare le mesh GLB in tempo reale.
+
 
 3. Strumenti per la Visualizzazione 3D
 
