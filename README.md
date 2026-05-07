@@ -8,7 +8,7 @@ Questo progetto implementa una pipeline per l'elaborazione di dati di motion cap
 
 2. **Rendering 3D**: I dati di movimento elaborati vengono resi in 3D per visualizzazione e analisi.
 
-3. **Archiviazione e Interrogazione**: I dati renderizzati vengono archiviati in un database relazionale che supporta query complesse tramite una SDT personalizzata.
+3. **Archiviazione e Interrogazione**: I dati renderizzati vengono archiviati in un database relazionale che supporta query complesse tramite una CFG personalizzata.
 
 ## Casi d'Uso
 

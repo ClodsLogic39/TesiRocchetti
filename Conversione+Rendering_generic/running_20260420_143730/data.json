@@ -1,0 +1,1056 @@
+[
+  {
+    "timestamp": 0.00029087066650390625,
+    "metrics": {
+      "tracking_quality": 0.7149713751520418
+    },
+    "tracking_quality": 0.7149713751520418
+  },
+  {
+    "timestamp": 0.034620046615600586,
+    "metrics": {
+      "tracking_quality": 0.7157779884886016
+    },
+    "tracking_quality": 0.7157779884886016
+  },
+  {
+    "timestamp": 0.06841897964477539,
+    "metrics": {
+      "Trunk Lean": 4.848220359696189,
+      "tracking_quality": 0.71651288611765
+    },
+    "tracking_quality": 0.71651288611765
+  },
+  {
+    "timestamp": 0.09982609748840332,
+    "metrics": {
+      "Trunk Lean": 4.246840233644201,
+      "tracking_quality": 0.7173976976816696
+    },
+    "tracking_quality": 0.7173976976816696
+  },
+  {
+    "timestamp": 0.13260293006896973,
+    "metrics": {
+      "Trunk Lean": 3.8915367497071536,
+      "tracking_quality": 0.7176480470493103
+    },
+    "tracking_quality": 0.7176480470493103
+  },
+  {
+    "timestamp": 0.1645798683166504,
+    "metrics": {
+      "Trunk Lean": 3.6574116372042416,
+      "tracking_quality": 0.7182052006338022
+    },
+    "tracking_quality": 0.7182052006338022
+  },
+  {
+    "timestamp": 0.1965029239654541,
+    "metrics": {
+      "Trunk Lean": 3.4682672694985532,
+      "tracking_quality": 0.7182552348272249
+    },
+    "tracking_quality": 0.7182552348272249
+  },
+  {
+    "timestamp": 0.23169708251953125,
+    "metrics": {
+      "Trunk Lean": 3.168675030541145,
+      "tracking_quality": 0.7185352797604344
+    },
+    "tracking_quality": 0.7185352797604344
+  },
+  {
+    "timestamp": 0.2641308307647705,
+    "metrics": {
+      "Trunk Lean": 2.868474373412607,
+      "tracking_quality": 0.718954828166192
+    },
+    "tracking_quality": 0.718954828166192
+  },
+  {
+    "timestamp": 0.2975790500640869,
+    "metrics": {
+      "Trunk Lean": 2.6393075627937272,
+      "tracking_quality": 0.7175109118506953
+    },
+    "tracking_quality": 0.7175109118506953
+  },
+  {
+    "timestamp": 0.33065199851989746,
+    "metrics": {
+      "Trunk Lean": 2.500791532727425,
+      "tracking_quality": 0.7163138904612755
+    },
+    "tracking_quality": 0.7163138904612755
+  },
+  {
+    "timestamp": 0.3642880916595459,
+    "metrics": {
+      "Trunk Lean": 2.421122164167684,
+      "tracking_quality": 0.7151485889991102
+    },
+    "tracking_quality": 0.7151485889991102
+  },
+  {
+    "timestamp": 0.39893388748168945,
+    "metrics": {
+      "Trunk Lean": 2.321316041963371,
+      "tracking_quality": 0.714043656548187
+    },
+    "tracking_quality": 0.714043656548187
+  },
+  {
+    "timestamp": 0.4349238872528076,
+    "metrics": {
+      "Trunk Lean": 2.2668119907798285,
+      "tracking_quality": 0.712882337075412
+    },
+    "tracking_quality": 0.712882337075412
+  },
+  {
+    "timestamp": 0.4686870574951172,
+    "metrics": {
+      "Trunk Lean": 2.2346126036956093,
+      "tracking_quality": 0.7118072563695905
+    },
+    "tracking_quality": 0.7118072563695905
+  },
+  {
+    "timestamp": 0.49886393547058105,
+    "metrics": {
+      "Trunk Lean": 1.9484678730797949,
+      "tracking_quality": 0.710622206993955
+    },
+    "tracking_quality": 0.710622206993955
+  },
+  {
+    "timestamp": 0.5311791896820068,
+    "metrics": {
+      "Trunk Lean": 1.7172368917514946,
+      "tracking_quality": 0.709168842287578
+    },
+    "tracking_quality": 0.709168842287578
+  },
+  {
+    "timestamp": 0.5664260387420654,
+    "metrics": {
+      "Trunk Lean": 1.5782960419370515,
+      "tracking_quality": 0.7079391451618655
+    },
+    "tracking_quality": 0.7079391451618655
+  },
+  {
+    "timestamp": 0.5999720096588135,
+    "metrics": {
+      "Trunk Lean": 1.5226394757927715,
+      "tracking_quality": 0.7066749150829061
+    },
+    "tracking_quality": 0.7066749150829061
+  },
+  {
+    "timestamp": 0.6336009502410889,
+    "metrics": {
+      "Trunk Lean": 1.4637567101337858,
+      "tracking_quality": 0.7054873903034604
+    },
+    "tracking_quality": 0.7054873903034604
+  },
+  {
+    "timestamp": 0.6670849323272705,
+    "metrics": {
+      "Trunk Lean": 1.38728151461436,
+      "tracking_quality": 0.7044184938305548
+    },
+    "tracking_quality": 0.7044184938305548
+  },
+  {
+    "timestamp": 0.7011611461639404,
+    "metrics": {
+      "Trunk Lean": 1.2825610239523841,
+      "tracking_quality": 0.7034274908447432
+    },
+    "tracking_quality": 0.7034274908447432
+  },
+  {
+    "timestamp": 0.7327070236206055,
+    "metrics": {
+      "Trunk Lean": 1.2537593159156744,
+      "tracking_quality": 0.7025286824974694
+    },
+    "tracking_quality": 0.7025286824974694
+  },
+  {
+    "timestamp": 0.7683930397033691,
+    "metrics": {
+      "Trunk Lean": 1.2584585638452956,
+      "tracking_quality": 0.7017589644838704
+    },
+    "tracking_quality": 0.7017589644838704
+  },
+  {
+    "timestamp": 0.80010986328125,
+    "metrics": {
+      "Trunk Lean": 1.274416480977496,
+      "tracking_quality": 0.701003957818929
+    },
+    "tracking_quality": 0.701003957818929
+  },
+  {
+    "timestamp": 0.8346819877624512,
+    "metrics": {
+      "Trunk Lean": 1.4308572163205,
+      "tracking_quality": 0.7004865420025123
+    },
+    "tracking_quality": 0.7004865420025123
+  },
+  {
+    "timestamp": 0.8692359924316406,
+    "metrics": {
+      "Trunk Lean": 1.633141522070961,
+      "tracking_quality": 0.699979001992853
+    },
+    "tracking_quality": 0.699979001992853
+  },
+  {
+    "timestamp": 0.8989808559417725,
+    "metrics": {
+      "Trunk Lean": 2.027553938392729,
+      "tracking_quality": 0.6996286763073427
+    },
+    "tracking_quality": 0.6996286763073427
+  },
+  {
+    "timestamp": 0.932161808013916,
+    "metrics": {
+      "Trunk Lean": 2.3860042904838252,
+      "tracking_quality": 0.6993901153547278
+    },
+    "tracking_quality": 0.6993901153547278
+  },
+  {
+    "timestamp": 0.965785026550293,
+    "metrics": {
+      "Trunk Lean": 2.697652519289789,
+      "tracking_quality": 0.6997625279131391
+    },
+    "tracking_quality": 0.6997625279131391
+  },
+  {
+    "timestamp": 0.9986388683319092,
+    "metrics": {
+      "Trunk Lean": 3.099267359112811,
+      "tracking_quality": 0.7002560377185353
+    },
+    "tracking_quality": 0.7002560377185353
+  },
+  {
+    "timestamp": 1.0341930389404297,
+    "metrics": {
+      "Trunk Lean": 3.48219269611746,
+      "tracking_quality": 0.7007082088157679
+    },
+    "tracking_quality": 0.7007082088157679
+  },
+  {
+    "timestamp": 1.06502103805542,
+    "metrics": {
+      "Trunk Lean": 3.849709778549555,
+      "tracking_quality": 0.7018015191440072
+    },
+    "tracking_quality": 0.7018015191440072
+  },
+  {
+    "timestamp": 1.0973331928253174,
+    "metrics": {
+      "Trunk Lean": 4.163914462670802,
+      "tracking_quality": 0.7022308735611273
+    },
+    "tracking_quality": 0.7022308735611273
+  },
+  {
+    "timestamp": 1.1333379745483398,
+    "metrics": {
+      "Trunk Lean": 4.458551032093254,
+      "tracking_quality": 0.7029446335635096
+    },
+    "tracking_quality": 0.7029446335635096
+  },
+  {
+    "timestamp": 1.1683459281921387,
+    "metrics": {
+      "Trunk Lean": 4.722080741471992,
+      "tracking_quality": 0.7041050654828943
+    },
+    "tracking_quality": 0.7041050654828943
+  },
+  {
+    "timestamp": 1.2013018131256104,
+    "metrics": {
+      "Trunk Lean": 4.988373494092486,
+      "tracking_quality": 0.7052937007048802
+    },
+    "tracking_quality": 0.7052937007048802
+  },
+  {
+    "timestamp": 1.2338659763336182,
+    "metrics": {
+      "Trunk Lean": 5.221577499175808,
+      "tracking_quality": 0.7063771823754492
+    },
+    "tracking_quality": 0.7063771823754492
+  },
+  {
+    "timestamp": 1.2678179740905762,
+    "metrics": {
+      "Trunk Lean": 5.407132198169912,
+      "tracking_quality": 0.7074684802950784
+    },
+    "tracking_quality": 0.7074684802950784
+  },
+  {
+    "timestamp": 1.3003778457641602,
+    "metrics": {
+      "Trunk Lean": 5.534084387676021,
+      "tracking_quality": 0.7079608801718815
+    },
+    "tracking_quality": 0.7079608801718815
+  },
+  {
+    "timestamp": 1.3319461345672607,
+    "metrics": {
+      "Trunk Lean": 5.464388959019391,
+      "tracking_quality": 0.7083521923297226
+    },
+    "tracking_quality": 0.7083521923297226
+  },
+  {
+    "timestamp": 1.3646049499511719,
+    "metrics": {
+      "Trunk Lean": 5.285630467032431,
+      "tracking_quality": 0.7084815895553523
+    },
+    "tracking_quality": 0.7084815895553523
+  },
+  {
+    "timestamp": 1.4007339477539062,
+    "metrics": {
+      "Trunk Lean": 4.936950232166769,
+      "tracking_quality": 0.708870507860521
+    },
+    "tracking_quality": 0.708870507860521
+  },
+  {
+    "timestamp": 1.4344289302825928,
+    "metrics": {
+      "Trunk Lean": 4.602375768650418,
+      "tracking_quality": 0.7092603942728601
+    },
+    "tracking_quality": 0.7092603942728601
+  },
+  {
+    "timestamp": 1.4661531448364258,
+    "metrics": {
+      "Trunk Lean": 4.3326236874718065,
+      "tracking_quality": 0.7093464773638654
+    },
+    "tracking_quality": 0.7093464773638654
+  },
+  {
+    "timestamp": 1.4999070167541504,
+    "metrics": {
+      "Trunk Lean": 4.017461197496244,
+      "tracking_quality": 0.7097810033874614
+    },
+    "tracking_quality": 0.7097810033874614
+  },
+  {
+    "timestamp": 1.5343639850616455,
+    "metrics": {
+      "Trunk Lean": 3.757315368947924,
+      "tracking_quality": 0.709784547738364
+    },
+    "tracking_quality": 0.709784547738364
+  },
+  {
+    "timestamp": 1.5671651363372803,
+    "metrics": {
+      "Trunk Lean": 3.6094264917635965,
+      "tracking_quality": 0.7093525328382384
+    },
+    "tracking_quality": 0.7093525328382384
+  },
+  {
+    "timestamp": 1.6002869606018066,
+    "metrics": {
+      "Trunk Lean": 3.5389136972222657,
+      "tracking_quality": 0.7089931756852434
+    },
+    "tracking_quality": 0.7089931756852434
+  },
+  {
+    "timestamp": 1.6338369846343994,
+    "metrics": {
+      "Trunk Lean": 3.6087131032777466,
+      "tracking_quality": 0.7084002361198972
+    },
+    "tracking_quality": 0.7084002361198972
+  },
+  {
+    "timestamp": 1.6679069995880127,
+    "metrics": {
+      "Trunk Lean": 3.7542062478554135,
+      "tracking_quality": 0.7078223228154732
+    },
+    "tracking_quality": 0.7078223228154732
+  },
+  {
+    "timestamp": 1.6995339393615723,
+    "metrics": {
+      "Trunk Lean": 3.9504534218261087,
+      "tracking_quality": 0.7072183763269674
+    },
+    "tracking_quality": 0.7072183763269674
+  },
+  {
+    "timestamp": 1.7339260578155518,
+    "metrics": {
+      "Trunk Lean": 4.224372822369526,
+      "tracking_quality": 0.7063467581500652
+    },
+    "tracking_quality": 0.7063467581500652
+  },
+  {
+    "timestamp": 1.768549919128418,
+    "metrics": {
+      "Trunk Lean": 4.58733799678738,
+      "tracking_quality": 0.7057040623816041
+    },
+    "tracking_quality": 0.7057040623816041
+  },
+  {
+    "timestamp": 1.7979958057403564,
+    "metrics": {
+      "Trunk Lean": 4.997037629104968,
+      "tracking_quality": 0.7050854719118709
+    },
+    "tracking_quality": 0.7050854719118709
+  },
+  {
+    "timestamp": 1.8321890830993652,
+    "metrics": {
+      "Trunk Lean": 5.436280887279475,
+      "tracking_quality": 0.7042930488162462
+    },
+    "tracking_quality": 0.7042930488162462
+  },
+  {
+    "timestamp": 1.865729808807373,
+    "metrics": {
+      "Trunk Lean": 6.003749501964135,
+      "tracking_quality": 0.7035783489638672
+    },
+    "tracking_quality": 0.7035783489638672
+  },
+  {
+    "timestamp": 1.8996198177337646,
+    "metrics": {
+      "Trunk Lean": 6.6034219758086685,
+      "tracking_quality": 0.7029658947325185
+    },
+    "tracking_quality": 0.7029658947325185
+  },
+  {
+    "timestamp": 1.933312177658081,
+    "metrics": {
+      "Trunk Lean": 7.20435505687142,
+      "tracking_quality": 0.7024093341015307
+    },
+    "tracking_quality": 0.7024093341015307
+  },
+  {
+    "timestamp": 1.9672269821166992,
+    "metrics": {
+      "Trunk Lean": 7.783779938210699,
+      "tracking_quality": 0.7019213090754806
+    },
+    "tracking_quality": 0.7019213090754806
+  },
+  {
+    "timestamp": 2.001054048538208,
+    "metrics": {
+      "Trunk Lean": 8.3479605325639,
+      "tracking_quality": 0.7014857367074442
+    },
+    "tracking_quality": 0.7014857367074442
+  },
+  {
+    "timestamp": 2.032360076904297,
+    "metrics": {
+      "Trunk Lean": 8.867911900038544,
+      "tracking_quality": 0.701166895962546
+    },
+    "tracking_quality": 0.701166895962546
+  },
+  {
+    "timestamp": 2.0651118755340576,
+    "metrics": {
+      "Trunk Lean": 9.291100494040466,
+      "tracking_quality": 0.7010248039644493
+    },
+    "tracking_quality": 0.7010248039644493
+  },
+  {
+    "timestamp": 2.1010489463806152,
+    "metrics": {
+      "Trunk Lean": 9.699722175695312,
+      "tracking_quality": 0.7008462542651228
+    },
+    "tracking_quality": 0.7008462542651228
+  },
+  {
+    "timestamp": 2.1335179805755615,
+    "metrics": {
+      "Trunk Lean": 9.930026653259954,
+      "tracking_quality": 0.7006243789730819
+    },
+    "tracking_quality": 0.7006243789730819
+  },
+  {
+    "timestamp": 2.1654391288757324,
+    "metrics": {
+      "Trunk Lean": 9.950069142831554,
+      "tracking_quality": 0.7004458518931642
+    },
+    "tracking_quality": 0.7004458518931642
+  },
+  {
+    "timestamp": 2.2008941173553467,
+    "metrics": {
+      "Trunk Lean": 9.952471301681474,
+      "tracking_quality": 0.7003755427056493
+    },
+    "tracking_quality": 0.7003755427056493
+  },
+  {
+    "timestamp": 2.234596014022827,
+    "metrics": {
+      "Trunk Lean": 9.881799572180514,
+      "tracking_quality": 0.7002441341195883
+    },
+    "tracking_quality": 0.7002441341195883
+  },
+  {
+    "timestamp": 2.2685608863830566,
+    "metrics": {
+      "Trunk Lean": 9.739496876510556,
+      "tracking_quality": 0.7001335661793057
+    },
+    "tracking_quality": 0.7001335661793057
+  },
+  {
+    "timestamp": 2.300168991088867,
+    "metrics": {
+      "Trunk Lean": 9.59944854501212,
+      "tracking_quality": 0.7001705119186998
+    },
+    "tracking_quality": 0.7001705119186998
+  },
+  {
+    "timestamp": 2.332505941390991,
+    "metrics": {
+      "Trunk Lean": 9.451610633055568,
+      "tracking_quality": 0.7001959403657538
+    },
+    "tracking_quality": 0.7001959403657538
+  },
+  {
+    "timestamp": 2.3667030334472656,
+    "metrics": {
+      "Trunk Lean": 9.152836494332677,
+      "tracking_quality": 0.7002510139983232
+    },
+    "tracking_quality": 0.7002510139983232
+  },
+  {
+    "timestamp": 2.401153802871704,
+    "metrics": {
+      "Trunk Lean": 8.726368351167206,
+      "tracking_quality": 0.7006113028204929
+    },
+    "tracking_quality": 0.7006113028204929
+  },
+  {
+    "timestamp": 2.432029962539673,
+    "metrics": {
+      "Trunk Lean": 8.289336025443564,
+      "tracking_quality": 0.7012772032158505
+    },
+    "tracking_quality": 0.7012772032158505
+  },
+  {
+    "timestamp": 2.463804006576538,
+    "metrics": {
+      "Trunk Lean": 7.808372588926923,
+      "tracking_quality": 0.7018631172849741
+    },
+    "tracking_quality": 0.7018631172849741
+  },
+  {
+    "timestamp": 2.4982800483703613,
+    "metrics": {
+      "Trunk Lean": 7.279284854178252,
+      "tracking_quality": 0.7024413161112038
+    },
+    "tracking_quality": 0.7024413161112038
+  },
+  {
+    "timestamp": 2.533031940460205,
+    "metrics": {
+      "Trunk Lean": 6.7354300910744085,
+      "tracking_quality": 0.703315433505464
+    },
+    "tracking_quality": 0.703315433505464
+  },
+  {
+    "timestamp": 2.5680179595947266,
+    "metrics": {
+      "Trunk Lean": 6.208694927147377,
+      "tracking_quality": 0.7045566017437853
+    },
+    "tracking_quality": 0.7045566017437853
+  },
+  {
+    "timestamp": 2.6082749366760254,
+    "metrics": {
+      "Trunk Lean": 5.672594154543298,
+      "tracking_quality": 0.7066823586585198
+    },
+    "tracking_quality": 0.7066823586585198
+  },
+  {
+    "timestamp": 2.632049083709717,
+    "metrics": {
+      "Trunk Lean": 5.20610721883187,
+      "tracking_quality": 0.7079656439706344
+    },
+    "tracking_quality": 0.7079656439706344
+  },
+  {
+    "timestamp": 2.6647989749908447,
+    "metrics": {
+      "Trunk Lean": 4.953670270885994,
+      "tracking_quality": 0.708630560465143
+    },
+    "tracking_quality": 0.708630560465143
+  },
+  {
+    "timestamp": 2.698340892791748,
+    "metrics": {
+      "Trunk Lean": 4.754764012724757,
+      "tracking_quality": 0.7083725673710983
+    },
+    "tracking_quality": 0.7083725673710983
+  },
+  {
+    "timestamp": 2.7310428619384766,
+    "metrics": {
+      "Trunk Lean": 4.780998020153978,
+      "tracking_quality": 0.7074642819184881
+    },
+    "tracking_quality": 0.7074642819184881
+  },
+  {
+    "timestamp": 2.766427993774414,
+    "metrics": {
+      "Trunk Lean": 4.7527887356857565,
+      "tracking_quality": 0.7068606306195513
+    },
+    "tracking_quality": 0.7068606306195513
+  },
+  {
+    "timestamp": 2.8037869930267334,
+    "metrics": {
+      "Trunk Lean": 4.438407345456642,
+      "tracking_quality": 0.7069908117515628
+    },
+    "tracking_quality": 0.7069908117515628
+  },
+  {
+    "timestamp": 2.8324689865112305,
+    "metrics": {
+      "Trunk Lean": 4.034951723810061,
+      "tracking_quality": 0.7043060788613124
+    },
+    "tracking_quality": 0.7043060788613124
+  },
+  {
+    "timestamp": 2.865417003631592,
+    "metrics": {
+      "Trunk Lean": 3.730040047548553,
+      "tracking_quality": 0.7013705076745034
+    },
+    "tracking_quality": 0.7013705076745034
+  },
+  {
+    "timestamp": 2.900075912475586,
+    "metrics": {
+      "Trunk Lean": 3.5945403843336106,
+      "tracking_quality": 0.6978406713972094
+    },
+    "tracking_quality": 0.6978406713972094
+  },
+  {
+    "timestamp": 2.9343528747558594,
+    "metrics": {
+      "Trunk Lean": 3.390074570225558,
+      "tracking_quality": 0.6929812588601966
+    },
+    "tracking_quality": 0.6929812588601966
+  },
+  {
+    "timestamp": 2.9659018516540527,
+    "metrics": {
+      "Trunk Lean": 3.1865690449698443,
+      "tracking_quality": 0.6833520038935328
+    },
+    "tracking_quality": 0.6833520038935328
+  },
+  {
+    "timestamp": 3.0002760887145996,
+    "metrics": {
+      "Trunk Lean": 2.9656378860854167,
+      "tracking_quality": 0.6755807270070143
+    },
+    "tracking_quality": 0.6755807270070143
+  },
+  {
+    "timestamp": 3.0327329635620117,
+    "metrics": {
+      "Trunk Lean": 2.8659803883863817,
+      "tracking_quality": 0.664542695616767
+    },
+    "tracking_quality": 0.664542695616767
+  },
+  {
+    "timestamp": 3.065418004989624,
+    "metrics": {
+      "Trunk Lean": 2.793144125113713,
+      "tracking_quality": 0.6519640290185414
+    },
+    "tracking_quality": 0.6519640290185414
+  },
+  {
+    "timestamp": 3.098973035812378,
+    "metrics": {
+      "Trunk Lean": 2.715403981917942,
+      "tracking_quality": 0.641857675701789
+    },
+    "tracking_quality": 0.641857675701789
+  },
+  {
+    "timestamp": 3.1348979473114014,
+    "metrics": {
+      "Trunk Lean": 2.622274749955117,
+      "tracking_quality": 0.631525199583407
+    },
+    "tracking_quality": 0.631525199583407
+  },
+  {
+    "timestamp": 3.165605068206787,
+    "metrics": {
+      "Trunk Lean": 2.5081135376588852,
+      "tracking_quality": 0.621621475295714
+    },
+    "tracking_quality": 0.621621475295714
+  },
+  {
+    "timestamp": 3.198490858078003,
+    "metrics": {
+      "Trunk Lean": 2.3407808345573575,
+      "tracking_quality": 0.6105944754601682
+    },
+    "tracking_quality": 0.6105944754601682
+  },
+  {
+    "timestamp": 3.2328338623046875,
+    "metrics": {
+      "Trunk Lean": 1.9870300793226532,
+      "tracking_quality": 0.6024195376667194
+    },
+    "tracking_quality": 0.6024195376667194
+  },
+  {
+    "timestamp": 3.2686009407043457,
+    "metrics": {
+      "Trunk Lean": 1.713907504549787,
+      "tracking_quality": 0.5953358536653193
+    },
+    "tracking_quality": 0.5953358536653193
+  },
+  {
+    "timestamp": 3.29807710647583,
+    "metrics": {
+      "Trunk Lean": 1.703075185520511,
+      "tracking_quality": 0.5902567214339577
+    },
+    "tracking_quality": 0.5902567214339577
+  },
+  {
+    "timestamp": 3.331563949584961,
+    "metrics": {
+      "Trunk Lean": 1.795416785292103,
+      "tracking_quality": 0.5885467066634165
+    },
+    "tracking_quality": 0.5885467066634165
+  },
+  {
+    "timestamp": 3.3648641109466553,
+    "metrics": {
+      "Trunk Lean": 1.8469614183572214,
+      "tracking_quality": 0.5839284378188577
+    },
+    "tracking_quality": 0.5839284378188577
+  },
+  {
+    "timestamp": 3.4003610610961914,
+    "metrics": {
+      "Trunk Lean": 1.7996630309973705,
+      "tracking_quality": 0.5794886145740747
+    },
+    "tracking_quality": 0.5794886145740747
+  },
+  {
+    "timestamp": 3.4321491718292236,
+    "metrics": {
+      "Trunk Lean": 1.8122476920109234,
+      "tracking_quality": 0.5760602232308664
+    },
+    "tracking_quality": 0.5760602232308664
+  },
+  {
+    "timestamp": 3.467164993286133,
+    "metrics": {
+      "Trunk Lean": 1.8377249079928413,
+      "tracking_quality": 0.5746589167904335
+    },
+    "tracking_quality": 0.5746589167904335
+  },
+  {
+    "timestamp": 3.5013339519500732,
+    "metrics": {
+      "Trunk Lean": 1.8636185718496328,
+      "tracking_quality": 0.5754062144128098
+    },
+    "tracking_quality": 0.5754062144128098
+  },
+  {
+    "timestamp": 3.5326318740844727,
+    "metrics": {
+      "Trunk Lean": 1.778849100053921,
+      "tracking_quality": 0.5765547246361772
+    },
+    "tracking_quality": 0.5765547246361772
+  },
+  {
+    "timestamp": 3.5663959980010986,
+    "metrics": {
+      "Trunk Lean": 1.6567421002849385,
+      "tracking_quality": 0.5784261763998957
+    },
+    "tracking_quality": 0.5784261763998957
+  },
+  {
+    "timestamp": 3.5980911254882812,
+    "metrics": {
+      "Trunk Lean": 1.5520880742717174,
+      "tracking_quality": 0.5789080010868157
+    },
+    "tracking_quality": 0.5789080010868157
+  },
+  {
+    "timestamp": 3.6332719326019287,
+    "metrics": {
+      "Trunk Lean": 1.4696820342211592,
+      "tracking_quality": 0.5794345129450614
+    },
+    "tracking_quality": 0.5794345129450614
+  },
+  {
+    "timestamp": 3.6668341159820557,
+    "metrics": {
+      "Trunk Lean": 1.3971455088512714,
+      "tracking_quality": 0.5805290250361643
+    },
+    "tracking_quality": 0.5805290250361643
+  },
+  {
+    "timestamp": 3.699213981628418,
+    "metrics": {
+      "Trunk Lean": 1.321775123266982,
+      "tracking_quality": 0.5825867938921985
+    },
+    "tracking_quality": 0.5825867938921985
+  },
+  {
+    "timestamp": 3.73492693901062,
+    "metrics": {
+      "Trunk Lean": 1.2260918482557082,
+      "tracking_quality": 0.5853139640565849
+    },
+    "tracking_quality": 0.5853139640565849
+  },
+  {
+    "timestamp": 3.764050006866455,
+    "metrics": {
+      "Trunk Lean": 1.123274122188118,
+      "tracking_quality": 0.5886362001412746
+    },
+    "tracking_quality": 0.5886362001412746
+  },
+  {
+    "timestamp": 3.7975029945373535,
+    "metrics": {
+      "Trunk Lean": 1.0219140315974429,
+      "tracking_quality": 0.5922000923222213
+    },
+    "tracking_quality": 0.5922000923222213
+  },
+  {
+    "timestamp": 3.830454111099243,
+    "metrics": {
+      "Trunk Lean": 0.8998019387382176,
+      "tracking_quality": 0.5952299903570251
+    },
+    "tracking_quality": 0.5952299903570251
+  },
+  {
+    "timestamp": 3.8641419410705566,
+    "metrics": {
+      "Trunk Lean": 0.7753895710184909,
+      "tracking_quality": 0.5974447938373707
+    },
+    "tracking_quality": 0.5974447938373707
+  },
+  {
+    "timestamp": 3.8982059955596924,
+    "metrics": {
+      "Trunk Lean": 0.6800074020570684,
+      "tracking_quality": 0.5987411362302462
+    },
+    "tracking_quality": 0.5987411362302462
+  },
+  {
+    "timestamp": 3.9319398403167725,
+    "metrics": {
+      "Trunk Lean": 0.5969408490916802,
+      "tracking_quality": 0.5996521639242542
+    },
+    "tracking_quality": 0.5996521639242542
+  },
+  {
+    "timestamp": 4.034801959991455,
+    "metrics": {
+      "Trunk Lean": 0.5390974434453851,
+      "tracking_quality": 0.6001694033232828
+    },
+    "tracking_quality": 0.6001694033232828
+  },
+  {
+    "timestamp": 4.035680770874023,
+    "metrics": {
+      "Trunk Lean": 0.5427924812574126,
+      "tracking_quality": 0.6005446793878395
+    },
+    "tracking_quality": 0.6005446793878395
+  },
+  {
+    "timestamp": 4.036265134811401,
+    "metrics": {
+      "Trunk Lean": 0.5598743278799163,
+      "tracking_quality": 0.6009485730336923
+    },
+    "tracking_quality": 0.6009485730336923
+  },
+  {
+    "timestamp": 4.066325902938843,
+    "metrics": {
+      "Trunk Lean": 0.5858029616184818,
+      "tracking_quality": 0.6006491118195382
+    },
+    "tracking_quality": 0.6006491118195382
+  },
+  {
+    "timestamp": 4.100028991699219,
+    "metrics": {
+      "Trunk Lean": 0.6016567516847793,
+      "tracking_quality": 0.600489730325838
+    },
+    "tracking_quality": 0.600489730325838
+  },
+  {
+    "timestamp": 4.128235101699829,
+    "metrics": {
+      "Trunk Lean": 0.5980018894333099,
+      "tracking_quality": 0.5998755187840399
+    },
+    "tracking_quality": 0.5998755187840399
+  },
+  {
+    "timestamp": 4.165717124938965,
+    "metrics": {
+      "Trunk Lean": 0.5744582456135231,
+      "tracking_quality": 0.5992582279582028
+    },
+    "tracking_quality": 0.5992582279582028
+  },
+  {
+    "timestamp": 4.198455810546875,
+    "metrics": {
+      "Trunk Lean": 0.5539048667753591,
+      "tracking_quality": 0.5991472143637524
+    },
+    "tracking_quality": 0.5991472143637524
+  },
+  {
+    "timestamp": 4.232412099838257,
+    "metrics": {
+      "Trunk Lean": 0.5498672269674354,
+      "tracking_quality": 0.5982632485401789
+    },
+    "tracking_quality": 0.5982632485401789
+  },
+  {
+    "timestamp": 4.268614053726196,
+    "metrics": {
+      "Trunk Lean": 0.559682897687267,
+      "tracking_quality": 0.5967719572680917
+    },
+    "tracking_quality": 0.5967719572680917
+  },
+  {
+    "timestamp": 4.299396991729736,
+    "metrics": {
+      "Trunk Lean": 0.5831667485075354,
+      "tracking_quality": 0.5953348292828058
+    },
+    "tracking_quality": 0.5953348292828058
+  },
+  {
+    "timestamp": 4.331641912460327,
+    "metrics": {
+      "Trunk Lean": 0.6160084987494735,
+      "tracking_quality": 0.5931621570013125
+    },
+    "tracking_quality": 0.5931621570013125
+  },
+  {
+    "timestamp": 4.36548376083374,
+    "metrics": {
+      "Trunk Lean": 0.6572541067424484,
+      "tracking_quality": 0.5911431372391455
+    },
+    "tracking_quality": 0.5911431372391455
+  }
+]
