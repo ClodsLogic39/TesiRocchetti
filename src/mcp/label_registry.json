@@ -1,0 +1,82 @@
+{
+  "version": "1.2",
+  "source": "c3d_analogs",
+  "angle_units": "degrees",
+  "angle_method": "signed/included angle between segment direction vectors, projected onto global anatomical planes",
+  "reliable_plane": "sagittal",
+  "estimated_planes": ["frontal"],
+  "angle_reliability_note": "Joint angles are 2-DOF, derived from segment direction vectors (2-point segments carry no roll). Computed planes: sagittal (flexion = included angle) and frontal (signed planar). Transverse/rotation axes are NOT computed and were removed. Even sagittal relies on the AP axis, the least reliable dimension on a frontal-view capture; non-flexion queries return the 'estimated_non_anatomical_axis' warning.",
+  "planes": {
+    "sagittal": ["flexion_extension"],
+    "frontal": ["abduction_adduction", "varus_valgus", "lateral_bending"]
+  },
+  "available_angle_labels": [
+    "elbow_left_flexion_extension",
+    "elbow_right_flexion_extension",
+    "hip_left_abduction_adduction",
+    "hip_left_flexion_extension",
+    "hip_right_abduction_adduction",
+    "hip_right_flexion_extension",
+    "knee_left_flexion_extension",
+    "knee_left_varus_valgus",
+    "knee_right_flexion_extension",
+    "knee_right_varus_valgus",
+    "neck_flexion_extension",
+    "neck_lateral_bending",
+    "shoulder_left_abduction_adduction",
+    "shoulder_left_flexion_extension",
+    "shoulder_right_abduction_adduction",
+    "shoulder_right_flexion_extension",
+    "spine_flexion_extension",
+    "spine_lateral_bending"
+  ],
+  "joints": {
+    "hip": {
+      "left": {
+        "sagittal": "hip_left_flexion_extension",
+        "frontal": "hip_left_abduction_adduction"
+      },
+      "right": {
+        "sagittal": "hip_right_flexion_extension",
+        "frontal": "hip_right_abduction_adduction"
+      }
+    },
+    "knee": {
+      "left": {
+        "sagittal": "knee_left_flexion_extension",
+        "frontal": "knee_left_varus_valgus"
+      },
+      "right": {
+        "sagittal": "knee_right_flexion_extension",
+        "frontal": "knee_right_varus_valgus"
+      }
+    },
+    "shoulder": {
+      "left": {
+        "sagittal": "shoulder_left_flexion_extension",
+        "frontal": "shoulder_left_abduction_adduction"
+      },
+      "right": {
+        "sagittal": "shoulder_right_flexion_extension",
+        "frontal": "shoulder_right_abduction_adduction"
+      }
+    },
+    "elbow": {
+      "left": {
+        "sagittal": "elbow_left_flexion_extension"
+      },
+      "right": {
+        "sagittal": "elbow_right_flexion_extension"
+      }
+    },
+    "spine": {
+      "sagittal": "spine_flexion_extension",
+      "frontal": "spine_lateral_bending"
+    },
+    "neck": {
+      "sagittal": "neck_flexion_extension",
+      "frontal": "neck_lateral_bending"
+    }
+  },
+  "missing_labels": []
+}

@@ -16,3 +16,25 @@ Questo progetto implementa una pipeline per l'elaborazione di dati di motion cap
 - Valutazione delle prestazioni sportive
 - Tracciamento del movimento riabilitativo
 - Ricerca su animazione e movimento
+
+## Struttura del repository
+
+```
+src/
+  conversion/      # conversione dati grezzi -> quaternioni, angoli, C3D/JSON/CSV
+  visualization/   # viewer 3D (Matplotlib, Open3D)
+  database/        # schema PostgreSQL + ingestione (JSON canonico)
+  mcp/             # server MCP con i tool di query biomeccanica
+docs/              # documentazione di progetto (it)
+data/              # sessioni motion-capture (raw/ e processed/) — NON versionate
+requirements.txt   # dipendenze Python (Python 3.9)
+```
+
+I dati in `data/` sono ignorati da git. Gli script risolvono i percorsi rispetto
+alla radice del repo, quindi si eseguono da qualsiasi directory:
+
+```bash
+python src/conversion/process_session_generic.py --list-sessions
+python src/conversion/process_session_generic.py <nome_sessione>
+python src/visualization/c3d_viewer.py
+```
