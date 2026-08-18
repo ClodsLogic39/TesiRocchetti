@@ -1,16 +1,12 @@
-# Pipeline biomeccanica — dipendenze Python (Python 3.9)
-#
-# Core (calcolo quaternioni/angoli, presenti nel .venv locale):
+# Convertitore e cinematica
 numpy
 scipy
+ezc3d            # export/lettura C3D (opzionale: senza, solo JSON)
 
-# Rendering 3D:
-open3d
-matplotlib
+# Database e MCP
+psycopg[binary]  # PostgreSQL (ingest, query MCP)
+pgvector         # tipo vector per gli embedding
+mcp              # FastMCP server
 
-# Export/interop C3D (opzionale: se assente, il converter degrada a JSON/CSV):
-ezc3d
-
-# Storage + query MCP (richiesti solo per ingest_c3d.py e mcp/server.py):
-psycopg[binary]
-mcp
+# Rendering (viewer, ambiente separato)
+open3d           # richiede anche ezc3d nell'interprete del viewer

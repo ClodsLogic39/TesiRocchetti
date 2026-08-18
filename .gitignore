@@ -1,12 +1,33 @@
+# Segreti e certificati — MAI nel repo
+.env
+.pgpass
+*.key
+*.crt
+*.pem
+certs/
+secrets/
+
+# Dati di cattura: MAI nel repo. I grezzi sono registrazioni di persone, e il
+# nome del file diventa la session_key (vedi la nota sulla pseudonimizzazione in
+# docs/Progetto.md). Gli elaborati si rigenerano dalla conversione.
+DatiGrezzi/
+DatiElaborati/
+
 # Python
 __pycache__/
-*.py[cod]
-*.egg-info/
+*.pyc
 .venv/
-venv/
 
-# OS
+# Prodotti rigenerabili: non appartengono al progetto.
+.pytest_cache/
 .DS_Store
+graphify-out/
 
-# Dati di sessione (non versionati: motion-capture grezzi e processati)
-data/
+# Interfaccia locale di caricamento: comoda per chi carica dati sulla propria
+# macchina, non fa parte di cio' che viene pubblicato. I suoi test stanno con
+# lei, cosi' la suite resta verde su un clone che non la contiene.
+src/ui/
+tests/test_ui.py
+
+# Documentazione: resta sulla macchina, non nel repo pubblico.
+docs/

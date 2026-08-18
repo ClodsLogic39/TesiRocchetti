@@ -1,0 +1,43 @@
+# docker-compose locale: DB e (opzionale) servizi app su rete privata.
+# Il DB NON e' esposto a Internet: la porta e' pubblicata solo su 127.0.0.1.
+services:
+  db:
+    # Immagine con pgvector preinstallato: `CREATE EXTENSION vector` in init
+    # fallirebbe con la postgres stock, bloccando anche l'applicazione dei ruoli.
+    image: pgvector/pgvector:pg16
+    environment:
+      POSTGRES_DB: ${POSTGRES_DB}
+      POSTGRES_USER: ${POSTGRES_USER}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+    # Solo loopback dell'host: nessun accesso dalla rete esterna.
+    ports:
+      - "127.0.0.1:5432:5432"
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+      # Init automatico al primo avvio: schema + ruoli a privilegio minimo.
+      - ./src/database/schema.sql:/docker-entrypoint-initdb.d/01_schema.sql:ro
+      - ./db/setup_roles.sql:/docker-entrypoint-initdb.d/02_roles.sql:ro
+    networks:
+      - biomech
+
+  # Servizio di conversione+ingest, da lanciare on-demand (job da operatore):
+  #   docker compose run --rm ingest python -m src.conversion.process
+  ingest:
+    build: .
+    environment:
+      INGEST_DB_DSN: ${INGEST_DB_DSN}
+    volumes:
+      - ./:/app
+    working_dir: /app
+    depends_on:
+      - db
+    networks:
+      - biomech
+    profiles: ["tools"]   # non parte da solo; solo con `docker compose run`
+
+networks:
+  biomech:
+    driver: bridge
+
+volumes:
+  pgdata:
