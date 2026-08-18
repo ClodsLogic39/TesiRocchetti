@@ -14,9 +14,6 @@ i marker sia le uscite di un modello clinico calibrato, ogni giunto confrontabil
 ricade entro **3.2 gradi** di scarto quadratico medio. Lo strumento che lo misura è
 nel progetto e si esegue con un comando.
 
-Documentazione completa in [`docs/Tesi.md`](docs/Tesi.md) (il lavoro e i suoi
-risultati) e [`docs/Progetto.md`](docs/Progetto.md) (le decisioni di progetto, con
-il motivo di ognuna).
 
 ---
 
