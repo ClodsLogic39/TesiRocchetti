@@ -1,13 +1,16 @@
-"""Dai punti agli angoli: terne di segmento, quaternioni, Eulero ZXY.
+"""Dai punti agli angoli: pulizia, terne di segmento, quaternioni, Eulero ZXY.
 
-Si calcola solo cio' che la sorgente non fornisce gia'. Se il file contiene
-angoli di modello a tre gradi di liberta', quelli restano: sono stati prodotti
-da un modello calibrato sul soggetto, e ricalcolarli sarebbe una perdita.
+Riceve i punti letti da una sorgente e produce le terne di ogni segmento, i
+quaternioni con velocita' e accelerazione angolare, e gli angoli di ogni giunto
+sui tre piani. Gli angoli che la sorgente porta gia' calcolati vengono passati a
+`joint_angles` in `esistenti` e lasciati invariati.
 
-Convenzione, raccomandazione ISB (Wu et al. 2002) con sequenza di Grood e Suntay:
-terne con Y lungo il segmento verso l'alto, Z verso destra, X = Y x Z; angoli
-come Eulero ZXY della rotazione del distale rispetto al prossimale, cioe' prima
-la flessione, poi l'ab/adduzione, infine la rotazione assiale.
+Convenzione: terne con Y lungo il segmento verso il prossimale, Z verso destra
+del soggetto, X = Y x Z; angoli come Eulero ZXY della rotazione del segmento
+distale rispetto al prossimale.
+
+Prerequisiti: numpy e scipy. In ingresso la struttura restituita da
+`readers.read`.
 """
 import numpy as np
 from scipy.signal import butter, filtfilt
@@ -15,17 +18,24 @@ from scipy.spatial.transform import Rotation, Slerp
 
 from . import anatomy
 
-CUTOFF_HZ = 6.0            # passa-basso di prassi per la cinematica del cammino
+# --- Soglie di filtraggio e di plausibilita' ---
+# Frequenza di taglio e ordine del passa-basso, durata massima di un buco
+# interpolabile, lunghezza minima di un tratto contiguo, flessione sotto la quale
+# il piano di un giunto non e' definito, velocita' angolare oltre la quale il
+# campione viene scartato.
+CUTOFF_HZ = 6.0
 FILTER_ORDER = 4
-MAX_GAP_S = 0.20           # buchi piu' lunghi restano buchi
-MIN_RUN = 15               # campioni contigui minimi perche' un tratto sia usabile
-MIN_PLANE_DEG = 10.0       # sotto questa flessione il piano del giunto non esiste
-MAX_ANGULAR_DEG_S = 1000.0  # oltre non e' movimento umano ma rumore
+MAX_GAP_S = 0.20
+MIN_RUN = 15
+MIN_PLANE_DEG = 10.0
+MAX_ANGULAR_DEG_S = 1000.0
 
 _unit = anatomy.unit
 
 
 # --- Pulizia delle traiettorie ---
+# Interpolazione dei buchi brevi, scarto dei tratti troppo corti e passa-basso.
+# `clean` applica i tre passaggi in sequenza a tutti i punti.
 def _runs(valid):
     out, i, n = [], 0, len(valid)
     while i < n:
@@ -41,7 +51,6 @@ def _runs(valid):
 
 
 def interpolate_gaps(series, max_gap):
-    """Colma i buchi interni brevi. Bordi e buchi lunghi restano NaN."""
     out = np.asarray(series, dtype=float).copy()
     valid = np.all(np.isfinite(out), axis=1)
     if valid.sum() < 2:
@@ -60,7 +69,6 @@ def interpolate_gaps(series, max_gap):
 
 
 def drop_short_runs(series, minimo):
-    """Scarta i tratti troppo corti: qualche frame isolato non e' una misura."""
     out = np.asarray(series, dtype=float).copy()
     tenuti = np.zeros(len(out), dtype=bool)
     for s, e in _runs(np.all(np.isfinite(out), axis=1)):
@@ -71,11 +79,6 @@ def drop_short_runs(series, minimo):
 
 
 def lowpass(series, fps, cutoff=CUTOFF_HZ, order=FILTER_ORDER):
-    """Butterworth a fase nulla, applicato a ogni tratto contiguo separatamente.
-
-    Filtrare attraverso un buco spalmerebbe valori inventati sui campioni buoni
-    che lo circondano.
-    """
     out = np.asarray(series, dtype=float).copy()
     if not fps or cutoff <= 0 or cutoff >= fps / 2:
         return out
@@ -88,10 +91,6 @@ def lowpass(series, fps, cutoff=CUTOFF_HZ, order=FILTER_ORDER):
 
 
 def clean(points, fps):
-    """Buchi brevi colmati, tratti corti scartati, poi passa-basso.
-
-    Restituisce (punti puliti, quali sono stati interpolati).
-    """
     if not fps:
         return dict(points), set()
     max_gap = max(1, int(round(MAX_GAP_S * fps)))
@@ -106,13 +105,9 @@ def clean(points, fps):
 
 
 # --- Terna del laboratorio ---
+# Costruisce dai punti la verticale e la direzione di avanzamento del soggetto:
+# e' il riferimento rispetto a cui si misura l'inclinazione del tronco.
 def world_frame(points):
-    """Terna di riferimento: verticale del laboratorio e destra del soggetto.
-
-    Serve come prossimale per l'inclinazione del tronco. La verticale si prende
-    dall'asse del laboratorio piu' allineato all'asse del corpo: e' l'assunzione
-    che la camera o il laboratorio siano in bolla, e va dichiarata.
-    """
     def mediana(nome):
         v = points.get(nome)
         if v is None:
@@ -124,8 +119,6 @@ def world_frame(points):
     if hip_l is None or hip_r is None:
         return np.eye(3), ["world_frame_missing"]
     hip_c = (hip_l + hip_r) / 2.0
-    # L'alto viene dal tronco quando c'e'; un'acquisizione dei soli arti
-    # inferiori non ha le spalle, ma il bacino sopra le ginocchia basta.
     alto = None
     for sopra, sotto in ((mediana("shoulder_c"), hip_c), (hip_c, mediana("knee_c")),
                          (hip_c, mediana("ankle_l"))):
@@ -146,16 +139,10 @@ def world_frame(points):
 
 
 # --- Terne dei segmenti ---
+# Per ogni segmento si scelgono gli estremi disponibili e la prima ricetta di
+# roll i cui punti ci sono, e da questi si costruisce la matrice di rotazione
+# fotogramma per fotogramma.
 def _utilizzabile(punti, chiavi):
-    """Vero se quei punti sono validi in almeno `MIN_COVERAGE` dei frame.
-
-    La presenza della chiave non basta. Un punto derivato esiste nel dizionario
-    anche quando cio' da cui si ricava non e' mai stato visto: `hip_c` di una
-    ripresa che taglia sotto le spalle e' un vettore di soli NaN. Provandolo
-    comunque, la prima ricetta restituiva NaN invece di fallire, e nessun
-    ripiego veniva mai raggiunto -- il segmento cadeva pur avendo un'alternativa
-    del tutto valida piu' in basso nell'elenco.
-    """
     for k in chiavi:
         v = punti.get(k)
         if v is None:
@@ -166,11 +153,6 @@ def _utilizzabile(punti, chiavi):
 
 
 def _roll_axis(points, nome, spec, destra_rif, estremi):
-    """(terzo asse, indice della ricetta usata). (None, None) se nessuna vale.
-
-    L'indice dice quale ripiego e' stato usato: serve a chi vuole sapere se la
-    rotazione e' stata fissata dalla ricetta migliore o da una di riserva.
-    """
     for i, roll in enumerate(anatomy.roll_recipes(nome)):
         if not _utilizzabile(points, anatomy.roll_inputs(roll)):
             continue
@@ -184,14 +166,10 @@ def _roll_single(points, estremi, roll, destra_rif):
     if roll[0] == "plane":
         a, b, c = (points[k] for k in roll[1:])
         normale = np.cross(a - b, c - b)
-        # |n| = |ab||cb| sin(theta): sotto MIN_PLANE_DEG i tre punti sono
-        # allineati, il piano non esiste e l'asse si prende dal soggetto.
         scala = np.linalg.norm(a - b, axis=1) * np.linalg.norm(c - b, axis=1)
         degenere = np.linalg.norm(normale, axis=1) < (
             np.sin(np.radians(MIN_PLANE_DEG)) * np.maximum(scala, 1e-9))
         z = np.where(degenere[:, None], destra_rif, normale)
-        # l'asse di flessione va sempre verso destra del soggetto: e' il segno
-        # in JOINTS a distinguere i due lati, non l'orientamento della terna
         return np.where(np.sum(z * destra_rif, axis=1, keepdims=True) < 0, -z, z)
     if roll[0] == "toward":
         p = points.get(roll[1])
@@ -203,10 +181,6 @@ def _roll_single(points, estremi, roll, destra_rif):
 
 
 def segment_frames(points, R_world):
-    """Terne per segmento. Restituisce (terne, provenienza, assenze, avvisi).
-
-    Ogni terna ha righe [X anteriore, Y lungo, Z destra].
-    """
     n = len(next(iter(points.values()))) if points else 0
     destra_rif = np.tile(R_world[2], (n, 1))
     terne, prov, assenze, avvisi, rimandati = {}, {}, {}, [], []
@@ -231,15 +205,15 @@ def segment_frames(points, R_world):
         if terza is None:
             assenze[nome] = (anatomy.MISSING_INPUTS, "riferimento per la rotazione")
             continue
-        if asse == "long":                       # Y lungo il segmento
+        if asse == "long":
             y = _unit(b - a)
             z = _unit(terza - np.sum(terza * y, axis=1, keepdims=True) * y)
             x = np.cross(y, z)
-        elif asse == "lateral":                  # Z fra i due estremi (cinti)
+        elif asse == "lateral":
             z = _unit(b - a)
             y = _unit(terza - np.sum(terza * z, axis=1, keepdims=True) * z)
             x = np.cross(y, z)
-        else:                                    # X in avanti (piede)
+        else:
             x = _unit(b - a)
             y = _unit(terza - np.sum(terza * x, axis=1, keepdims=True) * x)
             z = np.cross(x, y)
@@ -263,7 +237,6 @@ def segment_frames(points, R_world):
         terne[nome] = R
         prov[nome] = spec["provenance"]
 
-    # le due clavicole condividono l'orientamento del cinto scapolare
     for lato in ("l", "r"):
         altro = "r" if lato == "l" else "l"
         if f"clavicle_{lato}" not in terne and f"clavicle_{altro}" in terne:
@@ -276,15 +249,14 @@ def segment_frames(points, R_world):
     return terne, prov, assenze, avvisi
 
 
-# --- Quaternioni e derivate ---
+# --- Quaternioni e derivate angolari ---
+# Conversione delle matrici di rotazione in quaternioni, riempimento dei buchi
+# brevi, calcolo di velocita' e accelerazione angolare.
 def quaternions(R):
-    """Terne -> quaternioni [x, y, z, w], con segno continuo nel tempo."""
     n = len(R)
     q = np.full((n, 4), np.nan)
     valid = np.all(np.isfinite(R), axis=(1, 2))
     if valid.any():
-        # le righe di R sono gli assi, quindi R e' la matrice mondo->locale:
-        # la rotazione del segmento e' la sua trasposta
         q[valid] = Rotation.from_matrix(np.transpose(R[valid], (0, 2, 1))).as_quat()
     ordine = np.where(valid)[0]
     for k in range(1, len(ordine)):
@@ -295,7 +267,6 @@ def quaternions(R):
 
 
 def fill_quaternions(q, max_gap):
-    """SLERP sui buchi brevi: interpolare le componenti darebbe rotazioni invalide."""
     out = q.copy()
     valid = np.all(np.isfinite(out), axis=1)
     mancanti = np.where(~valid)[0]
@@ -314,7 +285,6 @@ def fill_quaternions(q, max_gap):
 
 
 def angular_kinematics(q, fps):
-    """Velocita' angolare dalla derivata del quaternione, e accelerazione da essa."""
     n = len(q)
     omega = np.full((n, 3), np.nan)
     if not fps:
@@ -335,8 +305,10 @@ def angular_kinematics(q, fps):
 
 
 # --- Angoli articolari ---
+# Rimozione dei salti oltre il limite fisiologico, conteggio della quota di
+# variazioni implausibili e calcolo degli angoli di ogni giunto sui tre piani con
+# i segni della convenzione clinica.
 def despike(series, limite):
-    """Toglie i frame isolati oltre il limite fisiologico rispetto a entrambi i vicini."""
     out = np.asarray(series, dtype=float).copy()
     a, b, c = out[:-2], out[1:-1], out[2:]
     sospetti = (np.abs(b - a) > limite) & (np.abs(b - c) > limite)
@@ -345,17 +317,12 @@ def despike(series, limite):
 
 
 def implausible_rate(series, limite):
-    """Quota di variazioni oltre il limite: quanto e' gesto e quanto rumore."""
     v = np.asarray(series, dtype=float)
     f = v[np.isfinite(v)]
     return None if f.size < 2 else float(np.mean(np.abs(np.diff(f)) > limite))
 
 
 def joint_angles(terne, fps, esistenti=None):
-    """Angoli per (giunto, piano). Restituisce (angoli, provenienza, assenze).
-
-    Gli angoli che la sorgente fornisce gia' non vengono ricalcolati.
-    """
     angoli = dict(esistenti or {})
     prov = {k: anatomy.MEASURED for k in angoli}
     assenze = {}
@@ -376,8 +343,6 @@ def joint_angles(terne, fps, esistenti=None):
         valid = (np.all(np.isfinite(Rp), axis=(1, 2))
                  & np.all(np.isfinite(Rd), axis=(1, 2)))
         if valid.any():
-            # cambio di base dal distale al prossimale: e' la rotazione che il
-            # distale ha subito rispetto al prossimale
             rel = np.matmul(Rp[valid], np.transpose(Rd[valid], (0, 2, 1)))
             ang[valid] = Rotation.from_matrix(rel).as_euler(
                 anatomy.EULER_SEQUENCE, degrees=True)
@@ -386,8 +351,6 @@ def joint_angles(terne, fps, esistenti=None):
             if (nome, piano) in angoli:
                 continue
             if anatomy.plane_provenance(nome, piano) != anatomy.DERIVED:
-                # il piano non e' osservabile da queste terne: registrarlo come
-                # valore darebbe un numero credibile ma senza significato
                 if nome == "spine" and piano == "sagittal":
                     dettaglio = ("il bacino prende il suo rollio dalla stessa "
                                  "direzione che definisce l'asse del tronco: "
@@ -404,8 +367,9 @@ def joint_angles(terne, fps, esistenti=None):
 
 
 # --- Ingresso unico ---
+# Esegue pulizia, terne, quaternioni e angoli su quanto e' stato letto, e
+# restituisce il risultato completo con provenienza, copertura e assenze.
 def compute(letto):
-    """Da quanto letto dalla sorgente al pacchetto completo per il C3D."""
     meta = dict(letto["meta"])
     fps = meta.get("fps")
     max_gap = max(1, int(round(MAX_GAP_S * fps))) if fps else 1
@@ -433,8 +397,6 @@ def compute(letto):
         assenze["kinematics:angular_velocity"] = (anatomy.NO_TIME_BASE, "fps assente")
 
     limite = MAX_ANGULAR_DEG_S / fps if fps else 90.0
-    # I centri costruiti (bacino) servono a costruire le terne ma non sono punti
-    # da riconoscere: fuori restano i sedici canonici.
     punti = {k: v for k, v in punti.items() if k in anatomy.POINTS}
     prov_punti = {k: (anatomy.FILLED if k in interpolati else anatomy.MEASURED)
                   for k in punti}
@@ -447,8 +409,6 @@ def compute(letto):
                      for k, v in punti.items()},
         "implausible": {k: implausible_rate(v, limite) for k, v in angoli.items()},
         "world_frame": np.asarray(R_world).tolist(),
-        # Gli appoggi marcati dalla sorgente passano di qui senza essere toccati:
-        # la segmentazione li preferisce a qualunque cosa sappia ricavare.
         "events": letto.get("events") or {},
         "warnings": avvisi,
         "meta": meta,

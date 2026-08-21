@@ -1,0 +1,105 @@
+{
+  "session_id": "running_20260220_121922",
+  "sport": "running",
+  "main_analysis": [
+    {
+      "title": "Hip Drop Elevato",
+      "description": "Il Hip Drop mostra un'elevata variabilit\u00e0 durante la corsa, indicando una possibile instabilit\u00e0 del bacino. Ci\u00f2 pu\u00f2 influenzare negativamente l'efficienza della corsa.",
+      "evidence": "Media 13.4, range: 0.3-89.4, con picco a met\u00e0 sessione.",
+      "confidence": "high",
+      "timestamp_refs": [
+        "00:30-00:45"
+      ]
+    },
+    {
+      "title": "Knee Valgus Sostenuto",
+      "description": "Knee Valgus rimane elevato per tutta la durata della sessione, indicando un potenziale rischio di infortunio e inefficienza nel passo.",
+      "evidence": "Media 53.0, range: 7.8-89.8.",
+      "confidence": "high",
+      "timestamp_refs": null
+    },
+    {
+      "title": "Asimmetria nella Corsa",
+      "description": "La simmetria media \u00e8 sotto l'ottimale, con alert di asimmetria rilevati. Questo pu\u00f2 causare un dispendio energetico maggiore e un'inefficienza del passo.",
+      "evidence": "Media 39.1%, range: 34.6-51.6.",
+      "confidence": "medium",
+      "timestamp_refs": [
+        "01:00-01:31"
+      ]
+    },
+    {
+      "title": "Head Tilt Variabile",
+      "description": "Il Head Tilt varia significativamente durante la sessione, potenzialmente indicando tensione o cattiva postura.",
+      "evidence": "Media 16.1, range: -8.8-76.8.",
+      "confidence": "medium",
+      "timestamp_refs": null
+    }
+  ],
+  "two_week_plan": {
+    "week1": {
+      "focus": "Rinforzo Stabilizzatori e Simmetria",
+      "sessions": [
+        {
+          "day": "Luned\u00ec",
+          "description": "Rinforzo muscoli stabilizzatori dell'anca + Bilanciamento",
+          "duration_minutes": 30
+        },
+        {
+          "day": "Mercoled\u00ec",
+          "description": "Rinforzo muscoli del ginocchio + Stretching collo e spalle",
+          "duration_minutes": 30
+        },
+        {
+          "day": "Venerd\u00ec",
+          "description": "Allenamento di simmetria + Jogging leggero",
+          "duration_minutes": 45
+        }
+      ]
+    },
+    "week2": {
+      "focus": "Integrazione e Pratica",
+      "sessions": [
+        {
+          "day": "Luned\u00ec",
+          "description": "Sessione combinata rinforzo + Tecnica di corsa",
+          "duration_minutes": 45
+        },
+        {
+          "day": "Mercoled\u00ec",
+          "description": "Lavoro su asimmetrie + Allungamenti specifici",
+          "duration_minutes": 45
+        },
+        {
+          "day": "Venerd\u00ec",
+          "description": "Corsa lunga con focus su postura e simmetria",
+          "duration_minutes": 60
+        }
+      ]
+    },
+    "daily_routine": null
+  },
+  "limitations": [
+    "Se si avverte dolore superiore a 7/10, \u00e8 consigliato consultare un professionista.",
+    "Questo piano non sostituisce il parere di un medico o fisioterapista."
+  ],
+  "next_session_checklist": [
+    "Prima dell'allenamento, fai una sessione di riscaldamento focalizzata su anca, ginocchio e collo.",
+    "Durante la corsa, mantieni la consapevolezza del tuo Hip Drop e Knee Valgus.",
+    "Concentrati sulla simmetria dei passi e sulla postura del collo.",
+    "Concludi ogni sessione con stretching specifico per le aree di interesse."
+  ],
+  "generated_at": "2026-02-20T12:22:45.019195",
+  "tokens_used": 2284,
+  "cached": false,
+  "template": "athlete",
+  "style": "performance",
+  "quick_actions": [
+    "Concentrati su esercizi per rafforzare i muscoli stabilizzatori dell'anca per ridurre il Hip Drop.",
+    "Incorpora esercizi di rinforzo per i muscoli intorno al ginocchio per limitare il Knee Valgus.",
+    "Lavora su esercizi di bilanciamento e simmetria per migliorare la distribuzione del carico tra le gambe.",
+    "Pratica esercizi di allungamento del collo e delle spalle per ridurre il Head Tilt."
+  ],
+  "data_quality_warnings": [
+    "Trend temporali non rilevati - possibile qualit\u00e0 dati insufficiente"
+  ]
+}

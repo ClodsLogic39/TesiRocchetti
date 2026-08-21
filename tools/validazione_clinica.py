@@ -1,17 +1,15 @@
 """Confronta gli angoli calcolati dal progetto con quelli di un modello clinico.
 
-I C3D di laboratorio con marker set Plug-in Gait portano sia i punti sia le
-uscite del modello. Si possono quindi ricalcolare gli angoli dai soli punti e
-misurare lo scarto rispetto alla verita' che sta nello stesso file: e' l'unica
-condizione in cui il calcolo del progetto e' verificabile, perche' sui dati
-MediaPipe non esiste niente con cui confrontarlo.
+I C3D di laboratorio con marker set Plug-in Gait contengono sia i punti sia le
+uscite del modello. Lo strumento ricalcola gli angoli a partire dai soli punti,
+dopo aver svuotato quelli che la sorgente porta gia', e misura lo scarto rispetto
+alle uscite del modello presenti nello stesso file. Stampa un riepilogo per
+giunto e piano, con la possibilita' di raggrupparlo per condizione di ripresa.
 
-Attenzione a come il convertitore tratta questi file: quando la sorgente porta
-gia' gli angoli, li ricopia invece di ricalcolarli (provenienza `measured`).
-Il confronto qui sotto svuota apposta quel campo, altrimenti misurerebbe un
-valore contro se stesso.
+Uso:  python -m tools.validazione_clinica <cartella con file .c3d>
 
-    python -m tools.validazione_clinica DatiGrezzi/Ref_1 DatiGrezzi/Ref_2
+Prerequisiti: numpy ed ezc3d; file C3D che contengano insieme i marker e le
+uscite del modello clinico.
 """
 import argparse
 import os
@@ -21,21 +19,22 @@ import numpy as np
 
 from src.conversion import angles, readers
 
-# Il fit lineare separa due cose diverse: una convenzione diversa (segno,
-# offset, guadagno) lascia un residuo piccolo perche' la forma della curva e'
-# la stessa; un modello diverso lascia un residuo grande, e nessuna costante
-# puo' ripararlo.
+# --- Soglia di confronto ---
+# Numero minimo di fotogrammi validi perche' il confronto su un piano venga
+# considerato.
 MIN_CAMPIONI = 30
 
 
+# --- Confronto di un file ---
+# Rilegge la sorgente, azzera gli angoli che porta gia' calcolati, li ricalcola
+# dai punti e misura lo scarto rispetto a quelli del modello.
 def confronta_file(percorso):
-    """{(giunto, piano): metriche} confrontando ricalcolo e modello clinico."""
     letto = readers.read(percorso)
     riferimento = dict(letto.get("angles") or {})
     if not riferimento:
         return {}
     senza = dict(letto)
-    senza["angles"] = {}          # costringe il ricalcolo dai punti
+    senza["angles"] = {}
     calcolato = angles.compute(senza)["angles"]
 
     out = {}
@@ -63,13 +62,9 @@ def confronta_file(percorso):
     return out
 
 
+# --- Riepilogo su piu' file ---
+# Raccoglie gli scarti di tutti i file trovati e li aggrega per giunto e piano.
 def riepilogo(radici, per_condizione=0):
-    """Mediana delle metriche per (giunto, piano) sui file trovati.
-
-    `per_condizione` limita quanti file prendere da ogni sottocartella: le
-    mediane si stabilizzano con pochi file per condizione, e un confronto che
-    dura mezzo minuto non viene eseguito. Zero significa tutti.
-    """
     raccolta = {}
     for radice in radici:
         presi = {}
@@ -101,6 +96,7 @@ def riepilogo(radici, per_condizione=0):
     return out
 
 
+# --- Riga di comando ---
 def main(argv=None):
     ap = argparse.ArgumentParser(description=__doc__.split("\n")[0])
     ap.add_argument("radici", nargs="+", help="cartelle con C3D del modello clinico")

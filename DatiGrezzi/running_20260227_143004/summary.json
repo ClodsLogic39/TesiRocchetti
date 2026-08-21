@@ -1,0 +1,35 @@
+{
+  "sport": "running",
+  "duration_seconds": 35.44443726539612,
+  "start_time": "2026-02-27T14:30:14.024859",
+  "end_time": "2026-02-27T14:30:49.469296",
+  "metric_averages": {
+    "Hip Drop": 8.712738078556692,
+    "Head Tilt": 25.943027520796825,
+    "Knee Valgus": 3.760853288702094
+  },
+  "metric_mins": {
+    "Hip Drop": 1.0305455275392503,
+    "Head Tilt": -1.5928926914441186,
+    "Knee Valgus": 2.7453004614316834
+  },
+  "metric_maxs": {
+    "Hip Drop": 72.95124506922883,
+    "Head Tilt": 72.64114570466435,
+    "Knee Valgus": 3.7682123671605803
+  },
+  "alert_counts": {
+    "R01": 0,
+    "R02": 0,
+    "R03": 0,
+    "R04": 0,
+    "R10": 1
+  },
+  "total_alerts": 1,
+  "marker_mode_used": false,
+  "marker_quality_avg": null,
+  "markers_tracked": null,
+  "marker_stats": null,
+  "marker_impact": null,
+  "view": "frontal"
+}

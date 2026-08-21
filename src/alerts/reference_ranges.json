@@ -1,5 +1,5 @@
 {
-  "note": "Valori fissi presi da letteratura scientifica, non calcolati dai dati caricati. Vanno riletti e validati da chi conosce il dominio prima dell'uso clinico: il software li applica, non li giustifica. Convenzione: flessione positiva, gradi.",
+  "note": "Valori fissi presi da letteratura scientifica, non calcolati dai dati caricati. Convenzione: flessione positiva, gradi.",
   "convention": "ISB Wu2002 / Grood-Suntay ZXY, flessione positiva",
   "sources": {
     "aaos": {
@@ -28,71 +28,423 @@
       "note": "20 adulti sani, marker Plug-in Gait (C7/T10/CLAV/STRN + ASIS/PSIS/SACR): tronco rispetto al bacino durante il cammino. Valori qui usati come media dell'escursione ciclo per ciclo +/- 2 deviazioni standard, arrotondati."
     }
   },
-
   "anatomical": [
-    {"joint": "hip",      "plane": "sagittal", "metric": "peak_max", "max": 125, "severity": "critical", "source": "aaos", "note": "flessione d'anca oltre il limite goniometrico"},
-    {"joint": "hip",      "plane": "sagittal", "metric": "peak_min", "min": -35, "severity": "critical", "source": "aaos", "note": "estensione d'anca oltre il limite goniometrico"},
-    {"joint": "hip",      "plane": "frontal",  "metric": "peak_max", "max": 50,  "severity": "critical", "source": "aaos", "note": "adduzione oltre il limite"},
-    {"joint": "hip",      "plane": "frontal",  "metric": "peak_min", "min": -50, "severity": "critical", "source": "aaos", "note": "abduzione oltre il limite"},
-
-    {"joint": "knee",     "plane": "sagittal", "metric": "peak_max", "max": 140, "severity": "critical", "source": "aaos", "note": "flessione di ginocchio oltre il limite goniometrico"},
-    {"joint": "knee",     "plane": "sagittal", "metric": "peak_min", "min": -10, "severity": "critical", "source": "aaos", "note": "iperestensione di ginocchio (genu recurvatum)"},
-
-    {"joint": "ankle",    "plane": "sagittal", "metric": "peak_max", "max": 25,  "severity": "critical", "source": "aaos", "note": "dorsiflessione oltre il limite"},
-    {"joint": "ankle",    "plane": "sagittal", "metric": "peak_min", "min": -55, "severity": "critical", "source": "aaos", "note": "flessione plantare oltre il limite"},
-
-    {"joint": "shoulder", "plane": "sagittal", "metric": "peak_max", "max": 185, "severity": "critical", "source": "aaos", "note": "flessione di spalla oltre il limite"},
-    {"joint": "shoulder", "plane": "sagittal", "metric": "peak_min", "min": -65, "severity": "critical", "source": "aaos", "note": "estensione di spalla oltre il limite"},
-    {"joint": "shoulder", "plane": "frontal",  "metric": "peak_min", "min": -185, "severity": "critical", "source": "aaos", "note": "abduzione oltre il limite"},
-
-    {"joint": "elbow",    "plane": "sagittal", "metric": "peak_max", "max": 155, "severity": "critical", "source": "aaos", "note": "flessione di gomito oltre il limite"},
-    {"joint": "elbow",    "plane": "sagittal", "metric": "peak_min", "min": -15, "severity": "critical", "source": "aaos", "note": "iperestensione di gomito"},
-
-    {"joint": "trunk",    "plane": "frontal",  "metric": "peak_max", "max": 45,  "severity": "warning",  "source": "aaos", "note": "inclinazione laterale del tronco marcata"},
-    {"joint": "trunk",    "plane": "frontal",  "metric": "peak_min", "min": -45, "severity": "warning",  "source": "aaos", "note": "inclinazione laterale del tronco marcata"},
-
-    {"joint": "spine",    "plane": "frontal",   "metric": "peak_max", "max": 35,  "severity": "critical", "source": "aaos", "note": "inclinazione laterale toracolombare oltre il limite"},
-    {"joint": "spine",    "plane": "frontal",   "metric": "peak_min", "min": -35, "severity": "critical", "source": "aaos", "note": "inclinazione laterale toracolombare oltre il limite"},
-    {"joint": "spine",    "plane": "transverse","metric": "peak_max", "max": 45,  "severity": "critical", "source": "aaos", "note": "rotazione assiale toracolombare oltre il limite"},
-    {"joint": "spine",    "plane": "transverse","metric": "peak_min", "min": -45, "severity": "critical", "source": "aaos", "note": "rotazione assiale toracolombare oltre il limite"}
+    {
+      "joint": "hip",
+      "plane": "sagittal",
+      "metric": "peak_max",
+      "max": 125,
+      "severity": "critical",
+      "source": "aaos",
+      "note": "flessione d'anca oltre il limite goniometrico"
+    },
+    {
+      "joint": "hip",
+      "plane": "sagittal",
+      "metric": "peak_min",
+      "min": -35,
+      "severity": "critical",
+      "source": "aaos",
+      "note": "estensione d'anca oltre il limite goniometrico"
+    },
+    {
+      "joint": "hip",
+      "plane": "frontal",
+      "metric": "peak_max",
+      "max": 50,
+      "severity": "critical",
+      "source": "aaos",
+      "note": "adduzione oltre il limite"
+    },
+    {
+      "joint": "hip",
+      "plane": "frontal",
+      "metric": "peak_min",
+      "min": -50,
+      "severity": "critical",
+      "source": "aaos",
+      "note": "abduzione oltre il limite"
+    },
+    {
+      "joint": "knee",
+      "plane": "sagittal",
+      "metric": "peak_max",
+      "max": 140,
+      "severity": "critical",
+      "source": "aaos",
+      "note": "flessione di ginocchio oltre il limite goniometrico"
+    },
+    {
+      "joint": "knee",
+      "plane": "sagittal",
+      "metric": "peak_min",
+      "min": -10,
+      "severity": "critical",
+      "source": "aaos",
+      "note": "iperestensione di ginocchio (genu recurvatum)"
+    },
+    {
+      "joint": "ankle",
+      "plane": "sagittal",
+      "metric": "peak_max",
+      "max": 25,
+      "severity": "critical",
+      "source": "aaos",
+      "note": "dorsiflessione oltre il limite"
+    },
+    {
+      "joint": "ankle",
+      "plane": "sagittal",
+      "metric": "peak_min",
+      "min": -55,
+      "severity": "critical",
+      "source": "aaos",
+      "note": "flessione plantare oltre il limite"
+    },
+    {
+      "joint": "shoulder",
+      "plane": "sagittal",
+      "metric": "peak_max",
+      "max": 185,
+      "severity": "critical",
+      "source": "aaos",
+      "note": "flessione di spalla oltre il limite"
+    },
+    {
+      "joint": "shoulder",
+      "plane": "sagittal",
+      "metric": "peak_min",
+      "min": -65,
+      "severity": "critical",
+      "source": "aaos",
+      "note": "estensione di spalla oltre il limite"
+    },
+    {
+      "joint": "shoulder",
+      "plane": "frontal",
+      "metric": "peak_min",
+      "min": -185,
+      "severity": "critical",
+      "source": "aaos",
+      "note": "abduzione oltre il limite"
+    },
+    {
+      "joint": "elbow",
+      "plane": "sagittal",
+      "metric": "peak_max",
+      "max": 155,
+      "severity": "critical",
+      "source": "aaos",
+      "note": "flessione di gomito oltre il limite"
+    },
+    {
+      "joint": "elbow",
+      "plane": "sagittal",
+      "metric": "peak_min",
+      "min": -15,
+      "severity": "critical",
+      "source": "aaos",
+      "note": "iperestensione di gomito"
+    },
+    {
+      "joint": "trunk",
+      "plane": "frontal",
+      "metric": "peak_max",
+      "max": 45,
+      "severity": "warning",
+      "source": "aaos",
+      "note": "inclinazione laterale del tronco marcata"
+    },
+    {
+      "joint": "trunk",
+      "plane": "frontal",
+      "metric": "peak_min",
+      "min": -45,
+      "severity": "warning",
+      "source": "aaos",
+      "note": "inclinazione laterale del tronco marcata"
+    },
+    {
+      "joint": "spine",
+      "plane": "frontal",
+      "metric": "peak_max",
+      "max": 35,
+      "severity": "critical",
+      "source": "aaos",
+      "note": "inclinazione laterale toracolombare oltre il limite"
+    },
+    {
+      "joint": "spine",
+      "plane": "frontal",
+      "metric": "peak_min",
+      "min": -35,
+      "severity": "critical",
+      "source": "aaos",
+      "note": "inclinazione laterale toracolombare oltre il limite"
+    },
+    {
+      "joint": "spine",
+      "plane": "transverse",
+      "metric": "peak_max",
+      "max": 45,
+      "severity": "critical",
+      "source": "aaos",
+      "note": "rotazione assiale toracolombare oltre il limite"
+    },
+    {
+      "joint": "spine",
+      "plane": "transverse",
+      "metric": "peak_min",
+      "min": -45,
+      "severity": "critical",
+      "source": "aaos",
+      "note": "rotazione assiale toracolombare oltre il limite"
+    }
   ],
-
   "sports": {
     "walking": [
-      {"joint": "hip",   "plane": "sagittal", "metric": "peak_max", "min": 20,  "max": 40,  "severity": "warning", "source": "perry",   "note": "massima flessione d'anca in fase oscillante, attesa intorno a 30 gradi"},
-      {"joint": "hip",   "plane": "sagittal", "metric": "peak_min", "min": -25, "max": -5,  "severity": "warning", "source": "perry",   "note": "massima estensione d'anca a fine appoggio"},
-      {"joint": "hip",   "plane": "sagittal", "metric": "rom",      "min": 30,  "max": 60,  "severity": "warning", "source": "fukuchi", "note": "escursione d'anca nel ciclo del passo"},
-      {"joint": "hip",   "plane": "frontal",  "metric": "rom",      "min": 5,   "max": 20,  "severity": "info",    "source": "fukuchi", "note": "escursione frontale d'anca; valori alti indicano caduta del bacino"},
-
-      {"joint": "knee",  "plane": "sagittal", "metric": "peak_max", "min": 50,  "max": 75,  "severity": "warning", "source": "perry",   "note": "massima flessione di ginocchio in oscillazione iniziale, attesa intorno a 65 gradi"},
-      {"joint": "knee",  "plane": "sagittal", "metric": "peak_min", "min": -8,  "max": 12,  "severity": "warning", "source": "perry",   "note": "estensione a fine oscillazione, prossima allo zero"},
-      {"joint": "knee",  "plane": "sagittal", "metric": "rom",      "min": 50,  "max": 75,  "severity": "warning", "source": "knee_speed", "note": "escursione di flessoestensione, 62.6 gradi a velocita' di cammino"},
-
-      {"joint": "ankle", "plane": "sagittal", "metric": "peak_max", "min": 5,   "max": 20,  "severity": "warning", "source": "perry",   "note": "massima dorsiflessione in appoggio intermedio"},
-      {"joint": "ankle", "plane": "sagittal", "metric": "peak_min", "min": -35, "max": -10, "severity": "warning", "source": "perry",   "note": "flessione plantare in pre-oscillazione, 20-30 gradi"},
-      {"joint": "ankle", "plane": "sagittal", "metric": "rom",      "min": 20,  "max": 45,  "severity": "warning", "source": "perry",   "note": "escursione della caviglia nel ciclo del passo"},
-
-      {"joint": "trunk", "plane": "sagittal", "metric": "peak_max", "min": -5,  "max": 15,  "severity": "info",    "source": "perry",   "note": "il tronco resta quasi verticale nel cammino"},
-
-      {"joint": "spine", "plane": "frontal",    "metric": "rom", "min": 4,  "max": 22, "severity": "info", "source": "chung", "note": "escursione di inclinazione laterale del tronco rispetto al bacino"},
-      {"joint": "spine", "plane": "transverse", "metric": "rom", "min": 4,  "max": 24, "severity": "info", "source": "chung", "note": "escursione di rotazione assiale del tronco rispetto al bacino, la piu' ampia delle tre nel riferimento pelvico"}
+      {
+        "joint": "hip",
+        "plane": "sagittal",
+        "metric": "peak_max",
+        "min": 20,
+        "max": 40,
+        "severity": "warning",
+        "source": "perry",
+        "note": "massima flessione d'anca in fase oscillante, attesa intorno a 30 gradi"
+      },
+      {
+        "joint": "hip",
+        "plane": "sagittal",
+        "metric": "peak_min",
+        "min": -25,
+        "max": -5,
+        "severity": "warning",
+        "source": "perry",
+        "note": "massima estensione d'anca a fine appoggio"
+      },
+      {
+        "joint": "hip",
+        "plane": "sagittal",
+        "metric": "rom",
+        "min": 30,
+        "max": 60,
+        "severity": "warning",
+        "source": "fukuchi",
+        "note": "escursione d'anca nel ciclo del passo"
+      },
+      {
+        "joint": "hip",
+        "plane": "frontal",
+        "metric": "rom",
+        "min": 5,
+        "max": 20,
+        "severity": "info",
+        "source": "fukuchi",
+        "note": "escursione frontale d'anca; valori alti indicano caduta del bacino"
+      },
+      {
+        "joint": "knee",
+        "plane": "sagittal",
+        "metric": "peak_max",
+        "min": 50,
+        "max": 75,
+        "severity": "warning",
+        "source": "perry",
+        "note": "massima flessione di ginocchio in oscillazione iniziale, attesa intorno a 65 gradi"
+      },
+      {
+        "joint": "knee",
+        "plane": "sagittal",
+        "metric": "peak_min",
+        "min": -8,
+        "max": 12,
+        "severity": "warning",
+        "source": "perry",
+        "note": "estensione a fine oscillazione, prossima allo zero"
+      },
+      {
+        "joint": "knee",
+        "plane": "sagittal",
+        "metric": "rom",
+        "min": 50,
+        "max": 75,
+        "severity": "warning",
+        "source": "knee_speed",
+        "note": "escursione di flessoestensione, 62.6 gradi a velocita' di cammino"
+      },
+      {
+        "joint": "ankle",
+        "plane": "sagittal",
+        "metric": "peak_max",
+        "min": 5,
+        "max": 20,
+        "severity": "warning",
+        "source": "perry",
+        "note": "massima dorsiflessione in appoggio intermedio"
+      },
+      {
+        "joint": "ankle",
+        "plane": "sagittal",
+        "metric": "peak_min",
+        "min": -35,
+        "max": -10,
+        "severity": "warning",
+        "source": "perry",
+        "note": "flessione plantare in pre-oscillazione, 20-30 gradi"
+      },
+      {
+        "joint": "ankle",
+        "plane": "sagittal",
+        "metric": "rom",
+        "min": 20,
+        "max": 45,
+        "severity": "warning",
+        "source": "perry",
+        "note": "escursione della caviglia nel ciclo del passo"
+      },
+      {
+        "joint": "trunk",
+        "plane": "sagittal",
+        "metric": "peak_max",
+        "min": -5,
+        "max": 15,
+        "severity": "info",
+        "source": "perry",
+        "note": "il tronco resta quasi verticale nel cammino"
+      },
+      {
+        "joint": "spine",
+        "plane": "frontal",
+        "metric": "rom",
+        "min": 4,
+        "max": 22,
+        "severity": "info",
+        "source": "chung",
+        "note": "escursione di inclinazione laterale del tronco rispetto al bacino"
+      },
+      {
+        "joint": "spine",
+        "plane": "transverse",
+        "metric": "rom",
+        "min": 4,
+        "max": 24,
+        "severity": "info",
+        "source": "chung",
+        "note": "escursione di rotazione assiale del tronco rispetto al bacino, la piu' ampia delle tre nel riferimento pelvico"
+      }
     ],
-
     "running": [
-      {"joint": "hip",   "plane": "sagittal", "metric": "peak_max", "min": 25,  "max": 55,  "severity": "warning", "source": "fukuchi", "note": "massima flessione d'anca in oscillazione"},
-      {"joint": "hip",   "plane": "sagittal", "metric": "peak_min", "min": -30, "max": -5,  "severity": "warning", "source": "fukuchi", "note": "massima estensione d'anca a fine spinta"},
-      {"joint": "hip",   "plane": "sagittal", "metric": "rom",      "min": 40,  "max": 80,  "severity": "warning", "source": "fukuchi", "note": "escursione d'anca, maggiore che nel cammino"},
-      {"joint": "hip",   "plane": "frontal",  "metric": "rom",      "min": 5,   "max": 25,  "severity": "info",    "source": "fukuchi", "note": "escursione frontale; valori alti sono compatibili con caduta del bacino"},
-
-      {"joint": "knee",  "plane": "sagittal", "metric": "peak_max", "min": 70,  "max": 120, "severity": "warning", "source": "knee_speed", "note": "massima flessione in oscillazione, cresce con la velocita'"},
-      {"joint": "knee",  "plane": "sagittal", "metric": "peak_min", "min": -5,  "max": 25,  "severity": "warning", "source": "fukuchi", "note": "flessione al contatto iniziale, attesa fra 15 e 25 gradi"},
-      {"joint": "knee",  "plane": "sagittal", "metric": "rom",      "min": 60,  "max": 100, "severity": "warning", "source": "knee_speed", "note": "escursione di flessoestensione, fino a 77.1 gradi ad alta velocita'"},
-
-      {"joint": "ankle", "plane": "sagittal", "metric": "peak_max", "min": 10,  "max": 35,  "severity": "warning", "source": "fukuchi", "note": "massima dorsiflessione in appoggio: carico su tricipite surale e tendine d'Achille"},
-      {"joint": "ankle", "plane": "sagittal", "metric": "peak_min", "min": -45, "max": -15, "severity": "warning", "source": "fukuchi", "note": "flessione plantare allo stacco"},
-      {"joint": "ankle", "plane": "sagittal", "metric": "rom",      "min": 30,  "max": 65,  "severity": "warning", "source": "fukuchi", "note": "escursione della caviglia nel ciclo di corsa"},
-
-      {"joint": "trunk", "plane": "sagittal", "metric": "peak_max", "min": 0,   "max": 20,  "severity": "info",    "source": "fukuchi", "note": "leggera inclinazione in avanti del tronco"}
+      {
+        "joint": "hip",
+        "plane": "sagittal",
+        "metric": "peak_max",
+        "min": 25,
+        "max": 55,
+        "severity": "warning",
+        "source": "fukuchi",
+        "note": "massima flessione d'anca in oscillazione"
+      },
+      {
+        "joint": "hip",
+        "plane": "sagittal",
+        "metric": "peak_min",
+        "min": -30,
+        "max": -5,
+        "severity": "warning",
+        "source": "fukuchi",
+        "note": "massima estensione d'anca a fine spinta"
+      },
+      {
+        "joint": "hip",
+        "plane": "sagittal",
+        "metric": "rom",
+        "min": 40,
+        "max": 80,
+        "severity": "warning",
+        "source": "fukuchi",
+        "note": "escursione d'anca, maggiore che nel cammino"
+      },
+      {
+        "joint": "hip",
+        "plane": "frontal",
+        "metric": "rom",
+        "min": 5,
+        "max": 25,
+        "severity": "info",
+        "source": "fukuchi",
+        "note": "escursione frontale; valori alti sono compatibili con caduta del bacino"
+      },
+      {
+        "joint": "knee",
+        "plane": "sagittal",
+        "metric": "peak_max",
+        "min": 70,
+        "max": 120,
+        "severity": "warning",
+        "source": "knee_speed",
+        "note": "massima flessione in oscillazione, cresce con la velocita'"
+      },
+      {
+        "joint": "knee",
+        "plane": "sagittal",
+        "metric": "peak_min",
+        "min": -5,
+        "max": 25,
+        "severity": "warning",
+        "source": "fukuchi",
+        "note": "flessione al contatto iniziale, attesa fra 15 e 25 gradi"
+      },
+      {
+        "joint": "knee",
+        "plane": "sagittal",
+        "metric": "rom",
+        "min": 60,
+        "max": 100,
+        "severity": "warning",
+        "source": "knee_speed",
+        "note": "escursione di flessoestensione, fino a 77.1 gradi ad alta velocita'"
+      },
+      {
+        "joint": "ankle",
+        "plane": "sagittal",
+        "metric": "peak_max",
+        "min": 10,
+        "max": 35,
+        "severity": "warning",
+        "source": "fukuchi",
+        "note": "massima dorsiflessione in appoggio: carico su tricipite surale e tendine d'Achille"
+      },
+      {
+        "joint": "ankle",
+        "plane": "sagittal",
+        "metric": "peak_min",
+        "min": -45,
+        "max": -15,
+        "severity": "warning",
+        "source": "fukuchi",
+        "note": "flessione plantare allo stacco"
+      },
+      {
+        "joint": "ankle",
+        "plane": "sagittal",
+        "metric": "rom",
+        "min": 30,
+        "max": 65,
+        "severity": "warning",
+        "source": "fukuchi",
+        "note": "escursione della caviglia nel ciclo di corsa"
+      },
+      {
+        "joint": "trunk",
+        "plane": "sagittal",
+        "metric": "peak_max",
+        "min": 0,
+        "max": 20,
+        "severity": "info",
+        "source": "fukuchi",
+        "note": "leggera inclinazione in avanti del tronco"
+      }
     ]
   }
 }

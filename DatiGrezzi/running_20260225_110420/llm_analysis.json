@@ -1,0 +1,94 @@
+{
+  "session_id": "running_20260225_110420",
+  "sport": "running",
+  "main_analysis": [
+    {
+      "title": "Instabilit\u00e0 del bacino",
+      "description": "Il tuo bacino mostra una variazione durante la corsa, con un aumento medio dell'inclinazione laterale. Questo indica una potenziale debolezza della muscolatura stabilizzatrice.",
+      "evidence": "Hip Drop media: 5.4, range: 0.1-30.7",
+      "confidence": "high",
+      "timestamp_refs": null
+    },
+    {
+      "title": "Variazione dell'inclinazione della testa",
+      "description": "La tua inclinazione della testa varia significativamente durante la sessione, il che pu\u00f2 influenzare l'efficienza della corsa e aumentare il rischio di infortuni.",
+      "evidence": "Head Tilt media: 15.8, range: -40.4-61.3",
+      "confidence": "medium",
+      "timestamp_refs": null
+    },
+    {
+      "title": "Migliorabile economia di corsa",
+      "description": "La variazione nelle metriche di Head Tilt e Hip Drop suggerisce che ci sono opportunit\u00e0 per migliorare la tua economia di corsa attraverso un maggiore controllo posturale.",
+      "evidence": "Trend temporale Head Tilt e Hip Drop",
+      "confidence": "medium",
+      "timestamp_refs": null
+    }
+  ],
+  "two_week_plan": {
+    "week1": {
+      "focus": "Stabilit\u00e0 del core e forza dell'anca",
+      "sessions": [
+        {
+          "day": "Luned\u00ec",
+          "description": "Corsa leggera + Core stability workout",
+          "duration_minutes": 45
+        },
+        {
+          "day": "Mercoled\u00ec",
+          "description": "Esercizi di forza per l'anca",
+          "duration_minutes": 30
+        },
+        {
+          "day": "Venerd\u00ec",
+          "description": "Corsa con focus sulla postura",
+          "duration_minutes": 30
+        }
+      ]
+    },
+    "week2": {
+      "focus": "Miglioramento della postura e resistenza",
+      "sessions": [
+        {
+          "day": "Luned\u00ec",
+          "description": "Corsa leggera + Core stability workout avanzato",
+          "duration_minutes": 50
+        },
+        {
+          "day": "Mercoled\u00ec",
+          "description": "Esercizi di forza per l'anca con resistenza",
+          "duration_minutes": 35
+        },
+        {
+          "day": "Venerd\u00ec",
+          "description": "Corsa lunga con focus sulla postura",
+          "duration_minutes": 40
+        }
+      ]
+    },
+    "daily_routine": null
+  },
+  "limitations": [
+    "Questo piano non sostituisce il consiglio di un medico. In caso di dolore o disagio, consulta un professionista."
+  ],
+  "next_session_checklist": [
+    "Verifica la tua postura prima e durante la corsa.",
+    "Concentrati sull'attivazione del core per tutta la durata dell'allenamento.",
+    "Ricorda di fare stretching mirato dopo l'allenamento.",
+    "Usa scarpe da corsa adatte per supportare una corretta postura."
+  ],
+  "generated_at": "2026-02-25T11:06:51.233107",
+  "tokens_used": 1946,
+  "cached": false,
+  "template": "athlete",
+  "style": "performance",
+  "quick_actions": [
+    "Inizia a includere esercizi di stabilit\u00e0 del core nel tuo riscaldamento e defaticamento.",
+    "Pratica la corsa con la focalizzazione su una postura eretta e uno sguardo fisso all'orizzonte.",
+    "Incorpora esercizi di forza specifici per i glutei e i muscoli stabilizzatori dell'anca due volte a settimana.",
+    "Fai stretching mirato per i flessori dell'anca e la muscolatura posteriore della coscia dopo ogni sessione di allenamento."
+  ],
+  "data_quality_warnings": [
+    "Metriche limitate disponibili per l'analisi",
+    "Trend temporali non rilevati - possibile qualit\u00e0 dati insufficiente"
+  ]
+}

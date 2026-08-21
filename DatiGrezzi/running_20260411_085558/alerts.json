@@ -1,0 +1,35 @@
+[
+  {
+    "id": "R06_1775890579",
+    "message": "Postura molto dritta",
+    "suggestion": "Inclina leggermente il busto in avanti",
+    "severity": "info",
+    "timestamp": 1775890579.486636,
+    "metric_name": "Trunk Lean",
+    "segment_id": null,
+    "segment_confidence": null,
+    "extra_data": null
+  },
+  {
+    "id": "R10_1775890613",
+    "message": "Tracking instabile",
+    "suggestion": "Riposizionati nel campo visivo della camera",
+    "severity": "info",
+    "timestamp": 1775890613.575451,
+    "metric_name": "tracking_quality",
+    "segment_id": null,
+    "segment_confidence": null,
+    "extra_data": null
+  },
+  {
+    "id": "R07_1775890614",
+    "message": "Troppo inclinato in avanti",
+    "suggestion": "Raddrizza leggermente il busto",
+    "severity": "warning",
+    "timestamp": 1775890614.974367,
+    "metric_name": "Trunk Lean",
+    "segment_id": null,
+    "segment_confidence": null,
+    "extra_data": null
+  }
+]

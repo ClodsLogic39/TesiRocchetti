@@ -1,37 +1,39 @@
-"""Caricamento dei riferimenti per gli alert e valutazione di una sessione.
+"""Riferimenti di letteratura per gli alert e valutazione di una sessione.
 
-I riferimenti sono valori fissi presi da letteratura, in `reference_ranges.json`.
-Non vengono calcolati dalle sessioni caricate: un riferimento che nasce dagli
-stessi dati che deve giudicare non e' un riferimento, e' un'eco.
+I valori sono fissi e vengono letti da `reference_ranges.json`, che sta accanto a
+questo modulo. Sono divisi in due livelli:
+  anatomical  limiti articolari validi per chiunque, indipendenti dal gesto
+  sport       intervalli attesi per un gesto specifico
 
-Due livelli, con significati diversi:
-  anatomical  limiti articolari validi per chiunque, indipendenti dal gesto.
-              Uscirne significa movimento fuori dai limiti fisiologici o errore
-              di misura.
-  sport       intervalli attesi per un gesto specifico. Uscirne non e' di per
-              se' pericoloso: e' un'anomalia da guardare.
+`righe` porta il file in una forma tabellare, `metriche` calcola le grandezze
+osservate di una serie e `valuta` confronta le une con gli altri producendo gli
+alert, ciascuno con gravita' e fonte.
 
-L'alert dice solo *cosa* si scosta e *da quale riferimento*. Non dice cosa fare:
-quello e' compito di chi legge, umano o agente che sia.
+Prerequisiti: numpy; il file `reference_ranges.json` presente nella cartella del
+modulo.
 """
 import json
 import os
 
 import numpy as np
 
+# --- Sorgente dei riferimenti ---
+# Percorso del file dei valori di letteratura e lati su cui un riferimento senza
+# lato viene replicato.
 PERCORSO = os.path.join(os.path.dirname(__file__), "reference_ranges.json")
 
-# I riferimenti parlano di giunti senza lato: valgono per entrambi.
 _LATI = ("l", "r")
 
 
+# --- Lettura dei riferimenti ---
+# `carica` apre il file, `righe` lo appiattisce in una riga per giunto, piano,
+# metrica e livello.
 def carica(percorso=None):
     with open(percorso or PERCORSO) as f:
         return json.load(f)
 
 
 def righe(dati=None):
-    """Espande il file in righe pronte per `reference_ranges`, una per lato."""
     dati = dati or carica()
     fonti = dati["sources"]
     out = []
@@ -39,7 +41,6 @@ def righe(dati=None):
     def espandi(voce, scope, sport):
         fonte = fonti[voce["source"]]
         base = voce["joint"]
-        # trunk, spine e neck sono giunti centrali, senza lato.
         nomi = [base] if base in ("trunk", "spine", "neck") else [
             f"{base}_{s}" for s in _LATI]
         for giunto in nomi:
@@ -61,8 +62,8 @@ def righe(dati=None):
 
 
 # --- Metriche osservate ---
+# Le grandezze calcolate su una serie e confrontate con i riferimenti.
 def metriche(serie):
-    """Metriche confrontabili con i riferimenti, da una serie di angoli."""
     v = np.asarray(serie, dtype=float)
     f = v[np.isfinite(v)]
     if f.size < 2:
@@ -70,23 +71,19 @@ def metriche(serie):
     return {"peak_max": float(f.max()), "peak_min": float(f.min()),
             "rom": float(f.max() - f.min())}
 
-
-# Oltre questo multiplo dell'ampiezza dell'intervallo, lo scostamento non
-# descrive piu' un corpo: un gomito che iperestende di 137 gradi non e' un
-# atleta fuori norma, e' una misura rotta. Chiamarlo `critical` con una fonte
-# clinica a fianco darebbe dignita' medica a un errore di tracciamento.
+# --- Valutazione e alert ---
+# Gravita' di uno scostamento, confronto fra metriche osservate e riferimenti con
+# gli avvisi legati a copertura e provenienza, e selezione dei riferimenti che si
+# applicano a un dato gesto.
 FATTORE_IMPLAUSIBILE = 2.0
 DATA_QUALITY = "data_quality"
 
 
 def _gravita(riferimento, lo, hi, scarto):
-    """La gravita' dichiarata, o `data_quality` se il valore e' impossibile."""
     ampiezza = None
     if lo is not None and hi is not None:
         ampiezza = abs(hi - lo)
     elif lo is not None or hi is not None:
-        # Intervallo aperto da un lato: l'unico riferimento di scala e' il
-        # limite stesso.
         ampiezza = abs(lo if lo is not None else hi)
     if ampiezza and scarto > FATTORE_IMPLAUSIBILE * ampiezza:
         return DATA_QUALITY
@@ -95,13 +92,6 @@ def _gravita(riferimento, lo, hi, scarto):
 
 def valuta(osservate, riferimenti, coverage=None, provenance=None,
            min_coverage=0.30):
-    """Confronta le metriche osservate con i riferimenti applicabili.
-
-    `osservate` = {(giunto, piano): {metrica: valore}}
-    Restituisce la lista degli scostamenti, ciascuno con il riferimento che lo
-    ha generato. Un angolo visto in troppo pochi frame non viene giudicato: il
-    suo massimo e' il massimo di un sottoinsieme, non del gesto.
-    """
     per_chiave = {}
     for r in riferimenti:
         per_chiave.setdefault((r["joint"], r["plane"], r["metric"]), []).append(r)
@@ -133,11 +123,5 @@ def valuta(osservate, riferimenti, coverage=None, provenance=None,
 
 
 def applicabili(riferimenti, sport):
-    """I riferimenti che valgono per questa sessione.
-
-    Quelli anatomici valgono sempre; quelli di gesto solo se lo sport e'
-    dichiarato e riconosciuto. Una sessione senza sport riceve comunque i
-    controlli anatomici: quelli non dipendono da cosa si sta facendo.
-    """
     return [r for r in riferimenti
             if r["scope"] == "anatomical" or (sport and r["sport"] == sport)]

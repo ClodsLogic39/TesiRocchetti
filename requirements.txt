@@ -1,12 +1,19 @@
-# Convertitore e cinematica
+# Dipendenze Python del progetto.
+#
+# Prerequisiti: Python 3 e pip. Il viewer si installa a parte, in un ambiente
+# separato, perche' open3d non serve a conversione, caricamento e query.
+#
+#   pip install -r requirements.txt
+
+# Conversione e cinematica
 numpy
 scipy
-ezc3d            # export/lettura C3D (opzionale: senza, solo JSON)
+ezc3d
 
-# Database e MCP
-psycopg[binary]  # PostgreSQL (ingest, query MCP)
-pgvector         # tipo vector per gli embedding
-mcp              # FastMCP server
+# Database e server MCP
+psycopg[binary]
+pgvector
+mcp
 
-# Rendering (viewer, ambiente separato)
-open3d           # richiede anche ezc3d nell'interprete del viewer
+# Rendering del viewer
+open3d

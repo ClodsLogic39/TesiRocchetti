@@ -1,0 +1,13 @@
+[
+  {
+    "id": "R10_1772199044",
+    "message": "Tracking instabile",
+    "suggestion": "Riposizionati nel campo visivo della camera",
+    "severity": "info",
+    "timestamp": 1772199044.104223,
+    "metric_name": "tracking_quality",
+    "segment_id": null,
+    "segment_confidence": null,
+    "extra_data": null
+  }
+]

@@ -1,20 +1,27 @@
 -- Schema del database biomeccanico.
 --
--- Rispecchia uno a uno cio' che il C3D canonico contiene: sedici punti, le terne
--- dei segmenti, gli angoli sui piani osservabili, e cio' che manca con il motivo.
--- Il vocabolario anatomico e' vincolato da chiavi esterne, non da convenzioni di
--- stringhe: un giunto inesistente non entra nel database.
+-- Rispecchia il contenuto del C3D canonico: i punti anatomici, le terne dei
+-- segmenti, gli angoli sui piani, i cicli con la forma delle curve, cio' che
+-- manca insieme al motivo, e i riferimenti di letteratura con gli alert che ne
+-- derivano. Il vocabolario anatomico e' vincolato da chiavi esterne verso
+-- tabelle di lookup, i cui valori ammessi sono inseriti qui.
+--
+-- Prerequisiti: PostgreSQL con l'estensione pgvector disponibile e un utente che
+-- possa creare estensioni e tabelle. Il file si esegue per intero, in una sola
+-- transazione:
 --
 --   psql -d biomech -f src/database/schema.sql
 
 BEGIN;
 
--- I confronti fra andamenti si fanno con pgvector: e' il motivo per cui il
--- progetto usa PostgreSQL e non un archivio qualunque.
+-- Estensione su cui si appoggiano i confronti fra andamenti.
 CREATE EXTENSION IF NOT EXISTS vector;
 
 -- ===========================================================================
 -- 1. Vocabolario
+-- Tabelle di lookup con i valori ammessi: provenienze, motivi di assenza, piani,
+-- gesti, punti anatomici, segmenti e giunti. Tutto il resto vi si aggancia con
+-- chiavi esterne.
 -- ===========================================================================
 
 CREATE TABLE IF NOT EXISTS provenance_kinds (
@@ -46,19 +53,12 @@ CREATE TABLE IF NOT EXISTS planes (
 INSERT INTO planes (plane) VALUES ('sagittal'), ('frontal'), ('transverse')
 ON CONFLICT DO NOTHING;
 
--- I gesti riconosciuti. Il gesto decide come si segmenta in cicli e quali
--- riferimenti di letteratura si applicano: un nome fuori vocabolario passerebbe
--- i controlli anatomici e nessuno di quelli del gesto, e la sessione
--- risulterebbe senza alert invece che non giudicata. La chiave esterna lo rende
--- impossibile.
 CREATE TABLE IF NOT EXISTS sports (
     sport TEXT PRIMARY KEY
 );
 INSERT INTO sports (sport) VALUES ('walking'), ('running'), ('cycling'), ('swimming')
 ON CONFLICT DO NOTHING;
 
--- I sedici punti anatomici. Nessuno in piu': sono i centri articolari che ogni
--- sistema di cattura sa fornire, e da essi discende tutto il resto.
 CREATE TABLE IF NOT EXISTS points (
     point TEXT PRIMARY KEY,
     side  TEXT CHECK (side IN ('left', 'right', 'central'))
@@ -75,7 +75,6 @@ INSERT INTO points (point, side) VALUES
     ('toe_l', 'left'), ('toe_r', 'right')
 ON CONFLICT DO NOTHING;
 
--- I segmenti che i punti danno per costruzione.
 CREATE TABLE IF NOT EXISTS segments (
     segment TEXT PRIMARY KEY,
     side    TEXT CHECK (side IN ('left', 'right', 'central')),
@@ -100,13 +99,7 @@ CREATE TABLE IF NOT EXISTS joints (
     distal_segment   TEXT REFERENCES segments(segment)
 );
 INSERT INTO joints (joint, side, region, proximal_segment, distal_segment) VALUES
-    -- tronco rispetto al laboratorio. Prima che il tronco avesse una terna
-    -- propria questo giunto usava il bacino come surrogato (distal=pelvis),
-    -- ora misura il segmento che il nome promette.
     ('trunk', 'central', 'trunk', 'world', 'trunk'),
-    -- tronco rispetto al bacino: isola il movimento della colonna da quello
-    -- del bacino sotto di essa (la grandezza "Spine Angles" dei modelli
-    -- clinici Plug-in Gait).
     ('spine', 'central', 'trunk', 'pelvis', 'trunk'),
     ('neck', 'central', 'trunk', 'clavicle_r', 'neck'),
     ('shoulder_l', 'left', 'upper_limb', 'clavicle_l', 'humerus_l'),
@@ -122,18 +115,16 @@ INSERT INTO joints (joint, side, region, proximal_segment, distal_segment) VALUE
 ON CONFLICT DO NOTHING;
 
 -- ===========================================================================
--- 2. Identita' dei soggetti, separata dai dati di movimento
+-- 2. Identita' dei soggetti
+-- Tabella tenuta separata dai dati di movimento, che vi si riferiscono solo
+-- tramite un identificativo.
 -- ===========================================================================
--- Nessun ruolo applicativo ha accesso a questa tabella: il collegamento con le
--- sessioni passa solo per subject_id, che di per se' non identifica nessuno.
 
 CREATE TABLE IF NOT EXISTS subjects_identity (
-    subject_id   TEXT PRIMARY KEY,   -- codice opaco: non parla del soggetto
+    subject_id   TEXT PRIMARY KEY,
     full_name    TEXT,
     birth_date   DATE,
-    height_m     REAL,               -- statura di riferimento dell'anagrafica;
-                                     -- quella della singola acquisizione sta in
-                                     -- sessions, perche' cambia nel tempo
+    height_m     REAL,
     contact      TEXT,
     notes        TEXT,
     created_at   TIMESTAMPTZ NOT NULL DEFAULT now()
@@ -141,6 +132,8 @@ CREATE TABLE IF NOT EXISTS subjects_identity (
 
 -- ===========================================================================
 -- 3. Sessioni
+-- Una riga per acquisizione, con il gesto, la base temporale, il formato di
+-- origine e il riferimento al soggetto.
 -- ===========================================================================
 
 CREATE TABLE IF NOT EXISTS sessions (
@@ -151,13 +144,12 @@ CREATE TABLE IF NOT EXISTS sessions (
     fps             REAL,
     n_frames        INTEGER NOT NULL,
     duration_s      REAL,
-    -- da dove viene e come e' stato prodotto
-    source_format   TEXT,          -- mediapipe_json | c3d
-    capture_system  TEXT,          -- monocular_pose_estimation | marker_based
-    view            TEXT,          -- frontal | sagittal | ...
-    convention      TEXT NOT NULL, -- convenzione di terne e angoli dichiarata
-    biomech_version TEXT NOT NULL, -- versione del contratto del C3D canonico
-    canonical_path  TEXT,          -- il file da cui questa riga e' nata
+    source_format   TEXT,
+    capture_system  TEXT,
+    view            TEXT,
+    convention      TEXT NOT NULL,
+    biomech_version TEXT NOT NULL,
+    canonical_path  TEXT,
     body_mass_kg    REAL,
     height_m        REAL,
     ingested_at     TIMESTAMPTZ NOT NULL DEFAULT now()
@@ -166,9 +158,9 @@ CREATE INDEX IF NOT EXISTS sessions_sport_idx ON sessions (sport);
 
 -- ===========================================================================
 -- 4. Dati di movimento
+-- Traiettorie dei punti, serie dei segmenti, angoli articolari e assenze
+-- dichiarate, ciascuno con la propria provenienza e copertura.
 -- ===========================================================================
--- Le serie stanno in array REAL[]: un campione per frame, NULL dove il dato
--- manca. Un NULL non e' mai uno zero.
 
 CREATE TABLE IF NOT EXISTS point_trajectories (
     session_id  INTEGER NOT NULL REFERENCES sessions(id) ON DELETE CASCADE,
@@ -189,7 +181,7 @@ CREATE TABLE IF NOT EXISTS segment_series (
     quantity    TEXT NOT NULL CHECK (quantity IN ('quat', 'omega', 'alpha')),
     axis        TEXT NOT NULL CHECK (axis IN ('x', 'y', 'z', 'w')),
     provenance  TEXT NOT NULL REFERENCES provenance_kinds(provenance),
-    unit        TEXT NOT NULL,          -- '1' | 'rad/s' | 'rad/s^2'
+    unit        TEXT NOT NULL,
     values      REAL[] NOT NULL,
     coverage    REAL NOT NULL,
     PRIMARY KEY (session_id, segment, quantity, axis)
@@ -204,17 +196,13 @@ CREATE TABLE IF NOT EXISTS joint_angles (
     values      REAL[] NOT NULL,
     coverage    REAL NOT NULL,
     n_valid     INTEGER NOT NULL,
-    -- quota di variazioni oltre il limite fisiologico: dice quanto e' gesto e
-    -- quanto e' rumore, senza dover rileggere la serie
     implausible_rate REAL,
     PRIMARY KEY (session_id, joint, plane)
 );
 
--- Cio' che manca, e perche'. E' un dato quanto gli altri: permette all'agente di
--- rispondere "non posso dartelo perche'" invece di tacere.
 CREATE TABLE IF NOT EXISTS absences (
     session_id  INTEGER NOT NULL REFERENCES sessions(id) ON DELETE CASCADE,
-    entity      TEXT NOT NULL,     -- 'point:knee_l' | 'angle:hip_r:transverse' | ...
+    entity      TEXT NOT NULL,
     kind        TEXT NOT NULL CHECK (kind IN ('point', 'segment', 'angle', 'kinematics')),
     reason      TEXT NOT NULL REFERENCES absence_reasons(reason),
     detail      TEXT,
@@ -224,24 +212,18 @@ CREATE INDEX IF NOT EXISTS absences_reason_idx ON absences (reason);
 
 -- ===========================================================================
 -- 5. Cicli
+-- Intervalli individuati dalla segmentazione, con il metodo e il lato, e le
+-- metriche calcolate su ciascun ciclo.
 -- ===========================================================================
 
 CREATE TABLE IF NOT EXISTS cycles (
     id          SERIAL PRIMARY KEY,
     session_id  INTEGER NOT NULL REFERENCES sessions(id) ON DELETE CASCADE,
     cycle_index INTEGER NOT NULL,
-    -- Intervallo [start_frame, end_frame): fine esclusiva, la stessa
-    -- convenzione con cui il server MCP affetta le serie. Il picco che chiude
-    -- un ciclo apre il successivo, e non appartiene a entrambi.
     start_frame INTEGER NOT NULL,
     end_frame   INTEGER NOT NULL,
-    method      TEXT NOT NULL,     -- come e' stato individuato
+    method      TEXT NOT NULL,
     side        TEXT,
-    -- Cio' che la segmentazione ha dovuto concedere, come lo scrive il C3D.
-    -- Non e' deducibile dal metodo: `primary_signal_low_coverage` dipende da
-    -- quanto era visibile il segnale migliore, non da quale strategia ha vinto.
-    -- Senza questa colonna l'avviso restava nel file e non raggiungeva chi
-    -- interroga il database.
     warnings    TEXT[] NOT NULL DEFAULT '{}',
     UNIQUE (session_id, cycle_index)
 );
@@ -250,28 +232,17 @@ CREATE TABLE IF NOT EXISTS cycle_metrics (
     cycle_id    INTEGER NOT NULL REFERENCES cycles(id) ON DELETE CASCADE,
     joint       TEXT NOT NULL REFERENCES joints(joint),
     plane       TEXT NOT NULL REFERENCES planes(plane),
-    metric      TEXT NOT NULL,     -- rom | peak_max | peak_min | mean
+    metric      TEXT NOT NULL,
     value       REAL NOT NULL,
     unit        TEXT NOT NULL DEFAULT 'deg',
     PRIMARY KEY (cycle_id, joint, plane, metric)
 );
 
 -- ===========================================================================
--- 6. Atomi di ciclo: la forma delle curve, per i confronti
+-- 6. Atomi di ciclo
+-- Un vettore per ogni terna ciclo/giunto/piano, che descrive la forma della
+-- curva, con gli indici per la ricerca per somiglianza.
 -- ===========================================================================
--- Un atomo = (ciclo, giunto, piano). Il vettore descrive la sola FORMA della
--- curva: media rimossa e norma unitaria.
---
--- Perche' solo la forma. Gli angoli che produciamo portano scostamenti propri
--- del soggetto -- la caviglia non ha una prova statica, il bacino nasce dai
--- centri articolari e non dalle spine iliache -- quindi confrontare i valori
--- assoluti fra persone diverse misurerebbe la differenza fra i due modelli, non
--- fra i due gesti. L'andamento nel tempo invece e' confrontabile. Ampiezza e
--- livello viaggiano a parte, come numeri, dove si confrontano con operatori
--- ordinari e solo quando ha senso farlo.
---
--- Su vettori a media nulla e norma unitaria la distanza coseno vale 1 meno la
--- correlazione: 0 = stesso andamento, 1 = nessuna relazione, 2 = opposto.
 
 CREATE TABLE IF NOT EXISTS cycle_atoms (
     cycle_id        INTEGER NOT NULL REFERENCES cycles(id) ON DELETE CASCADE,
@@ -279,14 +250,13 @@ CREATE TABLE IF NOT EXISTS cycle_atoms (
     plane           TEXT NOT NULL REFERENCES planes(plane),
     encoder_version TEXT NOT NULL,
     shape           vector(32) NOT NULL,
-    rom             REAL NOT NULL,     -- escursione nel ciclo, in gradi
+    rom             REAL NOT NULL,
     peak            REAL NOT NULL,
     trough          REAL NOT NULL,
     provenance      TEXT NOT NULL REFERENCES provenance_kinds(provenance),
-    coverage        REAL NOT NULL,     -- quota di frame validi dentro il ciclo
+    coverage        REAL NOT NULL,
     PRIMARY KEY (cycle_id, joint, plane, encoder_version)
 );
--- L'indice serve la ricerca per somiglianza fra sessioni diverse.
 CREATE INDEX IF NOT EXISTS cycle_atoms_shape_idx
     ON cycle_atoms USING hnsw (shape vector_cosine_ops);
 CREATE INDEX IF NOT EXISTS cycle_atoms_lookup_idx
@@ -294,22 +264,14 @@ CREATE INDEX IF NOT EXISTS cycle_atoms_lookup_idx
 
 -- ===========================================================================
 -- 7. Riferimenti per gli alert
+-- Intervalli di letteratura, anatomici o legati a un gesto, e gli alert prodotti
+-- dal confronto con le metriche di una sessione.
 -- ===========================================================================
--- Valori fissi presi da letteratura scientifica, non calcolati dai dati che
--- carichiamo: un riferimento che nasce dalle stesse sessioni che deve giudicare
--- non e' un riferimento.
---
--- Due livelli:
---   scope='anatomical'  limiti articolari validi per chiunque, indipendenti dal
---                       gesto. Superarli significa o un movimento fuori dai
---                       limiti fisiologici o un errore di misura.
---   scope='sport'       intervalli attesi per uno specifico gesto. Uscirne non
---                       e' pericoloso di per se': e' un'anomalia da guardare.
 
 CREATE TABLE IF NOT EXISTS reference_ranges (
     id          SERIAL PRIMARY KEY,
     scope       TEXT NOT NULL CHECK (scope IN ('anatomical', 'sport')),
-    sport       TEXT,              -- NULL quando scope='anatomical'
+    sport       TEXT,
     joint       TEXT NOT NULL REFERENCES joints(joint),
     plane       TEXT NOT NULL REFERENCES planes(plane),
     metric      TEXT NOT NULL CHECK (metric IN ('rom', 'peak_max', 'peak_min')),
@@ -318,21 +280,14 @@ CREATE TABLE IF NOT EXISTS reference_ranges (
     unit        TEXT NOT NULL DEFAULT 'deg',
     severity    TEXT NOT NULL DEFAULT 'warning'
                 CHECK (severity IN ('info', 'warning', 'critical')),
-    source      TEXT NOT NULL,     -- la fonte, per esteso
+    source      TEXT NOT NULL,
     source_url  TEXT,
     note        TEXT,
-    -- NULLS NOT DISTINCT non e' un dettaglio: i riferimenti anatomici hanno
-    -- `sport` nullo, e per il vincolo predefinito due NULL contano come diversi.
-    -- Senza questa clausola `ON CONFLICT` non riconoscerebbe mai una riga
-    -- anatomica gia' presente, e ogni caricamento ne aggiungerebbe una copia:
-    -- gli alert anatomici scatterebbero tante volte quante sono le copie.
     UNIQUE NULLS NOT DISTINCT (scope, sport, joint, plane, metric)
 );
 CREATE INDEX IF NOT EXISTS reference_ranges_lookup_idx
     ON reference_ranges (joint, plane, metric);
 
--- Alert prodotti confrontando una sessione con i riferimenti. Si ricalcolano
--- interamente a ogni ingest della stessa sessione.
 CREATE TABLE IF NOT EXISTS alerts (
     id           SERIAL PRIMARY KEY,
     session_id   INTEGER NOT NULL REFERENCES sessions(id) ON DELETE CASCADE,
@@ -344,10 +299,8 @@ CREATE TABLE IF NOT EXISTS alerts (
     observed     REAL NOT NULL,
     expected_min REAL,
     expected_max REAL,
-    deviation    REAL NOT NULL,    -- di quanto si esce dall'intervallo
+    deviation    REAL NOT NULL,
     severity     TEXT NOT NULL,
-    -- un alert su un angolo poco coperto o modellato vale meno: il giudizio
-    -- resta all'agente, ma il dato per formularlo sta qui
     coverage     REAL,
     provenance   TEXT REFERENCES provenance_kinds(provenance),
     created_at   TIMESTAMPTZ NOT NULL DEFAULT now()
@@ -356,6 +309,8 @@ CREATE INDEX IF NOT EXISTS alerts_session_idx ON alerts (session_id);
 
 -- ===========================================================================
 -- 8. Viste di comodo
+-- Viste che riuniscono, per una sessione, i segnali disponibili, le assenze, gli
+-- atomi di forma e gli alert.
 -- ===========================================================================
 
 CREATE OR REPLACE VIEW session_signals AS
@@ -371,7 +326,6 @@ SELECT s.session_key, ab.entity, ab.kind, ab.reason, r.description, ab.detail
   JOIN sessions s ON s.id = ab.session_id
   JOIN absence_reasons r ON r.reason = ab.reason;
 
--- Atomi con il contesto della sessione: e' la base di ogni confronto.
 CREATE OR REPLACE VIEW session_atoms AS
 SELECT s.id AS session_id, s.session_key, s.sport, s.capture_system,
        c.id AS cycle_id, c.cycle_index, c.method AS cycle_method,

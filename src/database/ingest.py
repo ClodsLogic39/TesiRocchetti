@@ -1,17 +1,18 @@
-#!/usr/bin/env python3
-"""Caricamento: dal C3D canonico al database, in una sola transazione.
+"""Caricamento nel database, dal C3D canonico, in una sola transazione.
 
     python -m src.database.ingest DatiElaborati/running_20260220_121922.c3d
     python -m src.database.ingest DatiElaborati --tutte
-    python -m src.database.ingest --riferimenti      # solo i valori di letteratura
+    python -m src.database.ingest --riferimenti
 
-La sorgente autorevole e' il C3D canonico e nient'altro: se il database va
-ricreato, si ricarica da quei file e si ottiene lo stesso risultato. Niente
-viene ricalcolato qui -- angoli, quaternioni, cicli e assenze arrivano gia' decisi
-dalla conversione, con la loro provenienza.
+La sorgente e' il C3D canonico e nient'altro: angoli, quaternioni, cicli e
+assenze arrivano gia' decisi dalla conversione, insieme alla loro provenienza, e
+qui non vengono ricalcolati. Durante il caricamento vengono anche costruiti gli
+atomi di forma dei cicli e valutati gli alert, confrontando le metriche della
+sessione con i riferimenti di letteratura presenti in tabella.
 
-Gli alert si valutano durante il caricamento, confrontando le metriche della
-sessione con i riferimenti di letteratura gia' presenti in `reference_ranges`.
+Prerequisiti: psycopg, numpy ed ezc3d; un database con lo schema di
+`schema.sql` gia' applicato; la DSN del ruolo di scrittura nella variabile
+d'ambiente INGEST_DB_DSN.
 """
 import argparse
 import os
@@ -24,24 +25,19 @@ if __package__ in (None, ""):
     sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.dirname(
         os.path.abspath(__file__)))))
 
-from src.alerts import references              # noqa: E402
-from src.database import embeddings           # noqa: E402
-from src.conversion import anatomy, canonical  # noqa: E402
+from src.alerts import references
+from src.database import embeddings
+from src.conversion import anatomy, canonical
 
-# Il ruolo di scrittura ha il suo nome, distinto da quello di sola lettura del
-# server MCP: usare la stessa variabile per entrambi vanificherebbe la
-# separazione dei privilegi.
+# --- Connessione e conversioni di supporto ---
+# DSN del ruolo di scrittura, unita' di misura dei canali di segmento e piccole
+# funzioni che portano i valori letti dal file nella forma attesa dalle colonne.
 DSN_DEFAULT = os.environ.get("INGEST_DB_DSN", "dbname=biomech")
 
 _UNITA = {"quat": "1", "omega": "rad/s", "alpha": "rad/s^2"}
 
 
 def _lista(v):
-    """Array numpy -> lista con None al posto dei NaN.
-
-    Un buco deve arrivare in SQL come NULL. Sostituirlo con zero creerebbe un
-    segnale che non e' mai stato misurato.
-    """
     a = np.asarray(v, dtype=float)
     return [None if not np.isfinite(x) else float(x) for x in a]
 
@@ -58,8 +54,9 @@ def _tipo_assenza(entita):
 
 
 # --- Riferimenti di letteratura ---
+# Caricamento dei valori di riferimento in tabella e loro rilettura, ristretta a
+# quelli che si applicano al gesto della sessione.
 def carica_riferimenti(cur):
-    """Inserisce o aggiorna i valori di letteratura. Idempotente."""
     righe = references.righe()
     for r in righe:
         cur.execute(
@@ -79,13 +76,6 @@ def carica_riferimenti(cur):
 
 
 def _riferimenti_dal_db(cur, sport):
-    """I riferimenti applicabili: sempre gli anatomici, piu' quelli del gesto.
-
-    La condizione sullo sport si aggiunge solo quando lo sport c'e'. Scriverla
-    come `%s IS NOT NULL` con un parametro nullo lascerebbe Postgres senza il
-    tipo del parametro, e la query fallirebbe proprio nel caso -- sessione senza
-    sport dichiarato -- in cui deve funzionare.
-    """
     sql = ("SELECT id, scope, sport, joint, plane, metric, min_value, max_value,"
            "       severity, source"
            "  FROM reference_ranges WHERE scope = 'anatomical'")
@@ -98,11 +88,8 @@ def _riferimenti_dal_db(cur, sport):
     return [dict(zip(colonne, riga)) for riga in cur.fetchall()]
 
 
-# La session_key nasce dal nome del file di cattura e viene letta dal server MCP,
-# quindi finisce nel contesto dell'agente. Vincolarla a un nome semplice fa due
-# cose: tiene fuori il testo che potrebbe somigliare a un'istruzione rivolta
-# all'agente, e rende evidente a chi carica che quel nome sara' visibile. Stesso
-# alfabeto di `subjects.valid_id`, con piu' spazio per data e ora.
+# --- Chiave di sessione ---
+# Forma ammessa per il nome con cui una sessione viene registrata e letta.
 CHIAVE_RE = re.compile(r"^[A-Za-z0-9_-]{1,64}$")
 
 
@@ -110,13 +97,11 @@ def chiave_valida(session_key):
     return bool(session_key and CHIAVE_RE.match(session_key))
 
 
-# --- Caricamento di una sessione ---
+# --- Scrittura di una sessione ---
+# Una funzione per ogni parte del file: intestazione della sessione, punti,
+# segmenti, angoli, assenze dichiarate, cicli con i relativi atomi di forma e
+# alert calcolati dal confronto con i riferimenti.
 def _sessione(cur, dati, percorso, subject_id=None):
-    """Crea o aggiorna la riga di sessione. Restituisce l'identificativo.
-
-    Il legame con il soggetto vive solo qui: nel C3D canonico non c'e' nemmeno
-    lo pseudonimo, perche' quel file puo' essere copiato o condiviso.
-    """
     meta = dati["meta"]
     if not chiave_valida(meta.get("source")):
         raise ValueError(
@@ -125,11 +110,6 @@ def _sessione(cur, dati, percorso, subject_id=None):
             "Il nome del file diventa la session_key ed e' visibile all'agente: "
             "rinomina la cattura con un nome non parlante.")
     durata = (meta["n_frames"] / meta["fps"]) if meta.get("fps") else None
-    # Il gesto si normalizza anche qui, non solo in conversione: un C3D scritto
-    # da una versione precedente, o a mano, arriverebbe altrimenti con un nome
-    # che nessun riferimento riconosce. Se resta ignoto si scrive NULL: meglio
-    # "gesto non dichiarato", che e' vero, di un nome che sembra dichiarato e
-    # non seleziona nulla.
     sport = anatomy.canonical_sport(meta.get("sport"))
     cur.execute(
         """
@@ -223,18 +203,8 @@ def _assenze(cur, sid, dati):
 
 
 def _cicli(cur, sid, dati):
-    """Scrive i cicli gia' segnati nel C3D e ne calcola le metriche.
-
-    Non li ricalcola: il file li porta con se' (vedi `canonical.write`), e
-    ricavarli qui significherebbe che caricare due volte lo stesso file puo'
-    dare due risultati diversi, appena la segmentazione cambia una soglia.
-    """
     esito = dati.get("cycles") or {}
     metodo = esito.get("method") or "ignoto"
-    # Gli avvisi valgono per la segmentazione della sessione, quindi si ripetono
-    # su ogni riga come gia' fa `method`. Ricostruirli dal metodo non basta piu':
-    # `primary_signal_low_coverage` dice quanto era visibile il segnale migliore,
-    # e due sessioni con lo stesso metodo possono differire proprio su quello.
     avvisi = list(esito.get("warnings") or [])
     lati = esito.get("sides") or []
     identificativi = []
@@ -250,8 +220,6 @@ def _cicli(cur, sid, dati):
 
     for cid, inizio, fine in identificativi:
         for (giunto, piano), v in dati["angles"].items():
-            # `fine` e' esclusivo, come ovunque nel progetto: il picco che chiude
-            # un ciclo apre il successivo e non va contato due volte.
             tratto = np.asarray(v, dtype=float)[inizio:fine]
             for metrica, valore in references.metriche(tratto).items():
                 cur.execute(
@@ -261,18 +229,11 @@ def _cicli(cur, sid, dati):
                     ON CONFLICT DO NOTHING
                     """, (cid, giunto, piano, metrica, valore))
 
-    # Gli atomi descrivono la forma delle curve e servono ai confronti: si
-    # scrivono qui perche' dipendono dai cicli appena individuati.
     n_atomi = embeddings.insert_for_cycles(cur, dati, identificativi)
     return len(identificativi), n_atomi
 
 
 def _alert(cur, sid, dati, riferimenti):
-    """Confronta le metriche della sessione con i riferimenti di letteratura.
-
-    Si cancella e si ricalcola tutto: rivalutare una sessione gia' caricata non
-    deve accumulare doppioni.
-    """
     cur.execute("DELETE FROM alerts WHERE session_id = %s", (sid,))
 
     osservate, coperture = {}, {}
@@ -298,8 +259,10 @@ def _alert(cur, sid, dati, riferimenti):
     return fuori
 
 
+# --- Caricamento completo ---
+# Apre la transazione, ripulisce un eventuale caricamento precedente della stessa
+# sessione, scrive tutte le parti e conferma solo se ogni passo e' riuscito.
 def ingest(percorso, dsn=DSN_DEFAULT, conn=None, subject_id=None):
-    """Carica un C3D canonico. Restituisce un riepilogo."""
     import psycopg
 
     dati = canonical.read(percorso)
@@ -313,17 +276,10 @@ def ingest(percorso, dsn=DSN_DEFAULT, conn=None, subject_id=None):
             if sport_letto and not sport:
                 avvisi.append(f"gesto_non_riconosciuto:{sport_letto}")
             sid = _sessione(cur, dati, percorso, subject_id)
-            # Una sessione ricaricata riparte pulita: niente residui della volta
-            # prima. Scritti per esteso e non costruiti a runtime, cosi' i nomi
-            # delle tabelle restano verificabili contro lo schema.
             cur.execute("DELETE FROM point_trajectories WHERE session_id = %s", (sid,))
             cur.execute("DELETE FROM segment_series WHERE session_id = %s", (sid,))
             cur.execute("DELETE FROM joint_angles WHERE session_id = %s", (sid,))
             cur.execute("DELETE FROM cycles WHERE session_id = %s", (sid,))
-            # Anche le assenze: sono scritte con ON CONFLICT DO UPDATE, che sa
-            # aggiornare una riga ma non toglierla. Senza questa cancellazione un
-            # punto assente alla prima conversione e presente alla seconda
-            # resterebbe dichiarato mancante per sempre.
             cur.execute("DELETE FROM absences WHERE session_id = %s", (sid,))
 
             n_punti = _punti(cur, sid, dati)
@@ -351,6 +307,9 @@ def ingest(percorso, dsn=DSN_DEFAULT, conn=None, subject_id=None):
             "sport": sport, "subject_id": subject_id, "avvisi": avvisi}
 
 
+# --- Riga di comando ---
+# Caricamento di un singolo file, di tutti i C3D di una cartella, o dei soli
+# riferimenti di letteratura.
 def main(argv=None):
     ap = argparse.ArgumentParser(
         description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)

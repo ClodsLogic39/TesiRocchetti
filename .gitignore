@@ -1,4 +1,4 @@
-# Segreti e certificati — MAI nel repo
+# Segreti e certificati
 .env
 .pgpass
 *.key
@@ -7,10 +7,7 @@
 certs/
 secrets/
 
-# Dati di cattura: MAI nel repo. I grezzi sono registrazioni di persone, e il
-# nome del file diventa la session_key (vedi la nota sulla pseudonimizzazione in
-# docs/Progetto.md). Gli elaborati si rigenerano dalla conversione.
-DatiGrezzi/
+# Dati
 DatiElaborati/
 
 # Python
@@ -23,11 +20,9 @@ __pycache__/
 .DS_Store
 graphify-out/
 
-# Interfaccia locale di caricamento: comoda per chi carica dati sulla propria
-# macchina, non fa parte di cio' che viene pubblicato. I suoi test stanno con
-# lei, cosi' la suite resta verde su un clone che non la contiene.
+# Interfaccia locale di caricamento
 src/ui/
 tests/test_ui.py
 
-# Documentazione: resta sulla macchina, non nel repo pubblico.
+# Documentazione
 docs/

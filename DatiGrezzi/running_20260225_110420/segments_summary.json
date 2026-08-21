@@ -1,0 +1,395 @@
+{
+  "metadata": {
+    "sport": "running",
+    "view": "frontal",
+    "start_time": 1772013859.601256,
+    "end_time": 1772013907.420099,
+    "coordinate_system": "mediapipe_world",
+    "unit": "meters",
+    "fps": 30.0,
+    "reconstruction_confidence": 0.554,
+    "total_frames": 1314
+  },
+  "coverage_stats": {
+    "pelvis_center": {
+      "coverage_pct": 89.6,
+      "valid_frames": 1177,
+      "total_frames": 1314,
+      "avg_length_cm": 22.8,
+      "min_length_cm": 22.3,
+      "max_length_cm": 23.7,
+      "stability": 0.96,
+      "sample_count": 90
+    },
+    "pelvis_width": {
+      "coverage_pct": 89.6,
+      "valid_frames": 1177,
+      "total_frames": 1314,
+      "avg_length_cm": 22.8,
+      "min_length_cm": 22.3,
+      "max_length_cm": 23.7,
+      "stability": 0.96,
+      "sample_count": 90
+    },
+    "femur_left": {
+      "coverage_pct": 88.1,
+      "valid_frames": 1158,
+      "total_frames": 1314,
+      "avg_length_cm": 33.1,
+      "min_length_cm": 29.9,
+      "max_length_cm": 37.1,
+      "stability": 0.84,
+      "sample_count": 90
+    },
+    "femur_right": {
+      "coverage_pct": 87.7,
+      "valid_frames": 1152,
+      "total_frames": 1314,
+      "avg_length_cm": 28.5,
+      "min_length_cm": 25.1,
+      "max_length_cm": 32.1,
+      "stability": 0.83,
+      "sample_count": 90
+    },
+    "tibia_left": {
+      "coverage_pct": 21.6,
+      "valid_frames": 284,
+      "total_frames": 1314,
+      "avg_length_cm": 32.2,
+      "min_length_cm": 26.3,
+      "max_length_cm": 35.3,
+      "stability": 0.72,
+      "sample_count": 90
+    },
+    "tibia_right": {
+      "coverage_pct": 30.2,
+      "valid_frames": 397,
+      "total_frames": 1314,
+      "avg_length_cm": 31.6,
+      "min_length_cm": 28.6,
+      "max_length_cm": 35.4,
+      "stability": 0.76,
+      "sample_count": 90
+    },
+    "foot_left": {
+      "coverage_pct": 1.6,
+      "valid_frames": 21,
+      "total_frames": 1314,
+      "avg_length_cm": 8.8,
+      "min_length_cm": 7.3,
+      "max_length_cm": 10.3,
+      "stability": 0.57,
+      "sample_count": 21
+    },
+    "foot_right": {
+      "coverage_pct": 18.3,
+      "valid_frames": 240,
+      "total_frames": 1314,
+      "avg_length_cm": 15.5,
+      "min_length_cm": 13.8,
+      "max_length_cm": 16.3,
+      "stability": 0.88,
+      "sample_count": 90
+    },
+    "torso": {
+      "coverage_pct": 89.6,
+      "valid_frames": 1177,
+      "total_frames": 1314,
+      "avg_length_cm": 44.8,
+      "min_length_cm": 41.3,
+      "max_length_cm": 46.1,
+      "stability": 0.93,
+      "sample_count": 90
+    },
+    "head_neck": {
+      "coverage_pct": 100.0,
+      "valid_frames": 1314,
+      "total_frames": 1314,
+      "avg_length_cm": 20.6,
+      "min_length_cm": 18.9,
+      "max_length_cm": 22.6,
+      "stability": 0.88,
+      "sample_count": 90
+    },
+    "shoulder_width": {
+      "coverage_pct": 100.0,
+      "valid_frames": 1314,
+      "total_frames": 1314,
+      "avg_length_cm": 30.8,
+      "min_length_cm": 29.0,
+      "max_length_cm": 35.3,
+      "stability": 0.88,
+      "sample_count": 90
+    },
+    "humerus_left": {
+      "coverage_pct": 100.0,
+      "valid_frames": 1314,
+      "total_frames": 1314,
+      "avg_length_cm": 28.0,
+      "min_length_cm": 26.5,
+      "max_length_cm": 29.9,
+      "stability": 0.92,
+      "sample_count": 90
+    },
+    "humerus_right": {
+      "coverage_pct": 97.8,
+      "valid_frames": 1285,
+      "total_frames": 1314,
+      "avg_length_cm": 21.3,
+      "min_length_cm": 15.1,
+      "max_length_cm": 27.7,
+      "stability": 0.56,
+      "sample_count": 90
+    },
+    "forearm_left": {
+      "coverage_pct": 98.6,
+      "valid_frames": 1295,
+      "total_frames": 1314,
+      "avg_length_cm": 19.9,
+      "min_length_cm": 16.7,
+      "max_length_cm": 22.9,
+      "stability": 0.82,
+      "sample_count": 90
+    },
+    "forearm_right": {
+      "coverage_pct": 95.1,
+      "valid_frames": 1250,
+      "total_frames": 1314,
+      "avg_length_cm": 16.2,
+      "min_length_cm": 8.5,
+      "max_length_cm": 24.3,
+      "stability": 0.13,
+      "sample_count": 90
+    },
+    "heel_left": {
+      "coverage_pct": 9.1,
+      "valid_frames": 120,
+      "total_frames": 1314,
+      "avg_length_cm": 3.8,
+      "min_length_cm": 2.9,
+      "max_length_cm": 4.3,
+      "stability": 0.55,
+      "sample_count": 90
+    },
+    "heel_right": {
+      "coverage_pct": 18.3,
+      "valid_frames": 240,
+      "total_frames": 1314,
+      "avg_length_cm": 4.1,
+      "min_length_cm": 3.6,
+      "max_length_cm": 4.4,
+      "stability": 0.84,
+      "sample_count": 90
+    },
+    "stride_left": {
+      "coverage_pct": 21.6,
+      "valid_frames": 284,
+      "total_frames": 1314,
+      "avg_length_cm": 61.8,
+      "min_length_cm": 39.8,
+      "max_length_cm": 71.2,
+      "stability": 0.38,
+      "sample_count": 90
+    },
+    "stride_right": {
+      "coverage_pct": 30.2,
+      "valid_frames": 397,
+      "total_frames": 1314,
+      "avg_length_cm": 62.4,
+      "min_length_cm": 58.8,
+      "max_length_cm": 65.2,
+      "stability": 0.9,
+      "sample_count": 90
+    },
+    "contact_point_left": {
+      "coverage_pct": 1.6,
+      "valid_frames": 21,
+      "total_frames": 1314,
+      "avg_length_cm": 9.3,
+      "min_length_cm": 7.8,
+      "max_length_cm": 10.7,
+      "stability": 0.6,
+      "sample_count": 21
+    },
+    "contact_point_right": {
+      "coverage_pct": 18.3,
+      "valid_frames": 240,
+      "total_frames": 1314,
+      "avg_length_cm": 15.8,
+      "min_length_cm": 13.9,
+      "max_length_cm": 16.5,
+      "stability": 0.88,
+      "sample_count": 90
+    }
+  },
+  "segment_summaries": {
+    "pelvis_center": {
+      "count": 1177,
+      "mean_length_cm": 23.071,
+      "min_length_cm": 19.923,
+      "max_length_cm": 23.776,
+      "std_length_cm": 0.519,
+      "mean_confidence": 0.973
+    },
+    "pelvis_width": {
+      "count": 1177,
+      "mean_length_cm": 23.071,
+      "min_length_cm": 19.923,
+      "max_length_cm": 23.776,
+      "std_length_cm": 0.519,
+      "mean_confidence": 0.973
+    },
+    "femur_left": {
+      "count": 1158,
+      "mean_length_cm": 36.573,
+      "min_length_cm": 28.584,
+      "max_length_cm": 40.423,
+      "std_length_cm": 2.257,
+      "mean_confidence": 0.86
+    },
+    "femur_right": {
+      "count": 1152,
+      "mean_length_cm": 33.341,
+      "min_length_cm": 25.079,
+      "max_length_cm": 38.683,
+      "std_length_cm": 2.674,
+      "mean_confidence": 0.851
+    },
+    "tibia_left": {
+      "count": 284,
+      "mean_length_cm": 32.16,
+      "min_length_cm": 26.258,
+      "max_length_cm": 35.322,
+      "std_length_cm": 1.665,
+      "mean_confidence": 0.754
+    },
+    "tibia_right": {
+      "count": 397,
+      "mean_length_cm": 31.613,
+      "min_length_cm": 26.061,
+      "max_length_cm": 35.398,
+      "std_length_cm": 1.576,
+      "mean_confidence": 0.794
+    },
+    "foot_left": {
+      "count": 21,
+      "mean_length_cm": 8.787,
+      "min_length_cm": 7.316,
+      "max_length_cm": 10.265,
+      "std_length_cm": 1.13,
+      "mean_confidence": 0.553
+    },
+    "foot_right": {
+      "count": 240,
+      "mean_length_cm": 14.974,
+      "min_length_cm": 13.151,
+      "max_length_cm": 16.319,
+      "std_length_cm": 0.702,
+      "mean_confidence": 0.661
+    },
+    "torso": {
+      "count": 1177,
+      "mean_length_cm": 47.527,
+      "min_length_cm": 41.269,
+      "max_length_cm": 50.532,
+      "std_length_cm": 1.258,
+      "mean_confidence": 0.984
+    },
+    "head_neck": {
+      "count": 1314,
+      "mean_length_cm": 23.764,
+      "min_length_cm": 18.945,
+      "max_length_cm": 25.96,
+      "std_length_cm": 1.342,
+      "mean_confidence": 0.981
+    },
+    "shoulder_width": {
+      "count": 1314,
+      "mean_length_cm": 33.479,
+      "min_length_cm": 27.113,
+      "max_length_cm": 36.67,
+      "std_length_cm": 1.353,
+      "mean_confidence": 0.918
+    },
+    "humerus_left": {
+      "count": 1314,
+      "mean_length_cm": 24.552,
+      "min_length_cm": 14.12,
+      "max_length_cm": 29.874,
+      "std_length_cm": 1.873,
+      "mean_confidence": 0.852
+    },
+    "humerus_right": {
+      "count": 1285,
+      "mean_length_cm": 24.255,
+      "min_length_cm": 15.058,
+      "max_length_cm": 28.322,
+      "std_length_cm": 1.796,
+      "mean_confidence": 0.838
+    },
+    "forearm_left": {
+      "count": 1295,
+      "mean_length_cm": 22.859,
+      "min_length_cm": 15.516,
+      "max_length_cm": 26.242,
+      "std_length_cm": 1.684,
+      "mean_confidence": 0.842
+    },
+    "forearm_right": {
+      "count": 1250,
+      "mean_length_cm": 22.69,
+      "min_length_cm": 8.519,
+      "max_length_cm": 36.74,
+      "std_length_cm": 3.5,
+      "mean_confidence": 0.811
+    },
+    "heel_left": {
+      "count": 120,
+      "mean_length_cm": 3.91,
+      "min_length_cm": 2.888,
+      "max_length_cm": 4.345,
+      "std_length_cm": 0.468,
+      "mean_confidence": 0.627
+    },
+    "heel_right": {
+      "count": 240,
+      "mean_length_cm": 4.093,
+      "min_length_cm": 3.6,
+      "max_length_cm": 4.361,
+      "std_length_cm": 0.132,
+      "mean_confidence": 0.658
+    },
+    "stride_left": {
+      "count": 284,
+      "mean_length_cm": 66.722,
+      "min_length_cm": 39.784,
+      "max_length_cm": 71.411,
+      "std_length_cm": 7.387,
+      "mean_confidence": 0.703
+    },
+    "stride_right": {
+      "count": 397,
+      "mean_length_cm": 62.862,
+      "min_length_cm": 56.358,
+      "max_length_cm": 66.104,
+      "std_length_cm": 1.791,
+      "mean_confidence": 0.74
+    },
+    "contact_point_left": {
+      "count": 21,
+      "mean_length_cm": 9.324,
+      "min_length_cm": 7.818,
+      "max_length_cm": 10.743,
+      "std_length_cm": 1.113,
+      "mean_confidence": 0.689
+    },
+    "contact_point_right": {
+      "count": 240,
+      "mean_length_cm": 15.274,
+      "min_length_cm": 13.312,
+      "max_length_cm": 16.527,
+      "std_length_cm": 0.725,
+      "mean_confidence": 0.753
+    }
+  }
+}

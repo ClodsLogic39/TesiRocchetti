@@ -1,22 +1,28 @@
-"""Il C3D canonico: l'unico file da cui si fa ingest.
+"""Scrittura e lettura del C3D canonico, l'unico file da cui si fa ingest.
 
-Contiene tutto cio' che serve a riempire il database, e niente che vada ricavato
-altrove. Nei gruppi standard i dati; in un gruppo proprietario `BIOMECH` le
-annotazioni che il formato non prevede -- provenienza, copertura, assenze con il
-motivo, convenzione angolare. Un gruppo proprietario e' prassi consolidata nel
-settore (Vicon usa `PROCESSING`, Visual3D usa `VISUAL3D`) e non impedisce ad
-altri programmi di leggere il file: chi non lo conosce lo ignora.
+`write` salva in un solo C3D i punti anatomici, gli angoli articolari, i
+quaternioni con le derivate angolari e, in un gruppo proprietario BIOMECH, le
+annotazioni che il formato non prevede: provenienza, copertura, assenze con il
+motivo, cicli e convenzione adottata. `read` rilegge lo stesso file e ricostruisce
+la struttura di partenza.
 
-Struttura:
-  POINT   i sedici punti, poi un canale a tre componenti per giunto con gli
-          angoli sui tre piani (e' la convenzione dei model output clinici)
-  ANALOG  quaternione, velocita' e accelerazione angolare di ogni segmento
-  BIOMECH le annotazioni
+Struttura del file:
+  POINT    i punti anatomici, poi un canale a tre componenti per giunto con gli
+           angoli sui piani sagittale, frontale e trasverso
+  ANALOG   quaternione, velocita' e accelerazione angolare di ogni segmento
+  BIOMECH  le annotazioni
+
+Prerequisiti: numpy ed ezc3d. `write` accetta il risultato di `process.analizza`,
+che porta con se' i cicli; `read` accetta solo file che contengono il gruppo
+BIOMECH con la voce CYCLE_METHOD.
 """
 import numpy as np
 
 from . import anatomy
 
+# --- Costanti del contratto ---
+# Versione del formato, descrizione della convenzione di terne e angoli, nota
+# allegata agli angoli di caviglia e nomi delle componenti dei canali analogici.
 VERSION = "1.0"
 CONVENTION = "ISB Wu2002; terne Y-lungo/Z-destra/X=YxZ; Eulero ZXY Grood-Suntay"
 NOTE_CAVIGLIA = ("angolo geometrico senza prova statica: la caviglia porta uno "
@@ -28,17 +34,15 @@ _VEC_AXES = ("x", "y", "z")
 
 
 def _txt(value):
-    """I parametri di testo del C3D non tollerano il vuoto."""
     return str(value) if value not in (None, "") else "-"
 
 
+# --- Scrittura ---
+# Compone i canali del file e vi allega le annotazioni, poi lo salva su disco.
 def write(risultato, path):
-    """Scrive il C3D canonico. Restituisce il percorso."""
     import ezc3d
 
     if "cycles" not in risultato:
-        # Senza questo controllo il file uscirebbe dichiarando "nessun ciclo",
-        # che e' un esito legittimo: la dimenticanza si travestirebbe da misura.
         raise ValueError("il risultato non porta i cicli: passare da "
                          "`process.analizza`, non da `angles.compute`")
     punti = risultato["points"]
@@ -48,11 +52,9 @@ def write(risultato, path):
     n = int(meta.get("n_frames") or 0)
     fps = float(meta.get("fps") or 0.0)
 
-    # --- canali POINT: punti anatomici, poi angoli articolari ---
-    # Ogni voce e' (blocco n x 3, colonne che contengono davvero un dato). Un
-    # canale angolare puo' avere piani assenti: quelle colonne non partecipano
-    # al giudizio di validita', altrimenti l'assenza di un piano cancellerebbe
-    # anche gli altri due.
+    # --- Canali POINT: prima i punti anatomici, poi gli angoli articolari ---
+    # I fotogrammi non validi vengono marcati nel canale dei residui invece che
+    # scritti come coordinate.
     etichette, dati = [], []
     for nome in anatomy.POINTS:
         if nome not in punti:
@@ -74,26 +76,23 @@ def write(risultato, path):
 
     if dati:
         P = np.zeros((4, len(dati), n))
-        P[3] = 1.0                     # coordinata omogenea, come vuole ezc3d
+        P[3] = 1.0
         residui = np.zeros((1, len(dati), n))
         for i, (blocco, presenti) in enumerate(dati):
             valido = np.all(np.isfinite(blocco[:, presenti]), axis=1)
             P[:3, i, :] = np.where(np.isfinite(blocco), blocco, 0.0).T
-            # Il residuo e' il modo in cui il formato dichiara i buchi: -1 dove
-            # il campione non c'e'. Sta in meta_points, non nella quarta riga
-            # dei punti: quella ezc3d la usa per la coordinata omogenea.
             residui[0, i, :] = np.where(valido, 0.0, -1.0)
     else:
         P, residui = np.zeros((4, 0, n)), np.zeros((1, 0, n))
 
-    # --- canali ANALOG: quaternioni e derivate angolari ---
+    # --- Canali ANALOG: quaternioni e derivate angolari di ogni segmento ---
     an_etichette, an_dati = [], []
     for seg in sorted(segmenti):
         s = segmenti[seg]
         for chiave, assi in (("quat", _QUAT_AXES), ("omega", _VEC_AXES),
                              ("alpha", _VEC_AXES)):
             v = np.asarray(s[chiave], dtype=float)
-            for k, asse in enumerate(assi):  # noqa: B007
+            for k, asse in enumerate(assi):
                 an_etichette.append(f"{seg.upper()}_{chiave.upper()}_{asse.upper()}")
                 an_dati.append(v[:, k])
     A = (np.asarray(an_dati, dtype=float).reshape(1, len(an_dati), n)
@@ -110,7 +109,10 @@ def write(risultato, path):
         c["parameters"]["ANALOG"]["LABELS"]["value"] = an_etichette
         c["data"]["analogs"] = A
 
-    # --- gruppo BIOMECH ---
+    # --- Gruppo BIOMECH: le annotazioni ---
+    # Versione e convenzione, origine della sessione, elenco di punti, segmenti e
+    # angoli presenti con la loro provenienza e copertura, assenze con il motivo,
+    # cicli individuati e terna del laboratorio.
     p = c.add_parameter
     p("BIOMECH", "VERSION", [VERSION], "versione del contratto di questo file")
     p("BIOMECH", "CONVENTION", [CONVENTION], "convenzione di terne e angoli")
@@ -156,10 +158,6 @@ def write(risultato, path):
     p("BIOMECH", "ABSENT_DETAIL",
       [_txt(assenze[k][1]) for k in chiavi] or ["-"], "dettaglio del motivo")
 
-    # I cicli. Stanno nel file perche' chi lo carica non deve ricavarli: la
-    # segmentazione dipende dallo sport e da soglie che cambiano nel tempo, e se
-    # girasse al caricamento lo stesso file potrebbe dare cicli diversi a due
-    # letture. Qui e' deciso una volta, e resta scritto.
     cicli = risultato.get("cycles") or {}
     intervalli = cicli.get("frames") or []
     p("BIOMECH", "CYCLE_METHOD", [_txt(cicli.get("method"))],
@@ -183,8 +181,10 @@ def write(risultato, path):
     return path
 
 
+# --- Lettura ---
+# Ricostruisce punti, angoli, segmenti, annotazioni e cicli da un file scritto da
+# `write`. Un file privo del gruppo BIOMECH, o privo dei cicli, viene rifiutato.
 def read(path):
-    """Rilegge il C3D canonico. Inverso esatto di `write`, per l'ingest."""
     import ezc3d
 
     c = ezc3d.c3d(path)
@@ -193,9 +193,6 @@ def read(path):
     if not b:
         raise ValueError(f"{path} non e' un C3D canonico: manca il gruppo BIOMECH")
     if "CYCLE_METHOD" not in b:
-        # Distinzione che conta: "nessun ciclo trovato" e' un esito, "cicli mai
-        # cercati" e' un file incompleto. Senza questo controllo il secondo si
-        # travestirebbe da primo e il database si riempirebbe di sessioni mute.
         raise ValueError(
             f"{path} e' stato convertito prima che i cicli entrassero nel file. "
             "Va riconvertito: python -m src.conversion.process <sorgente>")
@@ -204,7 +201,7 @@ def read(path):
         if nome not in b:
             return default
         v = b[nome]["value"]
-        if len(v) == 0:                  # parametro dichiarato ma senza valori
+        if len(v) == 0:
             return default if default is not None else []
         return [str(x).strip() for x in v] if isinstance(v[0], str) else list(v)
 
@@ -265,8 +262,6 @@ def read(path):
     metodo = (val("CYCLE_METHOD", ["-"]) or ["-"])[0]
     lati = val("CYCLE_SIDE", [])
     inizi, fini = val("CYCLE_START", []), val("CYCLE_END", [])
-    # Il segnaposto -1 delle sessioni senza cicli cade da solo: nessun intervallo
-    # valido finisce prima di dove comincia. I lati seguono gli stessi indici.
     tenuti = [i for i, (s, e) in enumerate(zip(inizi, fini)) if int(e) > int(s)]
     cicli = {
         "method": None if metodo == "-" else metodo,

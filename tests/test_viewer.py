@@ -1,9 +1,13 @@
-"""Test del viewer: lettura del C3D canonico e percorso di lancio dall'MCP.
+"""Test del viewer: lettura del C3D canonico e avvio dal server MCP.
 
-Non serve Open3D: il layer dati del viewer e' separato dal rendering, ed e'
-proprio la parte che si era rotta quando il formato canonico e' cambiato.
+La parte dati del viewer e' separata dal rendering, quindi queste prove non
+richiedono Open3D: costruiscono un C3D canonico temporaneo e verificano che ossa,
+busto, terne e angoli ne vengano ricostruiti. Le prove sull'avvio sostituiscono
+il processo del viewer con uno finto.
 
     python -m pytest tests/test_viewer.py -q
+
+Prerequisiti: pytest, numpy ed ezc3d. Open3D non serve.
 """
 import numpy as np
 import pytest
@@ -12,7 +16,9 @@ from src.conversion import anatomy, canonical, process, readers
 from src.mcp import server as mcp_server
 from src.visualization import viewer_open3d
 
-# Stessa posa di riferimento dei test di conversione: in piedi, fermo.
+# --- Posa di riferimento e C3D di prova ---
+# La stessa posa in piedi dei test di conversione e la funzione che ne scrive un
+# C3D canonico temporaneo, eventualmente privo di alcuni punti.
 _IN_PIEDI = {
     "head": (0, 1.70, 0), "shoulder_c": (0, 1.45, 0),
     "shoulder_l": (-.20, 1.45, 0), "shoulder_r": (.20, 1.45, 0),
@@ -27,7 +33,6 @@ _IN_PIEDI = {
 
 
 def _c3d(tmp_path, esclusi=(), n=40):
-    """Scrive un C3D canonico, opzionalmente senza alcuni punti."""
     punti = {k: np.tile(np.asarray(v, dtype=float), (n, 1))
              for k, v in _IN_PIEDI.items() if k not in esclusi}
     letto = readers._finalise(punti, {"fps": 30.0, "n_frames": n, "source": "prova",
@@ -36,12 +41,12 @@ def _c3d(tmp_path, esclusi=(), n=40):
     return canonical.write(process.analizza(letto), str(tmp_path / "prova.c3d"))
 
 
+# --- Lettura del C3D canonico ---
+# Ricostruzione delle ossa dai punti, busto poggiato sui quattro punti reali e
+# assente quando mancano, segmenti senza estremi saltati, terne come quaternioni
+# per fotogramma, angoli della legenda e rifiuto di un file non canonico.
 def test_carica_ricostruisce_le_ossa_dai_punti_canonici(tmp_path):
     dati = viewer_open3d.carica(_c3d(tmp_path))
-    # Il C3D non contiene piu' i canali `{segmento}_start`: le ossa nascono dai
-    # punti attraverso anatomy.SEGMENTS. "trunk" fa eccezione: i suoi estremi
-    # (hip_c, shoulder_c) sono centri interni mai scritti come punti, quindi
-    # non puo' comparire come osso singolo -- si vede tramite il busto.
     assert {o[0] for o in dati["ossa"]} == set(anatomy.SEGMENTS) - {"trunk"}
     assert dati["n_frame"] == 40
     assert dati["fps"] == 30.0
@@ -51,19 +56,11 @@ def test_carica_ricostruisce_le_ossa_dai_punti_canonici(tmp_path):
 
 
 def test_il_busto_poggia_sui_quattro_punti_reali(tmp_path):
-    """Il tronco si disegna se ci sono i punti che lo delimitano, non altrimenti.
-
-    Il volume si costruisce sui quattro centri articolari di anche e spalle:
-    "trunk" non compare fra le ossa, perche' i suoi estremi -- hip_c e
-    shoulder_c -- sono centri interni che la conversione non scrive mai.
-    """
     dati = viewer_open3d.carica(_c3d(tmp_path))
     assert dati["ha_busto"]
     assert all(k in dati["punti"]
                for k in ("hip_l", "hip_r", "shoulder_l", "shoulder_r"))
     assert "trunk" not in {o[0] for o in dati["ossa"]}
-    # gli angoli del tronco, veri, sono in legenda anche se "trunk" non e' un
-    # osso disegnabile
     assert "trunk" in dati["angoli"] and "spine" in dati["angoli"]
     assert dati["angoli"]["trunk"][0] == "trunk"
     assert dati["angoli"]["spine"][0] == "spine"
@@ -75,7 +72,6 @@ def test_il_busto_manca_se_mancano_i_punti_delle_spalle(tmp_path):
 
 
 def test_i_segmenti_senza_estremi_vengono_saltati_non_esplodono(tmp_path):
-    """Dati parziali: una ripresa che non vede le gambe resta visualizzabile."""
     dati = viewer_open3d.carica(_c3d(tmp_path, esclusi=("knee_l", "knee_r",
                                                         "ankle_l", "ankle_r",
                                                         "toe_l", "toe_r")))
@@ -97,10 +93,6 @@ def test_gli_angoli_della_legenda_sono_sagittali(tmp_path):
     dati = viewer_open3d.carica(_c3d(tmp_path))
     assert dati["angoli"], "la legenda mostra l'angolo sagittale del giunto"
     for chiave, (giunto, serie) in dati["angoli"].items():
-        # "trunk" e "spine" condividono lo stesso segmento distale ("trunk"):
-        # un dizionario piatto indicizzato per segmento non potrebbe portarli
-        # entrambi, quindi per questi due la chiave e' gia' il nome del
-        # giunto invece che del segmento.
         if chiave in ("trunk", "spine"):
             assert giunto == chiave
         else:
@@ -120,13 +112,13 @@ def test_un_c3d_non_canonico_viene_rifiutato_con_chiarezza(tmp_path):
         viewer_open3d.carica(percorso)
 
 
-# --- Lancio dall'MCP ---
+# --- Avvio dal server MCP ---
+# Ricerca del file prodotto dalla conversione, segnalazione quando manca, rifiuto
+# delle chiavi che contengono un percorso, e distinzione fra un viewer avviato e
+# uno morto subito. Chiude l'interruttore che impedisce di aprire finestre.
 def test_visualize_session_trova_il_c3d_del_convertitore(tmp_path, monkeypatch):
-    """La cartella cercata deve essere quella in cui scrive il convertitore."""
     monkeypatch.setattr(mcp_server, "DATA_ROOT", tmp_path)
     (tmp_path / "sessione_x.c3d").write_bytes(b"")
-    # Interprete senza open3d: ci fermiamo prima del lancio, ma dopo il
-    # controllo sul percorso, che e' cio' che qui interessa.
     monkeypatch.setattr(mcp_server, "VIEWER_PY", "/bin/false")
     esito = mcp_server.visualize_session("sessione_x")
     assert "c3d_not_found" not in esito["warnings"]
@@ -152,13 +144,9 @@ def _finge_dipendenze_presenti(monkeypatch):
 
 
 class _ProcessoFinto:
-    """Un viewer che esce subito, come faceva davvero prima della correzione."""
-
     def __init__(self, uscita, errore=b"", log=None):
         self._uscita = uscita
         self.pid = 999
-        # Lo stderr non e' piu' una pipe ma un file temporaneo passato dal
-        # chiamante: il finto processo ci scrive dentro, come farebbe il vero.
         if log is not None and errore:
             log.write(errore)
         self._log = log
@@ -170,14 +158,12 @@ class _ProcessoFinto:
 
 
 def _popen_finto(uscita, errore=b""):
-    """Sostituto di Popen che scrive su `stderr=` come fa il processo vero."""
     def _crea(*a, **k):
         return _ProcessoFinto(uscita, errore, log=k.get("stderr"))
     return _crea
 
 
 def test_un_viewer_che_muore_subito_non_viene_dato_per_avviato(tmp_path, monkeypatch):
-    """Il bug peggiore: annunciare una finestra che l'utente non vedra' mai."""
     monkeypatch.setattr(mcp_server, "DATA_ROOT", tmp_path)
     (tmp_path / "sessione_x.c3d").write_bytes(b"")
     _finge_dipendenze_presenti(monkeypatch)
@@ -200,7 +186,6 @@ def test_un_viewer_ancora_vivo_risulta_avviato(tmp_path, monkeypatch):
 
 
 def test_l_interruttore_impedisce_di_aprire_finestre(tmp_path, monkeypatch):
-    """Su un server condiviso il viewer non deve toccare lo schermo dell'host."""
     monkeypatch.setattr(mcp_server, "DATA_ROOT", tmp_path)
     (tmp_path / "sessione_x.c3d").write_bytes(b"")
     monkeypatch.setattr(mcp_server, "VIEWER_DISABLED", True)
@@ -215,8 +200,3 @@ def test_l_interruttore_impedisce_di_aprire_finestre(tmp_path, monkeypatch):
     assert esito["result"] is None
 
 
-# `render_frame` e il suo test sono stati rimossi per ora: scriveva il PNG
-# nella cartella temporanea di sistema della macchina che ospita il server,
-# un percorso che l'agente non ha modo di leggere (vedi commento in
-# src/mcp/server.py). Va reintrodotto con una destinazione condivisa, o
-# restituendo i byte PNG direttamente nella risposta.

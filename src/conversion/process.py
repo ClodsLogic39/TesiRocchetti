@@ -1,14 +1,15 @@
-#!/usr/bin/env python3
 """Processazione: da una sorgente al C3D canonico pronto per l'ingest.
 
     python -m src.conversion.process --elenco
     python -m src.conversion.process DatiGrezzi/running_20260220_121922
     python -m src.conversion.process DatiGrezzi --tutte --uscita DatiElaborati
 
-Tre passi, nell'ordine:
-  1. leggere       riconoscere i sedici punti fra le etichette della sorgente
-  2. calcolare     terne, quaternioni e angoli, ma solo di cio' che manca
-  3. scrivere      un C3D canonico con i dati e le annotazioni
+Tre passi nell'ordine: lettura della sorgente e riconoscimento dei punti,
+calcolo di terne, quaternioni, angoli e cicli, scrittura del C3D canonico nella
+cartella di uscita. Al termine stampa un riepilogo della sessione convertita.
+
+Prerequisiti: numpy, scipy ed ezc3d; una sorgente leggibile sotto la cartella
+dei dati grezzi, cartella running_* oppure file .c3d.
 """
 import argparse
 import os
@@ -20,15 +21,18 @@ if __package__ in (None, ""):
     sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.dirname(
         os.path.abspath(__file__)))))
 
-from src.conversion import (anatomy, angles, canonical,  # noqa: E402
+from src.conversion import (anatomy, angles, canonical,
                             readers, segmentation)
 
+# --- Cartelle di lavoro predefinite ---
 RADICE_DEFAULT = "DatiGrezzi"
 USCITA_DEFAULT = "DatiElaborati"
 
 
+# --- Conversione di una sessione ---
+# Normalizzazione del gesto dichiarato, calcolo di angoli e cicli, scrittura del
+# file e riepilogo numerico di cio' che ne e' uscito.
 def _gesto_canonico(dichiarato):
-    """Il nome canonico del gesto, o un errore che elenca quelli ammessi."""
     if not dichiarato:
         return None
     canonico = anatomy.canonical_sport(dichiarato)
@@ -39,43 +43,16 @@ def _gesto_canonico(dichiarato):
 
 
 def analizza(letto):
-    """Tutto cio' che il C3D canonico deve portare: angoli, poi cicli.
-
-    Esiste come funzione a se' perche' il contenuto del file canonico va deciso
-    in un posto solo. Chi scrive un C3D passando direttamente da `angles.compute`
-    ne produce uno senza cicli, che `canonical.read` rifiuta.
-    """
     risultato = angles.compute(letto)
-    # I cicli si individuano qui, non al caricamento: sono parte del dato, non
-    # del modo in cui lo si legge. Lo stesso C3D deve dare gli stessi cicli a
-    # chiunque lo apra, oggi e con una versione futura del codice.
     risultato["cycles"] = segmentation.detect(risultato) or {}
     return risultato
 
 
 def process(sorgente, cartella_uscita, sport=None):
-    """Converte una sorgente. Restituisce (percorso del C3D, riepilogo).
-
-    `sport` dichiara il gesto quando la sorgente non lo sa: i C3D di laboratorio
-    non lo scrivono, e senza di esso non si possono applicare ne' la strategia di
-    segmentazione in cicli ne' i riferimenti di quel gesto. Se la sorgente lo
-    dichiara gia', il valore passato lo sovrascrive: e' l'operatore a sapere cosa
-    e' stato ripreso.
-
-    L'identificativo del soggetto NON entra qui: resta un'associazione del
-    database. Il C3D canonico e' un file che puo' essere copiato o condiviso, e
-    non deve portarsi dietro nemmeno lo pseudonimo.
-    """
-    # Il gesto passato a mano si controlla PRIMA di leggere: e' un errore di
-    # comando, e non ha senso caricare qualche megabyte di coordinate per poi
-    # rifiutare un argomento. Quello che arriva dalla sorgente si controlla
-    # dopo, perche' prima non lo si conosce.
     _gesto_canonico(sport)
     letto = readers.read(sorgente)
     dichiarato = sport or letto["meta"].get("sport")
     if dichiarato:
-        # Nel file finisce il nome canonico: e' l'unico che segmentazione e
-        # riferimenti riconoscono entrambi.
         letto["meta"]["sport"] = _gesto_canonico(dichiarato)
     risultato = analizza(letto)
     nome = risultato["meta"]["source"]
@@ -103,6 +80,9 @@ def process(sorgente, cartella_uscita, sport=None):
     }
 
 
+# --- Riga di comando ---
+# Stampa del riepilogo, elenco delle sorgenti disponibili e conversione di una
+# sola sorgente o di tutte quelle trovate sotto la cartella indicata.
 def _stampa(r):
     print(f"  {r['sessione']}")
     print(f"     {r['formato']}, {r['frame']} frame"

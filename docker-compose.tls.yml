@@ -1,12 +1,19 @@
-# Override opt-in: cifra il canale MCP <-> PostgreSQL con certificato self-signed.
-# Prerequisiti (una volta sola):
+# Override che cifra il canale fra i client e PostgreSQL.
+#
+# Monta certificato e chiave nel contenitore del database e riavvia postgres con
+# ssl attivo.
+#
+# Prerequisiti: certificato e chiave presenti in ./certs, con la chiave leggibile
+# al solo proprietario, e sslmode=require nella DSN dei client.
+#
 #   mkdir -p certs
 #   openssl req -new -x509 -nodes -days 825 -newkey rsa:2048 \
 #     -keyout certs/server.key -out certs/server.crt -subj "/CN=localhost"
-#   chmod 600 certs/server.key        # Postgres rifiuta chiavi accessibili ad altri
-# Avvio (servono ENTRAMBI i -f):
+#   chmod 600 certs/server.key
+#
+# Avvio:
 #   docker compose -f docker-compose.yml -f docker-compose.tls.yml up -d --force-recreate db
-# Lato client: aggiungere sslmode=require alla DSN.
+
 services:
   db:
     volumes:

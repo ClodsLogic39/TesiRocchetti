@@ -1,41 +1,41 @@
-"""Encoder degli atomi di ciclo: la forma di una curva articolare come vettore.
+"""Atomi di ciclo: la forma di una curva articolare come vettore.
 
-Un atomo = (ciclo, giunto, piano). Il vettore descrive la sola **forma** della
-curva: il ciclo viene ricampionato a lunghezza fissa, gli si toglie la media e lo
-si porta a norma unitaria.
+Un atomo corrisponde alla terna (ciclo, giunto, piano). Il ciclo viene
+ricampionato a lunghezza fissa, ruotato in modo da partire dal suo minimo, quindi
+portato a media nulla e norma unitaria: il vettore che ne risulta descrive la
+sola forma della curva, mentre ampiezza e livello viaggiano accanto come colonne
+numeriche.
 
-Perche' solo la forma, e non i valori. Gli angoli che produciamo portano
-scostamenti propri del soggetto e del modello: la caviglia non ha una prova
-statica di calibrazione, il bacino nasce dai centri articolari e non dalle spine
-iliache. Confrontare i valori assoluti fra due persone misurerebbe la differenza
-fra i due modelli, non fra i due gesti. L'andamento nel tempo, invece, e'
-confrontabile: e' quello che descrive *come* si muove un giunto.
+Su vettori a media nulla e norma unitaria la distanza coseno vale 1 meno la
+correlazione di Pearson fra le due curve: 0 stesso andamento, 1 nessuna
+relazione, 2 andamento opposto.
 
-Ampiezza e livello non spariscono: viaggiano come colonne numeriche accanto al
-vettore, dove si confrontano con operatori ordinari e solo quando ha senso.
-
-Su vettori a media nulla e norma unitaria la distanza coseno di pgvector vale
-1 meno la correlazione di Pearson fra le due curve:
-    0  stesso andamento     1  nessuna relazione     2  andamento opposto
+Prerequisiti: numpy. La dimensione del vettore deve coincidere con quella
+dichiarata in `schema.sql`, e `insert_for_cycles` richiede un cursore aperto su
+una connessione in scrittura.
 """
 import numpy as np
 
 from ..conversion import anatomy
 
-CYCLE_POINTS = 101        # ciclo normalizzato 0-100%, convenzione del dominio
-ATOM_DIM = 32             # dimensione del vettore, deve combaciare con schema.sql
-# v2: la forma e' allineata di fase (vedi `atom`). Gli atomi v1 restano in
-# tabella ma nessuna query li vede, perche' filtrano tutte su encoder_version:
-# per usarli di nuovo basta ricaricare le sessioni.
+# --- Parametri dell'encoder ---
+# Lunghezza del ciclo normalizzato, dimensione del vettore, versione dell'encoder
+# su cui filtrano le query, copertura minima del ciclo e limiti sotto i quali la
+# forma non e' definita.
+CYCLE_POINTS = 101
+ATOM_DIM = 32
 ENCODER_VERSION = "shape-v2"
 
-MIN_COVERAGE = 0.80       # sotto questa quota di frame validi il ciclo non basta
-_MIN_FINITE = 8           # campioni finiti minimi per ricampionare
-_MIN_NORM = 1e-9          # curva costante: la forma non e' definita
+MIN_COVERAGE = 0.80
+_MIN_FINITE = 8
+_MIN_NORM = 1e-9
 
 
+# --- Costruzione di un atomo ---
+# Copertura della serie, ricampionamento del ciclo a lunghezza fissa, rotazione
+# della curva sul suo minimo e riduzione a media nulla e norma unitaria, con la
+# resa del vettore nella forma testuale attesa dal database.
 def _nan(values):
-    """Serie dal database (con None) o da numpy -> array float con NaN."""
     return np.asarray([np.nan if v is None else v for v in values], dtype=float)
 
 
@@ -45,12 +45,6 @@ def coverage(series):
 
 
 def normalized_cycle(series, points=CYCLE_POINTS):
-    """Curva del ciclo ricampionata a 0-100%. None se i dati non bastano.
-
-    L'interpolazione lavora sui soli campioni validi e non esce dal loro
-    intervallo: un buco interno viene attraversato, ma un ciclo che comincia o
-    finisce nel vuoto non viene esteso per inventare i bordi.
-    """
     arr = np.asarray(series, dtype=float)
     mask = np.isfinite(arr)
     if mask.sum() < _MIN_FINITE:
@@ -60,15 +54,6 @@ def normalized_cycle(series, points=CYCLE_POINTS):
 
 
 def atom(series):
-    """Serie di un ciclo -> (forma, rom, picco, valle). None se degenere.
-
-    La forma viene ruotata perche' cominci dal suo minimo. Un ciclo e' chiuso --
-    finisce dove ricomincia -- quindi la rotazione non altera il gesto, ma lo
-    rende indipendente dal punto in cui la registrazione e' partita. Senza,
-    poiche' la forma e' centrata sulla media e normalizzata, la distanza coseno
-    vale `1 - correlazione`: due passate identiche riprese a mezzo ciclo di
-    distanza risultavano anti-correlate, cioe' massimamente diverse.
-    """
     curva = normalized_cycle(series)
     if curva is None:
         return None
@@ -79,24 +64,23 @@ def atom(series):
     forma = forma - forma.mean()
     norma = float(np.linalg.norm(forma))
     if norma < _MIN_NORM:
-        # curva piatta: un vettore nullo non e' indicizzabile per coseno e non
-        # significa "simile a tutto", significa "nessuna forma"
         return None
     return forma / norma, picco - valle, picco, valle
 
 
 def vector_literal(v):
-    """Vettore -> letterale che pgvector accetta."""
     return "[" + ",".join(f"{x:.6g}" for x in v) + "]"
 
 
+# --- Atomi di un ciclo e scrittura in tabella ---
+# Produce un atomo per ogni coppia giunto/piano dell'intervallo indicato e li
+# inserisce, ciclo per ciclo, nella tabella degli embedding.
 def atoms_for_cycle(angles, provenance, start, end):
-    """Atomi di un ciclo. Restituisce (righe, scarti con il motivo)."""
     righe, scarti = [], {}
     for (giunto, piano), serie in angles.items():
         if giunto not in anatomy.JOINTS:
             continue
-        tratto = _nan(serie)[start:end]     # `end` esclusivo, come in ingest
+        tratto = _nan(serie)[start:end]
         cop = coverage(tratto)
         if cop < MIN_COVERAGE:
             scarti[(giunto, piano)] = ("low_coverage", f"{cop:.0%} nel ciclo")
@@ -115,7 +99,6 @@ def atoms_for_cycle(angles, provenance, start, end):
 
 
 def insert_for_cycles(cur, dati, cicli):
-    """Scrive gli atomi di tutti i cicli. `cicli` = [(cycle_id, start, end)]."""
     scritti = 0
     for cycle_id, inizio, fine in cicli:
         righe, _ = atoms_for_cycle(dati["angles"], dati["angle_provenance"],
@@ -135,20 +118,14 @@ def insert_for_cycles(cur, dati, cicli):
     return scritti
 
 
-# --- Verifiche della proprieta' su cui si regge il confronto composito ---
+# --- Confronto fra vettori ---
+# Distanza coseno fra due atomi e confronto fra la distanza di due atomi
+# concatenati e la media delle distanze dei singoli.
 def cosine(a, b):
-    """Similarita' coseno fra due vettori gia' normalizzati."""
     return float(np.dot(a, b))
 
 
 def concat_equals_mean(a1, a2, b1, b2):
-    """cos(a1||a2, b1||b2) == media delle due similarita', se tutti unitari.
-
-    E' la proprieta' che permette di confrontare piu' giunti insieme sommando le
-    distanze dei singoli atomi invece di costruire un vettore composito: il
-    database puo' quindi rispondere su qualunque insieme di giunti senza doverne
-    indicizzare uno per combinazione.
-    """
     concat_a = np.concatenate([a1, a2]) / np.sqrt(2.0)
     concat_b = np.concatenate([b1, b2]) / np.sqrt(2.0)
     return cosine(concat_a, concat_b), (cosine(a1, b1) + cosine(a2, b2)) / 2.0

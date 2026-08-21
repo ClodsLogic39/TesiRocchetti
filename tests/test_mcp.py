@@ -1,9 +1,14 @@
-"""Il server MCP deve dire quanto pesa ogni numero che restituisce.
+"""Test del server MCP: ogni risposta deve dichiarare quanto pesa.
 
-E' il contratto di onestà applicato allo strato di interrogazione: la copertura
-e la provenienza sono lette dal database insieme ai valori, e devono arrivare
-fino alla risposta. Perderle per strada significa presentare come misura del
-gesto quella che è la misura di un sottoinsieme di fotogrammi.
+Copertura e provenienza vengono lette dal database insieme ai valori e devono
+arrivare fino alla risposta. Le prove verificano la soglia oltre la quale scatta
+l'avviso, il contratto comune a tutti gli strumenti, ispezionato staticamente sul
+sorgente del server, e il comportamento di alcuni strumenti su dati simulati.
+
+    python -m pytest tests/test_mcp.py -q
+
+Prerequisiti: pytest e numpy; il file `src/mcp/server.py`, che viene letto come
+testo per l'ispezione statica.
 """
 import ast
 import inspect
@@ -12,15 +17,18 @@ import os
 from src.alerts import references
 from src.mcp import core
 
+# --- Percorsi ---
 RADICE = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 SERVER = os.path.join(RADICE, "src", "mcp", "server.py")
 
 
+# --- Copertura e provenienza ---
+# Che copertura e provenienza compaiano nella risposta, che l'avviso scatti sotto
+# la soglia, che la soglia sia la stessa usata da chi genera gli alert e che
+# l'avviso di modello riguardi solo i piani che dipendono da un'assunzione.
 def test_la_copertura_arriva_fino_alla_risposta():
-    """Letta dal database, non deve fermarsi a meta' strada."""
     sql = inspect.getsource(core.fetch_angle)
     assert "a.coverage" in sql, "la query non la chiede"
-    # e la funzione la restituisce: quattro valori, non tre
     assert sql.count("None, None, None, None") == 1
     assert "row[3]" in sql, "la legge ma non la restituisce"
 
@@ -34,7 +42,6 @@ def test_avviso_quando_la_copertura_e_bassa():
 
     bassa = risposta(0.17)
     assert "bassa_copertura" in bassa["warnings"]
-    # il valore non viene alterato: si dichiara, non si nasconde
     assert bassa["result"]["value"] == 128.7
     assert bassa["selected_data"]["coverage"] == 0.17
 
@@ -43,12 +50,6 @@ def test_avviso_quando_la_copertura_e_bassa():
 
 
 def test_stessa_soglia_di_chi_giudica():
-    """Il server e il caricamento devono essere d'accordo su cosa e' troppo poco.
-
-    Se la soglia dell'uno fosse piu' larga di quella dell'altro, ci sarebbe una
-    fascia in cui il caricamento rifiuta di giudicare un angolo e il server lo
-    riporta senza dire nulla: due comportamenti opposti sullo stesso dato.
-    """
     difetto = inspect.signature(references.valuta).parameters["min_coverage"].default
     assert core.MIN_COVERAGE_AFFIDABILE == difetto
 
@@ -59,20 +60,16 @@ def test_avviso_solo_sui_piani_che_dipendono_da_un_modello():
             {}, {"joint": "knee_r", "plane": piano, "provenance": provenienza,
                  "coverage": 1.0}, 100.0, 300, None, [], {"value": 1.0}, "prova")
 
-    # un trasverso che il modello non osserva va segnalato
     assert "modelled_axis" in risposta("transverse", "modelled")["warnings"]
-    # ma se la sorgente lo forniva a tre gradi di liberta' e' una misura
     assert "modelled_axis" not in risposta("transverse", "measured")["warnings"]
-    # il sagittale non si segnala mai
     assert "modelled_axis" not in risposta("sagittal", "modelled")["warnings"]
 
 
+# --- Contratto comune agli strumenti ---
+# Lettura statica del sorgente del server per elencare gli strumenti esposti e
+# verificare che ognuno passi dalla funzione di risposta e dichiari la copertura
+# quando legge una serie.
 def _strumenti():
-    """Nomi e corpo delle funzioni decorate con @mcp.tool, lette dal sorgente.
-
-    Si legge il file invece di importarlo: il pacchetto `mcp` non e' installato
-    ovunque, e questo controllo non ha bisogno di eseguire il server.
-    """
     with open(SERVER) as f:
         testo = f.read()
     albero = ast.parse(testo, SERVER)
@@ -98,36 +95,26 @@ def test_ci_sono_gli_strumenti_attesi():
 
 
 def test_ogni_strumento_passa_dal_contratto_di_risposta():
-    """Nessuno strumento deve costruirsi la risposta a mano.
-
-    Il contratto -- input_spec, selected_data, result, explain, warnings -- e'
-    la garanzia di esplicitezza su cui il progetto si regge: uno strumento che
-    restituisce un dizionario suo la aggira in silenzio.
-    """
     fuori = [nome for nome, corpo in _strumenti().items()
              if "core.response" not in corpo and '"input_spec"' not in corpo]
     assert not fuori, f"strumenti fuori dal contratto: {fuori}"
 
 
 def test_gli_strumenti_che_leggono_una_serie_dichiarano_la_copertura():
-    """Chi carica una serie deve passare per `_load`, che porta la copertura."""
     with open(SERVER) as f:
         testo = f.read()
     assert "sig[\"coverage\"] = coverage" in testo, (
         "_load non propaga la copertura al segnale")
-    # e nessuno deve leggere gli angoli scavalcando _load
     corpi = "\n".join(_strumenti().values())
     assert "core.fetch_angle" not in corpi, (
         "uno strumento legge la serie senza passare da _load")
 
 
+# --- Comportamento dei singoli strumenti ---
+# Copertura di un confronto presa dalla peggiore delle serie, estremi dei cicli
+# coerenti con la lettura, risposta a una metrica inesistente, unicita' dei nomi
+# di metrica e appiattimento del testo libero.
 def test_la_copertura_di_un_confronto_e_la_peggiore_non_l_ultima(monkeypatch):
-    """Un confronto pesa quanto la sessione peggiore, in qualunque ordine.
-
-    `sig` viene riusato a ogni giro del ciclo e sovrascritto da `_load`: senza
-    ripararlo alla fine, l'avviso di bassa copertura dipenderebbe da quale
-    sessione e' stata letta per ultima, cioe' dall'ordine degli argomenti.
-    """
     import numpy as np
     from src.mcp import server
 
@@ -152,40 +139,22 @@ def test_la_copertura_di_un_confronto_e_la_peggiore_non_l_ultima(monkeypatch):
 
 
 def test_i_cicli_hanno_la_fine_esclusiva_come_la_lettura():
-    """Scrittura e lettura devono affettare la stessa finestra.
-
-    L'ingest scriveva `[inizio:fine+1]` mentre il server legge `[s:e)`: gli
-    stessi start/end restituiti da `list_cycles`, ridati a un altro strumento,
-    producevano una finestra diversa da quella con cui erano state calcolate le
-    metriche del ciclo.
-    """
     import numpy as np
     from src.database import embeddings
 
-    # Serie in cui il valore coincide con l'indice: il massimo del tratto dice
-    # da solo quale sia stato l'ultimo fotogramma incluso.
     serie = [float(i) for i in range(120)]
     angoli = {("knee_l", "sagittal"): serie}
 
     righe, _ = embeddings.atoms_for_cycle(angoli, {}, 10, 40)
     assert righe, "il ciclo doveva produrre un atomo"
-    # 39, non 40: il picco che chiude il ciclo appartiene al successivo.
     assert righe[0]["peak"] == 39.0
 
-    # E il server legge esattamente la stessa finestra.
     letto = core.prepare_series(serie, 10, 40)[0]
     assert len(letto) == 40 - 10
     assert float(np.nanmax(letto)) == 39.0
 
 
 def test_una_metrica_inesistente_lo_dice(monkeypatch):
-    """Un nome inventato non deve somigliare a un'assenza di dati.
-
-    Prima, `scalar_metric` restituiva None sia per un nome fuori elenco sia per
-    un segnale senza fotogrammi validi: chi legge non poteva distinguere "quella
-    metrica non esiste" da "non ci sono dati", e l'explain ripeteva il nome
-    inesistente come se fosse legittimo.
-    """
     from src.mcp import server
 
     def _mai(*a, **k):
@@ -202,13 +171,11 @@ def test_una_metrica_inesistente_lo_dice(monkeypatch):
         esito = chiamata()
         assert esito["warnings"] == ["unknown_metric"]
         assert esito["result"] is None
-        # l'explain deve elencare i nomi validi, non ripetere quello inventato
         for nome in core.METRICHE:
             assert nome in esito["explain"]
 
 
 def test_i_nomi_di_metrica_sono_una_fonte_sola():
-    """L'elenco dichiarato e quello calcolato non devono poter divergere."""
     import numpy as np
     serie = np.array([1.0, 2.0, 3.0])
     mask = np.ones(3, dtype=bool)
@@ -218,7 +185,6 @@ def test_i_nomi_di_metrica_sono_una_fonte_sola():
 
 
 def test_il_testo_libero_arriva_appiattito():
-    """Note e sorgenti sono dati citati, non blocchi che sembrano istruzioni."""
     assert core.testo_citato("una\nnota\nsu piu' righe") == "una nota su piu' righe"
     assert core.testo_citato(None) is None
     lungo = core.testo_citato("x" * (core.MAX_TESTO + 50))

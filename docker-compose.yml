@@ -1,27 +1,34 @@
-# docker-compose locale: DB e (opzionale) servizi app su rete privata.
-# Il DB NON e' esposto a Internet: la porta e' pubblicata solo su 127.0.0.1.
+# Servizi del progetto: il database e lo strumento di conversione e caricamento.
+#
+# Prerequisiti: le variabili POSTGRES_DB, POSTGRES_USER, POSTGRES_PASSWORD e
+# INGEST_DB_DSN definite nell'ambiente o in un file .env accanto a questo file.
+#
+# Avvio:
+#   docker compose up -d db
+#   docker compose run --rm ingest python -m src.database.ingest DatiElaborati --tutte
+
 services:
+  # Database PostgreSQL con pgvector. La porta e' pubblicata sul solo loopback
+  # dell'host. I due file SQL montati in docker-entrypoint-initdb.d creano schema
+  # e ruoli al primo avvio del volume.
   db:
-    # Immagine con pgvector preinstallato: `CREATE EXTENSION vector` in init
-    # fallirebbe con la postgres stock, bloccando anche l'applicazione dei ruoli.
     image: pgvector/pgvector:pg16
     environment:
       POSTGRES_DB: ${POSTGRES_DB}
       POSTGRES_USER: ${POSTGRES_USER}
       POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
-    # Solo loopback dell'host: nessun accesso dalla rete esterna.
     ports:
       - "127.0.0.1:5432:5432"
     volumes:
       - pgdata:/var/lib/postgresql/data
-      # Init automatico al primo avvio: schema + ruoli a privilegio minimo.
       - ./src/database/schema.sql:/docker-entrypoint-initdb.d/01_schema.sql:ro
       - ./db/setup_roles.sql:/docker-entrypoint-initdb.d/02_roles.sql:ro
     networks:
       - biomech
 
-  # Servizio di conversione+ingest, da lanciare on-demand (job da operatore):
-  #   docker compose run --rm ingest python -m src.conversion.process
+  # Conversione e caricamento. L'immagine viene costruita dal Dockerfile e monta
+  # il progetto in /app. Appartiene al profilo "tools", quindi non parte insieme
+  # al database ma solo con `docker compose run`.
   ingest:
     build: .
     environment:
@@ -33,7 +40,7 @@ services:
       - db
     networks:
       - biomech
-    profiles: ["tools"]   # non parte da solo; solo con `docker compose run`
+    profiles: [ "tools" ]
 
 networks:
   biomech:

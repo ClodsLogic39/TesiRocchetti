@@ -1,0 +1,94 @@
+{
+  "session_id": "running_20260227_143004",
+  "sport": "running",
+  "main_analysis": [
+    {
+      "title": "Aumento dell'Hip Drop",
+      "description": "Verso la fine della sessione, l'Hip Drop aumenta significativamente, indicando una perdita di stabilit\u00e0 e forza nel bacino.",
+      "evidence": "Hip Drop inizio: 4.8, met\u00e0: 5.9, fine: 15.4",
+      "confidence": "high",
+      "timestamp_refs": null
+    },
+    {
+      "title": "Knee Valgus costante",
+      "description": "Il Knee Valgus rimane costante durante la sessione, suggerendo una buona stabilit\u00e0 delle ginocchia ma potenzialmente una tecnica rigida.",
+      "evidence": "Knee Valgus media: 3.8",
+      "confidence": "medium",
+      "timestamp_refs": null
+    },
+    {
+      "title": "Variazione Head Tilt",
+      "description": "Il Head Tilt varia significativamente durante la sessione, indicando potenziali problemi di equilibrio o di concentrazione.",
+      "evidence": "Head Tilt inizio: 30.5, met\u00e0: 18.2, fine: 29.2",
+      "confidence": "medium",
+      "timestamp_refs": null
+    }
+  ],
+  "two_week_plan": {
+    "week1": {
+      "focus": "Stabilizzazione del bacino e forza dei glutei",
+      "sessions": [
+        {
+          "day": "Luned\u00ec",
+          "description": "Esercizi di stabilizzazione del bacino",
+          "duration_minutes": 20
+        },
+        {
+          "day": "Mercoled\u00ec",
+          "description": "Corsa leggera con focus sulla tecnica",
+          "duration_minutes": 30
+        },
+        {
+          "day": "Venerd\u00ec",
+          "description": "Forza dei glutei",
+          "duration_minutes": 20
+        }
+      ]
+    },
+    "week2": {
+      "focus": "Equilibrio, concentrazione e fluidit\u00e0 della corsa",
+      "sessions": [
+        {
+          "day": "Luned\u00ec",
+          "description": "Esercizi di equilibrio e concentrazione",
+          "duration_minutes": 20
+        },
+        {
+          "day": "Mercoled\u00ec",
+          "description": "Corsa con variazioni di ritmo",
+          "duration_minutes": 30
+        },
+        {
+          "day": "Venerd\u00ec",
+          "description": "Sessione di recupero con yoga o stretching",
+          "duration_minutes": 30
+        }
+      ]
+    },
+    "daily_routine": "Riscaldamento specifico prima di ogni corsa e stretching post corsa."
+  },
+  "limitations": [
+    "Questo report non sostituisce il parere di un professionista medico o fisioterapista.",
+    "Se riscontri dolore, consulta un professionista."
+  ],
+  "next_session_checklist": [
+    "Esegui un riscaldamento focalizzato sui glutei e il bacino.",
+    "Mantieni una buona postura, concentrati sull'allineamento del corpo.",
+    "Varia il ritmo durante la corsa per mantenere alta la concentrazione.",
+    "Concludi con esercizi di stretching per migliorare la flessibilit\u00e0."
+  ],
+  "generated_at": "2026-02-27T14:35:39.175169",
+  "tokens_used": 1971,
+  "cached": false,
+  "template": "athlete",
+  "style": "performance",
+  "quick_actions": [
+    "Concentrati su esercizi di stabilizzazione del bacino e di forza per i glutei.",
+    "Mantieni una tecnica di corsa fluida, evita di irrigidirti.",
+    "Lavora sull'equilibrio e sulla concentrazione, specialmente verso la fine delle tue corse.",
+    "Esegui un riscaldamento specifico per attivare i muscoli stabilizzatori del bacino prima di correre."
+  ],
+  "data_quality_warnings": [
+    "Trend temporali non rilevati - possibile qualit\u00e0 dati insufficiente"
+  ]
+}

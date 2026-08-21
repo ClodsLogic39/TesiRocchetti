@@ -1,8 +1,18 @@
-"""Server MCP (FastMCP) per le query biomeccaniche.
+"""Server MCP (FastMCP) che espone le query biomeccaniche come strumenti.
 
-Tool consolidati + discovery + similarita' (calcolata da pgvector) + alert.
-Ogni tool restituisce input_spec / selected_data / result / explain / warnings.
-Avvio: python -m src.mcp.server   (DSN via env MCP_DB_DSN)
+Ogni strumento restituisce sempre la stessa struttura:
+input_spec / selected_data / result / explain / warnings, con provenienza e
+copertura dei dati su cui la risposta si basa.
+
+Gli strumenti sono divisi per famiglia: metriche e confronti su una serie
+angolare, ricerca delle sessioni disponibili, confronti di forma calcolati da
+pgvector, alert registrati dal caricamento e apertura del viewer.
+
+Avvio: python -m src.mcp.server
+
+Prerequisiti: il pacchetto mcp, psycopg e numpy; la DSN di sola lettura nella
+variabile d'ambiente MCP_DB_DSN; per il viewer un interprete con open3d ed ezc3d
+e i C3D canonici nella cartella dei dati elaborati.
 """
 import os
 import subprocess
@@ -19,24 +29,25 @@ from ..conversion import process
 from ..conversion import segmentation
 from ..database import similarity
 
+# --- Percorsi e interruttori letti dall'ambiente ---
+# Cartella dei C3D canonici, interprete e modulo con cui il viewer viene lanciato,
+# e interruttore che impedisce di aprire finestre sulla macchina del server.
 REPO_ROOT = Path(__file__).resolve().parents[2]
-# La cartella dei C3D canonici e' quella in cui scrive il convertitore: presa da
-# li' e non riscritta a mano, cosi' non puo' piu' divergere dal pipeline.
 DATA_ROOT = Path(os.environ.get("BIOMECH_DATA_ROOT",
                                 REPO_ROOT / process.USCITA_DEFAULT))
 VIEWER_PY = os.environ.get("BIOMECH_VIEWER_PYTHON", sys.executable)
 VIEWER_MODULE = "src.visualization.viewer_open3d"
-# Aprire una finestra nativa ha senso quando server e utente sono la stessa
-# persona sulla stessa macchina. Su un server condiviso e' un processo eseguito
-# sull'host per conto di un estraneo: l'interruttore permette di negarlo senza
-# togliere lo strumento, che continua a rispondere spiegando perche'.
 VIEWER_DISABLED = bool(os.environ.get("BIOMECH_VIEWER_DISABLED"))
 
 mcp = FastMCP("Biomech MCP")
 
 
+# --- Funzioni di supporto agli strumenti ---
+# Risoluzione di giunto, lato e piano, lettura della serie, copertura peggiore di
+# un confronto, e i controlli che producono una risposta di rifiuto: segnale non
+# risolto, chiave di sessione non valida, C3D mancante, viewer senza dipendenze,
+# nome di metrica inesistente.
 def _signal(joint, plane, side=None):
-    """Risolve (giunto, lato, piano) o restituisce None se fuori vocabolario."""
     key = core.canonical_joint(joint, side)
     if not key or plane not in bodyparts.PLANES:
         return None
@@ -44,7 +55,6 @@ def _signal(joint, plane, side=None):
 
 
 def _load(session_key, sig, frame_start=None, frame_end=None, conn=None):
-    """Serie + metadati del segnale, con provenienza e copertura per riga."""
     fps, values, provenance, coverage = core.fetch_angle(
         session_key, sig["joint"], sig["plane"], conn=conn)
     sig["provenance"] = provenance
@@ -53,7 +63,6 @@ def _load(session_key, sig, frame_start=None, frame_end=None, conn=None):
 
 
 def _peggior_copertura(valori):
-    """La copertura di un confronto e' la peggiore fra quelle che lo compongono."""
     presenti = [v for v in valori if v is not None]
     return min(presenti) if presenti else None
 
@@ -63,11 +72,6 @@ def _no_signal(spec, explain="Giunto o piano fuori vocabolario."):
 
 
 def _c3d_sessione(spec, session_key):
-    """(percorso, None) se il C3D canonico c'e', altrimenti (None, risposta).
-
-    `session_key` finisce in un percorso: deve essere un nome semplice, o una
-    chiave con `..` leggerebbe fuori dalla cartella dei dati.
-    """
     def rifiuto(explain, avviso):
         return None, {"input_spec": spec, "selected_data": {}, "result": None,
                       "explain": explain, "warnings": [avviso]}
@@ -83,7 +87,6 @@ def _c3d_sessione(spec, session_key):
 
 
 def _viewer_pronto(spec):
-    """None se l'interprete del viewer ha le dipendenze, altrimenti la risposta."""
     try:
         ok = subprocess.run([VIEWER_PY, "-c", "import open3d, ezc3d"],
                             stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL,
@@ -98,13 +101,6 @@ def _viewer_pronto(spec):
 
 
 def _metrica_ignota(spec, metrica):
-    """Risposta se il nome della metrica non esiste, altrimenti None.
-
-    Senza questo controllo un nome inventato darebbe `result: None` esattamente
-    come un segnale senza fotogrammi validi: chi legge non distinguerebbe "quella
-    metrica non esiste" da "non ci sono dati", e l'explain ripeterebbe il nome
-    inesistente come se fosse legittimo.
-    """
     if metrica in core.METRICHE:
         return None
     return core.response(spec, None, None, 0, None, ["unknown_metric"], None,
@@ -112,7 +108,7 @@ def _metrica_ignota(spec, metrica):
                          f"Disponibili: {', '.join(core.METRICHE)}.")
 
 
-# --- Metriche scalari ---
+# --- Strumenti: metriche e confronti su una serie angolare ---
 @mcp.tool()
 def metric(session_key: str, joint: str, side: str | None = None, plane: str = "sagittal",
            metric: str = "rom", frame_start: int | None = None, frame_end: int | None = None):
@@ -228,13 +224,8 @@ def compare_sessions(session_keys: list[str], joint: str, side: str | None = Non
                          "provenance": sig.get("provenance")})
     for r in rows:
         r["delta"] = None if r["value"] is None or ref is None else r["value"] - ref
-    # `sig` viene riusato a ogni giro e `_load` lo sovrascrive: senza queste due
-    # righe provenienza e copertura resterebbero quelle dell'ultima sessione
-    # letta, e l'avviso di bassa copertura dipenderebbe dall'ordine degli
-    # argomenti invece che dai dati.
     sig["provenance"] = core.worst_provenance(*provenienze)
     sig["coverage"] = _peggior_copertura(coperture)
-    # Confronto fra sorgenti eterogenee: il numero e' calcolabile, non equivalente.
     distinte = {r["provenance"] for r in rows}
     warns = [] if len(distinte) <= 1 else ["mixed_provenance"]
     return core.response(spec, sig, None, 0, None, warns,
@@ -274,8 +265,6 @@ def compare_sports(sport_a: str, sport_b: str, joint: str, side: str | None = No
     with core.connect() as conn:
         a, b = summarize(sport_a, conn), summarize(sport_b, conn)
     delta = None if a["mean"] is None or b["mean"] is None else a["mean"] - b["mean"]
-    # Come in compare_sessions: senza riparare `sig`, una media costruita su
-    # serie misurate e modellate uscirebbe come se fossero omogenee.
     sig["provenance"] = core.worst_provenance(*provenienze)
     sig["coverage"] = _peggior_copertura(coperture)
     distinte = {p for p in provenienze if p}
@@ -332,15 +321,9 @@ def list_cycles(session_key: str):
                  "method": r[3], "side": r[4]} for r in righe]
         avvisi = list(righe[0][5] or []) if righe else []
     method = rows[0]["method"] if rows else None
-    # Gli avvisi arrivano dal file attraverso il database. Il ripiego sul metodo
-    # copre i casi in cui non ci sono cicli -- li' non esiste una riga da cui
-    # leggerli -- e i file convertiti prima che la colonna esistesse.
     avvisi = _avvisi_cicli(avvisi, method)
     spiega = ("Nessun ciclo individuato: la prova intera e' trattata come gesto unico."
               if method == "whole_trial"
-              # I confini stanno scritti nel C3D canonico, decisi in conversione:
-              # l'ingest li copia e basta. Dirlo importa, perche' significa che
-              # ricaricare lo stesso file da' sempre gli stessi cicli.
               else "Segmentazione deterministica scritta nel C3D canonico in conversione.")
     return {"input_spec": {"session_key": session_key},
             "selected_data": {"n": len(rows), "method": method},
@@ -375,7 +358,9 @@ def gesture_detection(session_key: str, joint: str, side: str | None = None, pla
                          {"count": len(segs), "segments": segs}, "Attraversamenti di soglia.")
 
 
-# --- Discovery ---
+# --- Strumenti: ricerca e descrizione delle sessioni ---
+# Quali sessioni esistono, come si risolve un nome parziale e cosa contiene una
+# sessione.
 @mcp.tool()
 def list_sessions(sport: str | None = None, subject_id: str | None = None, limit: int | None = None):
     """Elenca le sessioni (session_key, subject_id pseudonimo, sport, data).
@@ -383,9 +368,6 @@ def list_sessions(sport: str | None = None, subject_id: str | None = None, limit
     La ricerca per soggetto usa lo pseudonimo: il server non ha accesso
     all'identita' reale.
     """
-    # La query si compone in un pezzo solo, con il nome della tabella accanto
-    # alle colonne che cita: spezzata in frammenti, un ORDER BY su una colonna
-    # scomparsa non sarebbe piu' verificabile contro lo schema.
     vincoli, params = [], []
     if sport:
         vincoli.append("sport = %s")
@@ -446,22 +428,17 @@ def describe_session(session_key: str):
                               "cycle_method": method},
             "result": {"joints": joints},
             "explain": "Segnali presenti in joint_angles, con origine per piano.",
-            # Gli stessi avvisi di list_cycles: chi chiede la descrizione della
-            # sessione deve sapere se i cicli sono veri o un ripiego.
             "warnings": ([] if joints else ["no_signals"])
                         + (_avvisi_cicli(avvisi_cicli, method) if joints else [])}
 
 
 def _avvisi_cicli(memorizzati, metodo):
-    """Gli avvisi scritti dall'ingest, o quelli deducibili se non ci sono.
-
-    Il ripiego serve ai file convertiti prima che la colonna esistesse e alle
-    sessioni senza cicli, dove non c'e' una riga da cui leggerli.
-    """
     return list(memorizzati or []) or [a for a in (segmentation.avviso_per_metodo(metodo),) if a]
 
 
-# --- Similarita' (distanza calcolata da pgvector) ---
+# --- Strumenti: confronti di forma calcolati da pgvector ---
+# Cicli simili a uno dato, distanza fra due sessioni, ripetibilita' del gesto e
+# somiglianza fra i due lati.
 @mcp.tool()
 def find_similar_cycles(session_key: str, cycle_index: int = 0,
                         scope: str = "lower_body", planes: list[str] | None = None,
@@ -485,10 +462,6 @@ def find_similar_cycles(session_key: str, cycle_index: int = 0,
     return core.response(
         spec, {"scope": out.get("scope"), "planes": planes}, None, None, None,
         out["warnings"] + ([] if righe else ["nessun_candidato"]),
-        # Quante sessioni sono entrate nel confronto. Da quando il tetto sulle
-        # candidate non c'e' piu' i due numeri coincidono sempre: restano
-        # entrambi perche' dicono su quale base e' stata data la risposta, e
-        # perche' se un giorno tornasse un filtro la differenza si vedrebbe.
         {"neighbors": righe,
          "sessioni_confrontate": out.get("sessioni_confrontate"),
          "sessioni_compatibili": out.get("sessioni_compatibili")},
@@ -558,6 +531,9 @@ def side_shape_symmetry(session_key: str, planes: list[str] | None = None):
         "(shape_sinistra <=> shape_destra) sullo stesso ciclo, piu' la "
         "differenza di escursione.")
 
+
+# --- Strumento: alert ---
+# Gli alert registrati durante il caricamento della sessione.
 @mcp.tool()
 def list_alerts(session_key: str, severity: str | None = None):
     """Scostamenti dai riferimenti di letteratura, per una sessione.
@@ -579,18 +555,12 @@ def list_alerts(session_key: str, severity: str | None = None):
     if severity:
         q += " AND severity = %s"
         params.append(severity)
-    # `data_quality` va in fondo: non e' un reperto sul gesto ma un avviso che
-    # quella misura non e' credibile, e mescolarlo ai reperti clinici toglierebbe
-    # peso a entrambi.
     q += (" ORDER BY CASE severity WHEN 'critical' THEN 0 WHEN 'warning' THEN 1 "
           "WHEN 'info' THEN 2 ELSE 3 END, deviation DESC")
     with core.connect() as conn, conn.cursor() as cur:
         cur.execute(q, params)
         colonne = [d[0] for d in cur.description]
         righe = [dict(zip(colonne, r)) for r in cur.fetchall()]
-    # `note` e `source` sono testo libero di un file di riferimenti: vanno
-    # all'agente come dato citato, non come blocco che possa somigliare a
-    # un'istruzione.
     for r in righe:
         for campo in ("note", "source"):
             if campo in r:
@@ -606,7 +576,8 @@ def list_alerts(session_key: str, severity: str | None = None):
         "eseguito al caricamento.")
 
 
-# --- Rendering ---
+# --- Strumento: rendering ---
+# Apre il viewer sul C3D canonico della sessione.
 @mcp.tool()
 def visualize_session(session_key: str, show_coord_frames: bool = False):
     """Apre il viewer Open3D (finestra nativa locale) come processo separato."""
@@ -622,15 +593,9 @@ def visualize_session(session_key: str, show_coord_frames: bool = False):
     non_pronto = _viewer_pronto(spec)
     if non_pronto:
         return non_pronto
-    # Con `-m` dalla radice del repo: il viewer importa `anatomy` e `canonical`
-    # come parte del pacchetto, senza ritocchi a sys.path.
     cmd = [VIEWER_PY, "-m", VIEWER_MODULE, "--c3d", str(c3d)]
     if show_coord_frames:
         cmd.append("--coord")
-    # Lo stderr va su un file temporaneo, non su una pipe: il viewer resta vivo
-    # per tutta la sessione e nessuno leggerebbe la pipe, cosi' al primo blocco
-    # di avvisi di Open3D il buffer si riempirebbe e la finestra si fermerebbe a
-    # meta' rendering. Un file non ha quel limite.
     log = tempfile.TemporaryFile()
     try:
         proc = subprocess.Popen(cmd, cwd=str(REPO_ROOT), stdout=subprocess.DEVNULL,
@@ -639,9 +604,6 @@ def visualize_session(session_key: str, show_coord_frames: bool = False):
         log.close()
         return {"input_spec": spec, "selected_data": {"c3d": str(c3d)}, "result": None,
                 "explain": f"Impossibile avviare il viewer: {e}", "warnings": ["viewer_failed"]}
-    # Una finestra grafica resta viva: se il processo e' gia' morto entro la
-    # breve attesa, non e' partito e va detto, invece di annunciare un successo
-    # che l'utente non vedra' mai.
     try:
         if proc.wait(timeout=1.5) != 0:
             log.seek(0)
@@ -652,19 +614,10 @@ def visualize_session(session_key: str, show_coord_frames: bool = False):
                     "warnings": ["viewer_failed"]}
         log.close()
     except subprocess.TimeoutExpired:
-        # Ancora vivo: la finestra e' aperta. Il figlio tiene il suo descrittore
-        # del file, quindi qui si puo' chiudere il nostro senza troncare nulla.
         log.close()
     return {"input_spec": spec, "selected_data": {"c3d": str(c3d)},
             "result": {"launched": True, "pid": proc.pid},
             "explain": "Viewer Open3D lanciato come processo separato.", "warnings": []}
-
-
-# `render_frame` (rendering statico su PNG, senza finestra) e' stato rimosso
-# per ora: scriveva nella cartella temporanea di sistema della macchina che
-# ospita il server, un percorso che l'agente non ha modo di leggere. Va
-# reintrodotto quando avra' una destinazione condivisa (o restituira' i byte
-# PNG direttamente nella risposta invece di un percorso su disco).
 
 
 if __name__ == "__main__":
