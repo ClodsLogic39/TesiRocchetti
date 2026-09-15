@@ -140,6 +140,82 @@ def test_metriche_da_una_serie():
     assert references.metriche(np.array([np.nan, np.nan])) == {}
 
 
+# --- Dai valori ai fotogrammi ---
+# `frames_alert` risale da un alert ai fotogrammi che lo producono. La regola e'
+# asimmetrica: un eccesso e' puntuale (i fotogrammi che superano la soglia), una
+# carenza no (il ROM troppo piccolo non ha un fotogramma colpevole).
+def test_peak_max_localizza_i_fotogrammi_oltre_la_soglia():
+    serie = np.array([0.0, 10.0, 130.0, 40.0, 20.0])
+    alert = {"metric": "peak_max", "observed": 130.0,
+             "expected_min": None, "expected_max": 125.0}
+    maschera, localizzabile = references.frames_alert(serie, alert)
+    assert localizzabile
+    assert maschera.tolist() == [False, False, True, False, False]
+
+
+def test_peak_min_localizza_i_fotogrammi_sotto_la_soglia():
+    serie = np.array([0.0, -5.0, 10.0, -8.0, 20.0])
+    alert = {"metric": "peak_min", "observed": -8.0,
+             "expected_min": 0.0, "expected_max": None}
+    maschera, localizzabile = references.frames_alert(serie, alert)
+    assert localizzabile
+    assert maschera.tolist() == [False, True, False, True, False]
+
+
+def test_rom_in_eccesso_localizza_i_due_estremi():
+    serie = np.array([0.0, 10.0, 135.0, 40.0, -5.0])
+    alert = {"metric": "rom", "observed": 140.0,
+             "expected_min": 60.0, "expected_max": 100.0}
+    maschera, localizzabile = references.frames_alert(serie, alert)
+    assert localizzabile
+    assert maschera.tolist() == [False, False, True, False, True]
+
+
+def test_rom_in_carenza_non_si_localizza():
+    # Il ROM e' troppo piccolo: i due estremi sono i fotogrammi in cui il
+    # soggetto si muove *di piu'*, non quelli colpevoli della carenza.
+    serie = np.array([0.0, 10.0, 30.0, 20.0, -5.0])
+    alert = {"metric": "rom", "observed": 35.0,
+             "expected_min": 60.0, "expected_max": 100.0}
+    maschera, localizzabile = references.frames_alert(serie, alert)
+    assert not localizzabile
+    assert not maschera.any()
+
+
+def test_peak_max_sotto_il_minimo_non_si_localizza():
+    # Non e' un caso previsto dai riferimenti (peak_max ha solo max), ma la
+    # funzione non deve inventare una localizzazione che non ha senso.
+    serie = np.array([0.0, 10.0, 20.0])
+    alert = {"metric": "peak_max", "observed": 20.0,
+             "expected_min": 30.0, "expected_max": None}
+    maschera, localizzabile = references.frames_alert(serie, alert)
+    assert not localizzabile
+    assert not maschera.any()
+
+
+def test_serie_tutta_nan_non_esplode():
+    serie = np.array([np.nan, np.nan])
+    alert = {"metric": "peak_max", "observed": 130.0,
+             "expected_min": None, "expected_max": 125.0}
+    maschera, localizzabile = references.frames_alert(serie, alert)
+    assert not localizzabile
+    assert maschera.tolist() == [False, False]
+
+
+def test_frames_alert_funziona_su_un_alert_vero_di_valuta():
+    # Lo stesso alert che produce `valuta`, non uno costruito a mano: se la
+    # forma cambia da un lato, il test se ne accorge dall'altro.
+    righe = references.applicabili(references.righe(), "walking")
+    serie = np.array([10.0, 20.0, 160.0, 30.0, 15.0])
+    osservate = {("knee_r", "sagittal"): references.metriche(serie)}
+    fuori = references.valuta(osservate, righe, {("knee_r", "sagittal"): 1.0})
+    critici = [a for a in fuori if a["metric"] == "peak_max"]
+    assert critici
+    maschera, localizzabile = references.frames_alert(serie, critici[0])
+    assert localizzabile
+    assert maschera.tolist() == [False, False, True, False, False]
+
+
 # --- Ingest contro un cursore finto ---
 # Un cursore e una connessione che registrano le istruzioni ricevute, una
 # sessione di prova costruita su file, e le verifiche su cio' che l'ingest scrive,

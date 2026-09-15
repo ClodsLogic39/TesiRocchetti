@@ -1,0 +1,28 @@
+\glsdefs@newdocentry{cfd}%
+{%
+name={\acronymfont {\glsentryshort {cfd}}},%
+sort={CFD},%
+type={acronym},%
+first={CFD},%
+firstplural={CFDs},%
+text={CFD},%
+plural={CFDs},%
+description={Computational Fluid Dynamics},%
+descriptionplural={Computational Fluid Dynamics},%
+symbol={\relax },%
+symbolplural={\relax },%
+user1={},%
+user2={},%
+user3={},%
+user4={},%
+user5={},%
+user6={},%
+long={Computational Fluid Dynamics},%
+longplural={Computational Fluid Dynamicss},%
+short={CFD},%
+shortplural={CFDs},%
+counter={page},%
+parent={},%
+%
+}%
+

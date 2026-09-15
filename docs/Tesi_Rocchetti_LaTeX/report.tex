@@ -1,0 +1,84 @@
+%   SETUP%
+\documentclass[a4paper,11pt,oneside,titlepage]{book}
+\input{include/settings/settings}
+
+\begin{document}
+
+%   FRONT MATTER                                            %
+\frontmatter 	   % Begin Roman style (i, ii, iii, iv...) page numbering
+\pagestyle{empty}  % No headers or footers for the following pages
+
+%   TITLE PAGE
+\input{include/1-front/titlepage} 
+\clearpage
+
+%   QUOTE (OPTIONAL)
+\input{include/1-front/quote}
+\newpage
+
+%   ABSTRACT
+\afterpage{\null\thispagestyle{empty}\clearpage} % Blank page
+\input{include/1-front/abstract} 
+
+%   TOC - LOF - LOT
+\begin{singlespace}
+ \tableofcontents 	
+ \addcontentsline{toc}{chapter}{\listfigurename}
+ \listoffigures
+ \addcontentsline{toc}{chapter}{\listtablename}
+ \listoftables
+% \renewcommand{\lstlistlistingname}{List of Code}
+% \addcontentsline{toc}{chapter}{\lstlistlistingname} 
+% \lstlistoflistings
+
+%   NOMENCLATURE AND ACRONYMS
+ \printnomenclature
+ \printglossaries
+\end{singlespace}
+
+%   MAIN MATTER
+\mainmatter	  % Begin normal, numeric (1,2,3...) page numbering
+\clearpage
+% ------ set page style fancy with the follow 
+\pagestyle{fancy} 
+\renewcommand{\chaptermark}[1]{\markright{\chaptername\ \thechapter.\ #1}{}}
+\renewcommand{\sectionmark}[1]{\markright{\thesection.\ #1}}
+\lhead{} 
+\chead{}                   
+\rhead{\slshape \rightmark} 
+\lfoot{Rocchetti Claudio}
+\cfoot{} 
+\rfoot{\thepage}          
+\renewcommand{\headrulewidth}{0.4pt} 
+\renewcommand{\footrulewidth}{0.4pt} 
+
+%   CHAPTERS
+\input{include/2-chapters/01-introduzione}
+\input{include/2-chapters/02-background}
+\input{include/2-chapters/03-approccio-architettura}
+\input{include/2-chapters/04-casi-uso}
+\input{include/2-chapters/05-comparazione}
+\input{include/2-chapters/06-discussione}
+\input{include/2-chapters/07-conclusioni}
+
+%   BACK MATTER
+%   BIBLIOGRAPHY
+\cleardoublepage
+\addcontentsline{toc}{chapter}{\bibname}
+\nocite{*}
+\bibliography{include/3-back/bibliography}
+
+%   APPENDIX (facoltativa: nessuna appendice nella struttura attuale della
+%   tesi. Il file include/3-back/appendix/appendix_A.tex resta pronto se
+%   servisse in seguito: basta togliere il commento alla riga sotto e dargli
+%   un titolo vero.)
+\cleardoublepage
+\appendix % to tell LaTeX that the following chapters are appendices
+%\input{include/3-back/appendix/appendix_A}
+
+%   ACKNOWLEDGEMENTS
+\cleardoublepage
+\pagenumbering{gobble}
+\input{include/3-back/acknowledgement}
+
+\end{document} 

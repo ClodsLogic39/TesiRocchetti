@@ -1,0 +1,49 @@
+\begin{frontespizio}
+% Remember: After editing this file, delete the cache and recompile
+%---------------------Definizione font---------------------%
+\Preambolo{\renewcommand{\fronttitlefont}{\fontsize{24}{24}\bfseries}}
+%----------------------------------------------------------%
+	% \frontinstitutionfont 	Neretto, 14/17 
+	% \frontdivisionfont 		Tondo, 12/16 
+	% \frontpretitlefont 		Maiuscoletto, 10/12
+	% \fronttitlefont 		Neretto, 17/21 
+	% \frontsubtitlefont 		Tondo, 12/14
+	% \frontfixednamesfont 		Tondo, 12/14 
+	% \frontnamesfont 		Neretto, 12/14 
+	% \frontsmallfont 		Neretto, 9/11 
+	% \frontfootfont	 	Neretto, 12/14 
+
+	% \bfseries	Grassetto
+	% \itshape	Corsivo
+	% \scshape	Maiuscoletto
+%----------------------------------------------------------%
+\Margini{4cm}{3cm}{3cm}{3cm} % Margini sinistro, in basso, destro e in alto
+\Logo[4cm]{figures/logo/UnivAQ_logoA.eps}
+%\Universita{L'Aquila}
+\Istituzione{Dipartimento di Ingegneria e Scienze dell'Informazione e Matematica}
+%\Divisione{Department of Information Engineering, Computer Science and Mathematics}	% ENG
+\Divisione{Tesi di Laurea Triennale in Informatica}		% ITA
+%\Dipartimento{Dipartimento di Ingegneria e Scienze dell'Informazione e Matematica}
+%\Corso[Master Degree]{Ingegneria delle Telecomunicazioni}
+\Scuola{}
+\Titoletto{}
+
+\Titolo{Dai Keypoint alla Conoscenza}
+\Sottotitolo{Una pipeline per rendere il movimento umano interrogabile da agenti autonomi in modo esplicito, sicuro e verificabile}
+
+\Punteggiatura{} % Modifica la punteggiatura dopo 'Candidato', 'Realatore' ecc. (vuoto per togliere)
+\NCandidato{Laureando} % Sostituisce 'Candidato' con '...'
+\Preambolo{\renewcommand{\frontsmallfont}[1]{\small}}
+\Candidato[246965]{Rocchetti Claudio}
+
+%\NRelatore{Thesis Advisor}{Relatori}
+\NRelatore{Relatore}{Relatori}
+\Relatore{Prof. Di Rocco Yuri}
+%\NCorrelatore{Thesis Co-Advisor}{Relatori}
+%\Rientro{1cm} % Rientro di Relatore e Candidato
+
+\Piede{Anno Accademico 2025-2026}
+\end{frontespizio}
+
+\IfFileExists{\jobname-frn.pdf}{}{%
+\immediate\write18{pdflatex \jobname-frn}}

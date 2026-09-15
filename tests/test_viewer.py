@@ -1,9 +1,12 @@
-"""Test del viewer: lettura del C3D canonico e avvio dal server MCP.
+"""Test del viewer: lettura del C3D canonico, alert e avvio dal server MCP.
 
 La parte dati del viewer e' separata dal rendering, quindi queste prove non
 richiedono Open3D: costruiscono un C3D canonico temporaneo e verificano che ossa,
-busto, terne e angoli ne vengano ricostruiti. Le prove sull'avvio sostituiscono
-il processo del viewer con uno finto.
+busto, terne e angoli ne vengano ricostruiti. Le prove sugli alert chiamano
+`_alert` direttamente su un `dati` costruito a mano, cosi' da non dipendere
+nemmeno da ezc3d -- e verificano che il giunto giusto si accenda nel fotogramma
+giusto, con la gravita' giusta. Le prove sull'avvio sostituiscono il processo
+del viewer con uno finto.
 
     python -m pytest tests/test_viewer.py -q
 
@@ -100,6 +103,25 @@ def test_gli_angoli_della_legenda_sono_sagittali(tmp_path):
         assert len(serie) == dati["n_frame"]
 
 
+def test_carica_porta_le_chiavi_dell_alert_anche_senza_alert(tmp_path):
+    # La posa in piedi di _IN_PIEDI non sfonda nessun riferimento di
+    # letteratura: carica() deve comunque restituire le chiavi nuove, vuote.
+    dati = viewer_open3d.carica(_c3d(tmp_path))
+    assert dati["alert"] == []
+    assert dati["alert_per_punto"] == {}
+    assert not dati["alert_busto"].any()
+    assert dati["sport"] == "test"  # dichiarato in _c3d()
+
+
+def test_carica_con_con_alert_falso_non_calcola_nulla(tmp_path):
+    percorso = _c3d(tmp_path)
+    con = viewer_open3d.carica(percorso, con_alert=True)
+    senza = viewer_open3d.carica(percorso, con_alert=False)
+    assert senza["alert"] == [] and senza["alert_per_punto"] == {}
+    assert not senza["alert_busto"].any()
+    assert con["alert"] == senza["alert"]  # qui coincidono perche' la posa e' pulita
+
+
 def test_un_c3d_non_canonico_viene_rifiutato_con_chiarezza(tmp_path):
     import ezc3d
     c = ezc3d.c3d()
@@ -110,6 +132,146 @@ def test_un_c3d_non_canonico_viene_rifiutato_con_chiarezza(tmp_path):
     c.write(percorso)
     with pytest.raises(ValueError, match="BIOMECH"):
         viewer_open3d.carica(percorso)
+
+
+# --- Alert per fotogramma ---
+# `_alert` prende un `dati` con solo `meta` e `angles`, quindi queste prove non
+# passano da un C3D vero: costruiscono la serie a mano, con un solo valore fuori
+# dai riferimenti, e verificano che il giunto giusto si accenda nei fotogrammi
+# giusti, con la gravita' giusta, e che trunk/spine finiscano sul busto invece
+# che su un punto che non hanno.
+def _dati_minimi(angoli, sport="walking", n_frame=None):
+    n = n_frame or max(len(v) for v in angoli.values())
+    return {"meta": {"sport": sport}, "angles": angoli}, n
+
+
+def test_alert_localizza_il_giunto_nei_fotogrammi_giusti():
+    # anca destra, sagittale: solo l'eccesso critico anatomico (aaos, peak_max
+    # oltre 125) scatta -- nessun riferimento di sport perche' sport=None, e il
+    # minimo resta dentro il limite. Un alert solo, sul fotogramma 2 soltanto.
+    serie = [10.0, 20.0, 130.0, 40.0, 15.0]
+    dati, n = _dati_minimi({("hip_r", "sagittal"): serie}, sport=None)
+    voci, per_punto, busto = viewer_open3d._alert(dati, n)
+
+    assert len(voci) == 1, voci
+    a = voci[0]
+    assert a["joint"] == "hip_r" and a["severity"] == "critical"
+    assert a["localizzabile"]
+    assert a["maschera"].tolist() == [False, False, True, False, False]
+
+    assert per_punto["hip_r"].tolist() == [0, 0, 3, 0, 0]  # 3 = critical
+    assert not busto.any()
+
+
+def test_alert_di_sport_dipende_dal_gesto_dichiarato():
+    # Lo stesso picco di flessione del ginocchio (80 gradi) e' dentro
+    # l'intervallo atteso in corsa (70-120) ma fuori da quello in cammino
+    # (50-75): stesso valore, verdetto diverso a seconda dello sport.
+    serie = [10.0, 20.0, 80.0, 30.0, 15.0]
+
+    dati_corsa, n = _dati_minimi({("knee_r", "sagittal"): serie}, sport="running")
+    voci_corsa, per_punto_corsa, _ = viewer_open3d._alert(dati_corsa, n)
+    assert voci_corsa == [], "80 gradi e' un picco normale in corsa"
+    assert per_punto_corsa == {}
+
+    dati_cammino, n = _dati_minimi({("knee_r", "sagittal"): serie}, sport="walking")
+    voci_cammino, per_punto_cammino, _ = viewer_open3d._alert(dati_cammino, n)
+    assert len(voci_cammino) == 1, voci_cammino
+    a = voci_cammino[0]
+    assert a["metric"] == "peak_max" and a["severity"] == "warning"
+    assert a["maschera"].tolist() == [False, False, True, False, False]
+    assert per_punto_cammino["knee_r"].tolist() == [0, 0, 2, 0, 0]  # 2 = warning
+
+
+def test_alert_di_trunk_e_spine_tinge_il_busto_non_un_punto():
+    # Inclinazione laterale del busto oltre il limite anatomico (spine, frontal,
+    # critical oltre 35 gradi): spine non ha un punto proprio, quindi finisce
+    # sul busto, non in alert_per_punto.
+    serie = [0.0, 5.0, 45.0, 10.0, 0.0]
+    dati, n = _dati_minimi({("spine", "frontal"): serie}, sport=None)
+    voci, per_punto, busto = viewer_open3d._alert(dati, n)
+    assert len(voci) == 1 and voci[0]["joint"] == "spine"
+    assert voci[0]["punto"] is None
+    assert per_punto == {}
+    assert busto.tolist() == [0, 0, 3, 0, 0]  # 3 = critical
+
+
+def test_alert_prende_la_gravita_peggiore_quando_due_alert_si_sovrappongono():
+    # L'anca frontale ha un limite anatomico critico (aaos, peak_max oltre 50)
+    # e, in cammino, un intervallo di ROM (walking, 5-20): questa serie sfonda
+    # entrambi. Sul fotogramma del picco vince il critical; sul fotogramma
+    # dell'altro estremo del ROM resta solo il suo avviso.
+    serie = [0.0, 10.0, 140.0, 20.0, 0.0]
+    dati, n = _dati_minimi({("hip_r", "frontal"): serie}, sport="walking")
+    voci, per_punto, _ = viewer_open3d._alert(dati, n)
+    assert {v["metric"] for v in voci} == {"peak_max", "rom"}
+    assert per_punto["hip_r"].tolist() == [2, 0, 3, 0, 0]
+
+
+def test_punto_del_giunto_mappa_gli_arti_e_isola_trunk_spine():
+    assert viewer_open3d._punto_del_giunto("knee_l") == "knee_l"
+    assert viewer_open3d._punto_del_giunto("ankle_r") == "ankle_r"
+    assert viewer_open3d._punto_del_giunto("trunk") is None
+    assert viewer_open3d._punto_del_giunto("spine") is None
+    assert viewer_open3d._punto_del_giunto("neck") == "shoulder_c"
+
+
+def test_adatta_allunga_o_accorcia_senza_inventare_valori():
+    corta = np.array([1, 2], dtype=int)
+    assert viewer_open3d._adatta(corta, 4).tolist() == [1, 2, 0, 0]
+    lunga = np.array([1, 2, 3, 4], dtype=int)
+    assert viewer_open3d._adatta(lunga, 2).tolist() == [1, 2]
+    esatta = np.array([1, 2, 3], dtype=int)
+    assert viewer_open3d._adatta(esatta, 3) is esatta
+
+
+def test_rango_alert_legge_il_frame_giusto_e_zero_fuori_serie():
+    dati = {"alert_per_punto": {"knee_l": np.array([0, 2, 3])}}
+    assert viewer_open3d._rango_alert(dati, "knee_l", 1) == 2
+    assert viewer_open3d._rango_alert(dati, "knee_l", 99) == 0
+    assert viewer_open3d._rango_alert(dati, "hip_r", 0) == 0
+
+
+def test_alert_attivi_solo_localizzabili_e_solo_nel_fotogramma():
+    voci = [
+        {"joint": "knee_r", "localizzabile": True,
+         "maschera": np.array([False, True, False])},
+        {"joint": "knee_l", "localizzabile": False,
+         "maschera": np.array([False, False, False])},
+    ]
+    dati = {"alert": voci}
+    assert [a["joint"] for a in viewer_open3d._alert_attivi(dati, 1)] == ["knee_r"]
+    assert viewer_open3d._alert_attivi(dati, 0) == []
+
+
+def test_riga_alert_mostra_intervallo_atteso_e_osservato():
+    riga = viewer_open3d._riga_alert({
+        "joint": "hip_r", "plane": "sagittal", "metric": "peak_max",
+        "observed": 130.456, "expected_min": None, "expected_max": 125.0,
+        "severity": "critical"})
+    assert "hip_r" in riga and "130.5" in riga and "125" in riga and "critical" in riga
+
+
+# --- Direzione della freccia ---
+# La sola parte di `_freccia` che non tocca Open3D: la direzione radiale
+# rispetto all'asse bacino-spalle, e il ripiego quando non e' calcolabile.
+def test_direzione_radiale_e_perpendicolare_all_asse_del_busto():
+    anche = np.array([0.0, 0.9, 0.0])
+    spalle = np.array([0.0, 1.45, 0.0])  # asse verticale
+    punto = np.array([0.15, 1.1, 0.0])   # spostato lateralmente
+    d = viewer_open3d._direzione_radiale(punto, anche, spalle, np.array([1.0, 0.0, 0.0]))
+    asse = (spalle - anche) / np.linalg.norm(spalle - anche)
+    assert abs(float(d @ asse)) < 1e-6, "la direzione deve essere perpendicolare al busto"
+    assert float(np.linalg.norm(d)) == pytest.approx(1.0)
+
+
+def test_direzione_radiale_si_ripiega_quando_l_asse_manca():
+    ripiego = np.array([0.0, 0.0, 1.0])
+    assert viewer_open3d._direzione_radiale(np.zeros(3), None, np.zeros(3),
+                                            ripiego) is ripiego
+    coincidenti = np.array([0.0, 1.0, 0.0])
+    assert viewer_open3d._direzione_radiale(coincidenti, coincidenti, coincidenti,
+                                            ripiego) is ripiego
 
 
 # --- Avvio dal server MCP ---

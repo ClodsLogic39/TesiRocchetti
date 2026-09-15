@@ -7,7 +7,8 @@ questo modulo. Sono divisi in due livelli:
 
 `righe` porta il file in una forma tabellare, `metriche` calcola le grandezze
 osservate di una serie e `valuta` confronta le une con gli altri producendo gli
-alert, ciascuno con gravita' e fonte.
+alert, ciascuno con gravita' e fonte. `frames_alert` risale da un alert ai
+fotogrammi che lo producono, quando ne esistono.
 
 Prerequisiti: numpy; il file `reference_ranges.json` presente nella cartella del
 modulo.
@@ -120,6 +121,55 @@ def valuta(osservate, riferimenti, coverage=None, provenance=None,
                     "provenance": (provenance or {}).get((giunto, piano)),
                 })
     return fuori
+
+
+# --- Dai valori ai fotogrammi ---
+# Quali fotogrammi producono uno scostamento. La regola e' una sola: l'eccesso e'
+# puntuale, la carenza no. Un valore che supera un limite lo supera in fotogrammi
+# precisi, e quelli si indicano; una serie che non arriva a un minimo non ha
+# fotogrammi colpevoli -- il difetto sta nell'intera serie, e indicare i due
+# fotogrammi estremi vorrebbe dire additare proprio quelli in cui il soggetto si
+# muove di piu'. In quel caso l'alert resta, ma dichiarato non localizzabile.
+def frames_alert(serie, alert):
+    """Maschera dei fotogrammi che producono l'alert, e se l'alert si localizza.
+
+    Ritorna `(maschera, localizzabile)`: un array di booleani lungo quanto la
+    serie e il flag che dice se quella maschera ha un senso. Con
+    `localizzabile` falso la maschera e' tutta falsa e l'alert va riferito come
+    proprieta' dell'intera serie, non di un istante.
+
+    `alert` e' una voce come quelle prodotte da `valuta`: servono `metric`,
+    `observed`, `expected_min` ed `expected_max`.
+    """
+    v = np.asarray(serie, dtype=float)
+    vuota = np.zeros(v.shape, dtype=bool)
+    finiti = np.isfinite(v)
+    if not finiti.any():
+        return vuota, False
+
+    metrica = alert.get("metric")
+    osservato = alert.get("observed")
+    lo, hi = alert.get("expected_min"), alert.get("expected_max")
+    if osservato is None:
+        return vuota, False
+
+    # Eccesso su un picco: i fotogrammi oltre la soglia sono esattamente quelli.
+    if metrica == "peak_max" and hi is not None and osservato > hi:
+        return finiti & (v > hi), True
+    if metrica == "peak_min" and lo is not None and osservato < lo:
+        return finiti & (v < lo), True
+
+    # Eccesso di escursione: la producono i due fotogrammi degli estremi, che
+    # sono i due campioni da cui il numero e' calcolato.
+    if metrica == "rom" and hi is not None and osservato > hi:
+        indici = np.flatnonzero(finiti)
+        maschera = vuota.copy()
+        maschera[indici[np.argmax(v[indici])]] = True
+        maschera[indici[np.argmin(v[indici])]] = True
+        return maschera, True
+
+    # Tutto il resto e' una carenza: nessun fotogramma la produce.
+    return vuota, False
 
 
 def applicabili(riferimenti, sport):

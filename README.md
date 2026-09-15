@@ -166,7 +166,7 @@ MCP_DB_DSN="host=127.0.0.1 port=5432 dbname=biomech user=biomech_mcp sslmode=req
 Per collegarlo a un client MCP, dichiaralo nella configurazione del client con lo
 stesso comando e la `MCP_DB_DSN` nel blocco delle variabili d'ambiente.
 
-I diciotto strumenti coprono:
+I venti strumenti coprono:
 
 | | |
 |---|---|
@@ -176,6 +176,7 @@ I diciotto strumenti coprono:
 | **dentro una sessione** | `session_repeatability`, `side_shape_symmetry`, `symmetry_index`, `relative_phase` |
 | **giudizi** | `list_alerts` |
 | **rendering** | `visualize_session` |
+| **scrittura dalla chat** | `list_sources`, `ingest_session` (spenti finché non abiliti la scrittura) |
 
 Ogni risposta ha la stessa forma, e il vincolo non è stilistico:
 
@@ -193,6 +194,50 @@ Ogni risposta ha la stessa forma, e il vincolo non è stilistico:
 la risposta corretta a una domanda su un segnale che non esiste, ed è distinguibile
 da `result: null` con `warnings: ["no_data_or_fps"]`, che dice un'altra cosa.
 
+### Scrivere una sessione dalla chat
+
+Spento di default: senza `BIOMECH_INGEST_ENABLED=1` il server resta di sola
+lettura, e `list_sources` / `ingest_session` rispondono con un rifiuto spiegato
+invece di lanciare nulla.
+
+```bash
+export BIOMECH_INGEST_ENABLED=1
+export INGEST_DB_DSN="host=127.0.0.1 port=5432 dbname=biomech user=biomech_ingest sslmode=require password=..."
+```
+
+`list_sources()` elenca le sorgenti trovate sotto `BIOMECH_INGEST_ROOTS`
+(default `DatiGrezzi`, più cartelle separate da `:`), con **tre stati** — non
+due, perché "convertita" e "già a posto" non sono la stessa cosa:
+
+| Stato | C3D in `DatiElaborati` | Riga in `sessions` |
+|---|---|---|
+| `da_convertire` | no | no |
+| `convertita_non_caricata` | sì | no |
+| `nel_database` | sì | sì |
+
+`ingest_session(source, sport=None, subject_id=None, only_convert=False)`
+converte e carica: `source` è un nome elencato da `list_sources()`, o un
+percorso sotto una radice ammessa. Se dopo la conversione la sessione resta
+senza gesto — perché la sorgente non lo dichiara e non ne è stato passato uno —
+lo strumento si ferma lì invece di indovinare, ed elenca i gesti ammessi: è così
+che chiede di essere richiamato con `sport=`. Il C3D già prodotto resta a
+disposizione, perché la conversione è deterministica sulla stessa sorgente e
+non va rifatta. `subject_id` non viene verificato: il server si collega come
+`biomech_mcp`, che non vede l'anagrafica, quindi un identificativo inventato
+viene accettato in silenzio e la risposta lo dichiara con un avviso.
+
+La connessione del server **resta di sola lettura in ogni caso**: la scrittura
+passa da `src.conversion.process` e `src.database.ingest` lanciati come
+sottoprocessi, con `INGEST_DB_DSN` nell'ambiente e mai negli argomenti — lo
+stesso schema di `src/ui/server.py`. Dopo il caricamento, lo strumento
+**verifica** la sessione con una `SELECT` sulla propria connessione di sola
+lettura prima di dichiarare riuscito: un sottoprocesso che esce senza errori non
+basta, se la riga non è visibile in `sessions`.
+
+Ogni tentativo — riuscito o no — finisce anche in un log su file che non passa
+dal modello (`DatiElaborati/ingest.log` di default, ridefinibile con
+`BIOMECH_INGEST_LOG`): un posto dove guardare quando la chat non basta.
+
 ### Visualizzatore 3D
 
 Apre una finestra con la figura ricostruita dal C3D canonico:
@@ -203,6 +248,18 @@ python -m src.visualization.viewer_open3d --c3d DatiElaborati/una_sessione.c3d
 
 `--coord` mostra le terne dei segmenti; `--png file.png --frame 150` rende un
 fotogramma su file senza aprire nulla.
+
+Il giunto fuori dai riferimenti di letteratura diventa rosso **nei soli
+fotogrammi in cui lo è** (rosso tenue per `info`, medio per `warning`, pieno per
+`critical`), con una freccia che lo indica; `trunk` e `spine` non hanno un punto
+proprio e tingono il busto. Un alert `rom` per carenza (l'escursione troppo
+piccola, non troppo grande) non ha un fotogramma colpevole e resta solo in
+legenda, marcato «di sessione». Gli alert sono ricalcolati dal C3D con gli stessi
+riferimenti del caricamento, senza toccare il database — il viewer funziona anche
+su un file mai caricato. `--no-alert` toglie il colore e la legenda;
+`--no-frecce` tiene il colore ma non disegna le frecce; valgono anche con
+`--png`. Lo stesso interruttore, come `show_alerts` e `show_arrows`, è
+disponibile su `visualize_session` dal server MCP.
 
 Se `open3d` sta in un altro interprete, indicalo al server MCP:
 
@@ -275,13 +332,17 @@ src/database/       dal C3D al database
     ingest.py         il caricamento, in una sola transazione
     embeddings.py     i vettori di forma dei cicli
     similarity.py     i confronti, calcolati da pgvector
-src/alerts/         i riferimenti di letteratura e la loro valutazione
-src/mcp/            il server MCP e le sue query
-src/visualization/  il visualizzatore
+src/alerts/         i riferimenti di letteratura, la loro valutazione e la
+                      localizzazione per fotogramma (frames_alert)
+src/mcp/            il server MCP: le query di sola lettura e, quando
+                      abilitata, la scrittura di una sessione dalla chat
+src/visualization/  il visualizzatore, con il giunto in alert colorato per
+                      fotogramma e la freccia che lo indica
 db/setup_roles.sql  i ruoli a privilegio minimo
 tools/              la validazione clinica
-tests/              95 test, nessun database richiesto
-                      (9 saltati senza dati di laboratorio)
+tests/              nessun database richiesto per lanciarli;
+                      alcuni saltano senza dati di laboratorio, altri
+                      richiedono ezc3d con la libreria nativa disponibile
 ```
 
 ---

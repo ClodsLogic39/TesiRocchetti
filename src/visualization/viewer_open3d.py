@@ -6,8 +6,11 @@ dal bacino alle spalle e la testa un ellissoide orientato lungo il collo. Gli
 spessori sono espressi in frazioni della lunghezza del tronco del soggetto.
 
 La composizione dei segmenti e i colori vengono da `anatomy`; punti, angoli e
-quaternioni da `canonical.read`. Il modulo offre una finestra interattiva con
-cursore dei fotogrammi e la scrittura di un'istantanea su file PNG.
+quaternioni da `canonical.read`. Gli alert sono ricalcolati qui dai riferimenti
+di letteratura, senza database: il giunto fuori intervallo diventa rosso nei soli
+fotogrammi che lo producono, con una freccia che lo indica. Il modulo offre una
+finestra interattiva con cursore dei fotogrammi e la scrittura di un'istantanea
+su file PNG.
 
 Avvio: python -m src.visualization.viewer_open3d --c3d <file.c3d> [--coord]
 
@@ -27,6 +30,7 @@ try:
 except ImportError:
     o3d = None
 
+from ..alerts import references
 from ..conversion import anatomy, canonical
 
 # --- Colori e proporzioni della figura ---
@@ -51,11 +55,27 @@ _LARGHEZZA_BACINO = 1.60
 _LARGHEZZA_SPALLE = 1.05
 _TESTA = (0.15, 0.19, 0.22)
 
+# --- Alert ---
+# Rosso crescente con la gravita', ingrossamento del giunto segnalato, e il punto
+# canonico su cui ogni giunto viene indicato. `trunk` e `spine` non hanno un punto
+# proprio: valgono sul busto, che viene tinto per intero.
+_RANGO_GRAVITA = {"info": 1, "warning": 2, "data_quality": 2, "critical": 3}
+
+_COLORI_ALERT = {1: (0.86, 0.56, 0.52),
+                 2: (0.89, 0.31, 0.24),
+                 3: (0.95, 0.06, 0.06)}
+
+_INGROSSAMENTO_ALERT = 1.25
+_LUNGHEZZA_FRECCIA = 0.50
+_SCARTO_FRECCIA = 1.6
+
+_PUNTO_DEL_GIUNTO = {"trunk": None, "spine": None, "neck": "shoulder_c"}
+
 
 # --- Dati ---
 # Lettura del C3D canonico e preparazione di punti, ossa, quaternioni e angoli da
 # mostrare. Questa parte non dipende da Open3D.
-def carica(percorso):
+def carica(percorso, con_alert=True):
     dati = canonical.read(percorso)
     punti = {nome: np.asarray(v, dtype=float) for nome, v in dati["points"].items()}
     colori = anatomy.colours()
@@ -86,6 +106,10 @@ def carica(percorso):
     terne = {segmento: np.asarray(v["quat"], dtype=float)
              for segmento, v in dati["segments"].items() if "quat" in v}
 
+    n_frame = int(dati["meta"]["n_frames"])
+    alert, per_punto, busto = (_alert(dati, n_frame) if con_alert
+                               else ([], {}, np.zeros(n_frame, dtype=int)))
+
     return {
         "punti": punti,
         "ossa": ossa,
@@ -95,9 +119,76 @@ def carica(percorso):
         "terne": terne,
         "terna_mondo": dati["world_frame"],
         "fps": float(dati["meta"]["fps"] or 30.0),
-        "n_frame": int(dati["meta"]["n_frames"]),
+        "n_frame": n_frame,
         "sorgente": dati["meta"]["source"],
+        "sport": anatomy.canonical_sport(dati["meta"].get("sport")),
+        "alert": alert,
+        "alert_per_punto": per_punto,
+        "alert_busto": busto,
     }
+
+
+# --- Alert per fotogramma ---
+# Gli alert non arrivano dal database: si ricalcolano qui dagli stessi
+# riferimenti di letteratura e con le stesse funzioni che usa il caricamento, cosi'
+# che il viewer resti utilizzabile su un C3D mai caricato e dica comunque le stesse
+# cose di `list_alerts`. Da ogni alert `references.frames_alert` ricava i fotogrammi
+# che lo producono; quelli che non si localizzano restano nell'elenco, marcati.
+def _punto_del_giunto(giunto):
+    if giunto in _PUNTO_DEL_GIUNTO:
+        return _PUNTO_DEL_GIUNTO[giunto]
+    return giunto if giunto in anatomy.POINTS else None
+
+
+def _alert(dati, n_frame):
+    sport = anatomy.canonical_sport(dati["meta"].get("sport"))
+    riferimenti = references.applicabili(references.righe(), sport)
+
+    osservate, coperture = {}, {}
+    for chiave, v in dati["angles"].items():
+        misure = references.metriche(v)
+        if misure:
+            osservate[chiave] = misure
+            coperture[chiave] = float(np.isfinite(np.asarray(v, dtype=float)).mean())
+
+    fuori = references.valuta(osservate, riferimenti, coperture,
+                              dati.get("angle_provenance"))
+
+    voci, per_punto = [], {}
+    busto = np.zeros(n_frame, dtype=int)
+    for a in fuori:
+        maschera, localizzabile = references.frames_alert(
+            dati["angles"][(a["joint"], a["plane"])], a)
+        punto = _punto_del_giunto(a["joint"])
+        voci.append({**a, "punto": punto, "maschera": maschera,
+                     "localizzabile": localizzabile})
+        if not localizzabile:
+            continue
+        rango = np.where(maschera, _RANGO_GRAVITA.get(a["severity"], 2), 0)
+        rango = _adatta(rango, n_frame)
+        if punto is None:
+            busto = np.maximum(busto, rango)
+        else:
+            per_punto[punto] = np.maximum(per_punto.get(punto, busto * 0), rango)
+
+    voci.sort(key=lambda v: (-_RANGO_GRAVITA.get(v["severity"], 2), -v["deviation"]))
+    return voci, per_punto, busto
+
+
+def _adatta(rango, n_frame):
+    if rango.shape[0] == n_frame:
+        return rango
+    fuori = np.zeros(n_frame, dtype=int)
+    quanti = min(n_frame, rango.shape[0])
+    fuori[:quanti] = rango[:quanti]
+    return fuori
+
+
+def _rango_alert(dati, punto, frame):
+    rango = dati.get("alert_per_punto", {}).get(punto)
+    if rango is None or frame >= rango.shape[0]:
+        return 0
+    return int(rango[frame])
 
 
 # --- Misure del corpo ---
@@ -190,6 +281,52 @@ def _sfera(centro, raggio, colore):
     return m
 
 
+def _freccia(bersaglio, direzione, lunghezza, colore, destra=None, scarto=0.0):
+    """Freccia che punta al bersaglio arrivando da fuori, lungo `direzione`.
+
+    Open3D costruisce la freccia lungo +Z con la base nell'origine: la si ruota
+    portando +Z su -direzione, cosi' che la punta guardi il bersaglio, e la si
+    trasla in modo che la punta cada a distanza `scarto` dal bersaglio, appena
+    fuori dalla sfera del giunto.
+    """
+    d = np.asarray(direzione, dtype=float)
+    norma = float(np.linalg.norm(d))
+    if not np.isfinite(norma) or norma < 1e-9 or lunghezza <= 0:
+        return None
+    d = d / norma
+    corpo = 0.62 * lunghezza
+    m = o3d.geometry.TriangleMesh.create_arrow(
+        cylinder_radius=lunghezza * 0.055, cone_radius=lunghezza * 0.13,
+        cylinder_height=corpo, cone_height=lunghezza - corpo, resolution=16)
+    u, e1, e2 = _base_ortonormale(-d, destra)
+    v = np.asarray(m.vertices) @ np.vstack([e1, e2, u])
+    m.vertices = o3d.utility.Vector3dVector(
+        v + np.asarray(bersaglio, dtype=float) + d * (scarto + lunghezza))
+    m.paint_uniform_color(colore)
+    m.compute_vertex_normals()
+    return m
+
+
+def _direzione_radiale(punto, anche, spalle, ripiego):
+    """Uscita dal corpo: perpendicolare all'asse bacino-spalle, verso il punto.
+
+    Serve perche' una freccia orientata a caso finisce dentro il torace. Quando
+    l'asse non e' calcolabile o il punto ci giace sopra, si ripiega sull'asse
+    dato.
+    """
+    if anche is None or spalle is None:
+        return ripiego
+    asse = np.asarray(spalle, dtype=float) - np.asarray(anche, dtype=float)
+    norma = float(np.linalg.norm(asse))
+    if not np.isfinite(norma) or norma < 1e-6:
+        return ripiego
+    u = asse / norma
+    scarto = np.asarray(punto, dtype=float) - np.asarray(anche, dtype=float)
+    radiale = scarto - float(scarto @ u) * u
+    norma = float(np.linalg.norm(radiale))
+    return radiale / norma if norma > 1e-6 else ripiego
+
+
 def _terna(quaternione, centro, dimensione):
     if not np.all(np.isfinite(quaternione)):
         return None
@@ -202,7 +339,7 @@ def _terna(quaternione, centro, dimensione):
 # --- Composizione della figura ---
 # Assembla le geometrie di un singolo fotogramma -- ossa, busto, testa ed
 # eventuali terne -- e calcola l'inquadratura che contiene tutta la scena.
-def costruisci(dati, frame, con_terne=False):
+def costruisci(dati, frame, con_terne=False, con_alert=True, con_frecce=True):
     scala = dati["scala"]
     punti = dati["punti"]
 
@@ -223,6 +360,15 @@ def costruisci(dati, frame, con_terne=False):
             break
 
     geometrie = []
+    segnalati = {}
+
+    def sfera_giunto(nome, centro_g, raggio_g, colore_osso):
+        rango = _rango_alert(dati, nome, frame) if con_alert else 0
+        if not rango:
+            return _sfera(centro_g, raggio_g, colore_osso)
+        segnalati[nome] = (centro_g, raggio_g, rango)
+        return _sfera(centro_g, raggio_g * _INGROSSAMENTO_ALERT, _COLORI_ALERT[rango])
+
     for segmento, primo, secondo, colore in dati["ossa"]:
         if segmento in _NON_DISEGNATI:
             continue
@@ -235,7 +381,9 @@ def costruisci(dati, frame, con_terne=False):
         corpo = _tronco_di_cono(a, b, ra, rb, colore, destra_rif, _PROFONDITA_ARTO)
         if corpo is None:
             continue
-        geometrie += [corpo, _sfera(a, ra * 0.95, colore), _sfera(b, rb * 0.95, colore)]
+        geometrie += [corpo,
+                      sfera_giunto(primo, a, ra * 0.95, colore),
+                      sfera_giunto(secondo, b, rb * 0.95, colore)]
         if con_terne and segmento in dati["terne"]:
             assi = _terna(dati["terne"][segmento][frame], (a + b) / 2,
                           max(scala * 0.25, 0.08))
@@ -247,10 +395,18 @@ def costruisci(dati, frame, con_terne=False):
             posa("hip_r") - posa("hip_l"))) / 2.0 * _LARGHEZZA_BACINO
         larghezza_spalle = float(np.linalg.norm(
             posa("shoulder_r") - posa("shoulder_l"))) / 2.0 * _LARGHEZZA_SPALLE
+        serie_busto = dati.get("alert_busto")
+        rango_busto = (int(serie_busto[frame])
+                       if con_alert and serie_busto is not None
+                       and frame < len(serie_busto) else 0)
+        colore_busto = _COLORI_ALERT[rango_busto] if rango_busto else COLORE_BUSTO
+        if rango_busto:
+            segnalati["trunk"] = ((anche + spalle) / 2.0,
+                                  max(larghezza_spalle, 0.05 * scala), rango_busto)
         busto = _tronco_di_cono(anche, spalle,
                                 max(larghezza_anche, 0.05 * scala),
                                 max(larghezza_spalle, 0.05 * scala),
-                                COLORE_BUSTO, destra_rif, _PROFONDITA_BUSTO)
+                                colore_busto, destra_rif, _PROFONDITA_BUSTO)
         if busto is not None:
             geometrie.append(busto)
         if "trunk" in dati["terne"]:
@@ -284,6 +440,16 @@ def costruisci(dati, frame, con_terne=False):
                     geometrie.append(collo)
         geometrie.append(
             _ellissoide(centro_testa, semiassi, COLORE_TESTA, alto, destra_rif))
+
+    if con_alert and con_frecce and segnalati:
+        ripiego = np.asarray(dati["terna_mondo"], dtype=float)[2]
+        for centro_g, raggio_g, rango in segnalati.values():
+            punta = _freccia(centro_g,
+                             _direzione_radiale(centro_g, anche, spalle, ripiego),
+                             _LUNGHEZZA_FRECCIA * scala, _COLORI_ALERT[rango],
+                             destra_rif, scarto=raggio_g * _SCARTO_FRECCIA)
+            if punta is not None:
+                geometrie.append(punta)
     return geometrie
 
 
@@ -300,10 +466,36 @@ def inquadratura(dati):
     return centro, centro + destra * raggio * 3.0, su, raggio
 
 
+# --- Testo di un alert ---
+# Una riga sola per alert: giunto, piano, metrica, valore osservato contro
+# l'intervallo atteso e gravita'. La fonte non ci sta e resta nel database.
+_MAX_RIGHE_ALERT = 6
+
+
+def _alert_attivi(dati, frame):
+    return [a for a in dati.get("alert", [])
+            if a["localizzabile"] and frame < a["maschera"].shape[0]
+            and bool(a["maschera"][frame])]
+
+
+def _riga_alert(a):
+    lo, hi = a.get("expected_min"), a.get("expected_max")
+    if lo is not None and hi is not None:
+        atteso = f"{lo:g}..{hi:g}"
+    elif hi is not None:
+        atteso = f"max {hi:g}"
+    elif lo is not None:
+        atteso = f"min {lo:g}"
+    else:
+        atteso = "?"
+    return (f"{a['joint']} {a['plane']} {a['metric']}: "
+            f"{a['observed']:.1f} (atteso {atteso}) {a['severity']}")
+
+
 # --- Finestra e istantanee ---
 # Finestra interattiva con cursore dei fotogrammi e legenda, e scrittura di un
 # singolo fotogramma su file PNG tramite una finestra nascosta.
-def esegui(dati, con_terne=False):
+def esegui(dati, con_terne=False, con_alert=True, con_frecce=True):
     n = dati["n_frame"]
     fps = dati["fps"]
 
@@ -351,6 +543,21 @@ def esegui(dati, con_terne=False):
                 pannello.add_child(etichetta)
                 righe.append((chiave, giunto, suffisso, etichetta))
 
+    righe_alert = []
+    if con_alert and dati.get("alert"):
+        pannello.add_child(gui.Label(""))
+        pannello.add_child(gui.Label(f"Alert ({len(dati['alert'])} sulla sessione)"))
+        pannello.add_child(gui.Label("rosso: tenue info, medio warning, pieno critical"))
+        for _ in range(_MAX_RIGHE_ALERT):
+            etichetta = gui.Label("")
+            pannello.add_child(etichetta)
+            righe_alert.append(etichetta)
+        non_localizzabili = [a for a in dati["alert"] if not a["localizzabile"]]
+        if non_localizzabili:
+            pannello.add_child(gui.Label("Di sessione (nessun fotogramma li produce):"))
+            for a in non_localizzabili[:_MAX_RIGHE_ALERT]:
+                pannello.add_child(gui.Label(f"   {_riga_alert(a)}"))
+
     info = gui.Label("Frame 0")
     pannello.add_child(info)
     finestra.add_child(vista)
@@ -369,11 +576,25 @@ def esegui(dati, con_terne=False):
         for nome in stato["nomi"]:
             vista.scene.remove_geometry(nome)
         stato["nomi"] = []
-        for i, g in enumerate(costruisci(dati, frame, con_terne)):
+        for i, g in enumerate(costruisci(dati, frame, con_terne,
+                                         con_alert, con_frecce)):
             nome = f"g{i}"
             vista.scene.add_geometry(nome, g, materiale)
             stato["nomi"].append(nome)
-        info.text = f"Frame {frame}/{n - 1}  t={frame / fps:.2f}s"
+
+        attivi = _alert_attivi(dati, frame) if con_alert else []
+        capienza = max(len(righe_alert) - 1, 0)
+        mostrati = attivi if len(attivi) <= len(righe_alert) else attivi[:capienza]
+        for i, etichetta in enumerate(righe_alert):
+            if i < len(mostrati):
+                etichetta.text = f"   {_riga_alert(mostrati[i])}"
+            elif i == len(mostrati) and len(attivi) > len(mostrati):
+                etichetta.text = f"   (+{len(attivi) - len(mostrati)} altri)"
+            else:
+                etichetta.text = ""
+
+        info.text = (f"Frame {frame}/{n - 1}  t={frame / fps:.2f}s"
+                     + (f"   {len(attivi)} in alert" if attivi else ""))
         for segmento, giunto, suffisso, etichetta in righe:
             serie = dati["angoli"][segmento][1]
             valore = serie[frame] if frame < len(serie) else np.nan
@@ -407,10 +628,11 @@ def esegui(dati, con_terne=False):
     gui.Application.instance.run()
 
 
-def istantanea(dati, frame, destinazione, con_terne=False, larghezza=900, altezza=700):
+def istantanea(dati, frame, destinazione, con_terne=False, larghezza=900,
+               altezza=700, con_alert=True, con_frecce=True):
     if not 0 <= frame < dati["n_frame"]:
         raise ValueError(f"frame {frame} fuori intervallo (0..{dati['n_frame'] - 1})")
-    geometrie = costruisci(dati, frame, con_terne)
+    geometrie = costruisci(dati, frame, con_terne, con_alert, con_frecce)
     if not geometrie:
         raise ValueError(f"frame {frame}: nessun segmento con entrambi gli estremi noti")
 
@@ -468,15 +690,20 @@ def main():
                     help="mostra le terne degli assi dei segmenti")
     ap.add_argument("--png", help="rende un fotogramma su file e esce, senza finestra")
     ap.add_argument("--frame", type=int, default=0, help="fotogramma da rendere con --png")
+    ap.add_argument("--no-alert", dest="alert", action="store_false",
+                    help="non colorare i giunti fuori dai riferimenti")
+    ap.add_argument("--no-frecce", dest="frecce", action="store_false",
+                    help="colora i giunti in alert ma non disegna le frecce")
     args = ap.parse_args()
     if o3d is None:
         raise SystemExit("Open3D non installato in questo interprete "
                          "(vedi BIOMECH_VIEWER_PYTHON)")
-    dati = carica(args.c3d)
+    dati = carica(args.c3d, con_alert=args.alert)
     if args.png:
-        istantanea(dati, args.frame, args.png, con_terne=args.coord)
+        istantanea(dati, args.frame, args.png, con_terne=args.coord,
+                   con_alert=args.alert, con_frecce=args.frecce)
         return
-    esegui(dati, con_terne=args.coord)
+    esegui(dati, con_terne=args.coord, con_alert=args.alert, con_frecce=args.frecce)
 
 
 if __name__ == "__main__":

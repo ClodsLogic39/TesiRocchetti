@@ -1,0 +1,65 @@
+\begin{thebibliography}{10}
+
+\bibitem{aiendurance}
+Ai endurance --- server mcp ufficiale.
+\newblock \url{https://aiendurance.com/docs/mcp}.
+
+\bibitem{c3dorg}
+C3d.org --- sample c3d files.
+\newblock \url{https://www.c3d.org/sampledata.html}.
+\newblock File Plug-in Gait usati durante lo sviluppo per collaudare il riconoscimento delle etichette e la pipeline di conversione: gait-pig.c3d, gait-pig-nz.c3d, gait-raw.c3d.
+
+\bibitem{kailo}
+Kailo (gia' getfast) --- piattaforma di analisi allenamento con chat integrata.
+\newblock \url{https://apps.apple.com/us/app/kailo-ai-fitness}.
+
+\bibitem{mcpspec}
+Model context protocol --- specifica.
+\newblock \url{https://modelcontextprotocol.io}.
+
+\bibitem{trainingpeaksmcp}
+Trainingpeaks mcp (connettore non ufficiale).
+\newblock \url{https://github.com/JamsusMaximus/trainingpeaks-mcp}.
+
+\bibitem{aaos}
+{American Academy of Orthopaedic Surgeons}.
+\newblock Riferimenti di goniometria clinica per le escursioni articolari normali.
+
+\bibitem{fukuchi2019}
+C.~A. Fukuchi et~al.
+\newblock A public dataset of overground and treadmill walking kinematics and kinetics in healthy individuals.
+\newblock {\em Scientific Reports}, 2019.
+\newblock Confronto cammino-corsa citato nel testo.
+
+\bibitem{groodsuntay1983}
+E.~S. Grood and W.~J. Suntay.
+\newblock A joint coordinate system for the clinical description of three-dimensional motions: application to the knee.
+\newblock {\em Journal of Biomechanical Engineering}, 1983.
+
+\bibitem{perryburnfield}
+J.~Perry and J.~M. Burnfield.
+\newblock {\em Gait Analysis: Normal and Pathological Function}.
+\newblock SLACK Incorporated.
+
+\bibitem{opencap}
+{Stanford University}.
+\newblock Opencap --- piattaforma di motion capture markerless open-source.
+\newblock Validazione: Validation of OpenCap: A low-cost markerless motion capture system for lower-extremity kinematics during return-to-sport tasks, Journal of Biomechanics.
+
+\bibitem{theia3d}
+{Theia Markerless Inc.}
+\newblock Theia3d.
+\newblock \url{https://www.theiamarkerless.com}.
+
+\bibitem{vielemeyer2026}
+J.~Vielemeyer, L.~Tronicke, L.~Schreff, R.~Abel, K.~Lechler, and R.~M{\"u}ller.
+\newblock A full-body motion capture gait dataset of healthy young adults walking ramps up and down.
+\newblock {\em Scientific Data}, 2026.
+\newblock Codice: \url{https://github.com/jvielemeyer/human-ramp-walking}. Dataset di laboratorio (marker Plug-in Gait full body e uscite di modello nello stesso file) su cui poggia la riconfigurazione della lettura e della processazione dei dati grezzi e la validazione della convenzione angolare.
+
+\bibitem{wu2002isb}
+G.~Wu et~al.
+\newblock Isb recommendation on definitions of joint coordinate system of various joints for the reporting of human joint motion --- part i: ankle, hip, and spine.
+\newblock {\em Journal of Biomechanics}, 2002.
+
+\end{thebibliography}

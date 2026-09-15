@@ -1,0 +1,12 @@
+\babel@toc {italian}{}\relax 
+\babel@toc {italian}{}\relax 
+\contentsline {chapter}{Elenco delle figure}{iv}{chapter*.2}%
+\contentsline {chapter}{Elenco delle tabelle}{v}{chapter*.3}%
+\contentsline {chapter}{\numberline {1}Introduzione}{1}{chapter.1}%
+\contentsline {chapter}{\numberline {2}Background e problem statement}{2}{chapter.2}%
+\contentsline {chapter}{\numberline {3}Approccio proposto e architettura}{3}{chapter.3}%
+\contentsline {chapter}{\numberline {4}Tre casi d'uso reali}{4}{chapter.4}%
+\contentsline {chapter}{\numberline {5}Comparazione con strumenti esistenti}{5}{chapter.5}%
+\contentsline {chapter}{\numberline {6}Discussione interna: miglioramenti realistici e applicabili}{6}{chapter.6}%
+\contentsline {chapter}{\numberline {7}Conclusioni}{7}{chapter.7}%
+\contentsline {chapter}{Bibliografia}{8}{chapter.7}%

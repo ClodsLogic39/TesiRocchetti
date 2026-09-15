@@ -24,5 +24,3 @@ graphify-out/
 src/ui/
 tests/test_ui.py
 
-# Documentazione
-docs/

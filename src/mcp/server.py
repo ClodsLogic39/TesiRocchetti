@@ -6,18 +6,25 @@ copertura dei dati su cui la risposta si basa.
 
 Gli strumenti sono divisi per famiglia: metriche e confronti su una serie
 angolare, ricerca delle sessioni disponibili, confronti di forma calcolati da
-pgvector, alert registrati dal caricamento e apertura del viewer.
+pgvector, alert registrati dal caricamento, apertura del viewer e, quando
+abilitata, la scrittura di una nuova sessione dalla chat.
+
+La connessione del server resta di sola lettura in ogni caso: la scrittura, se
+attiva, passa da `src.conversion.process` e `src.database.ingest` lanciati come
+sottoprocessi, con la DSN di scrittura nell'ambiente e mai negli argomenti.
 
 Avvio: python -m src.mcp.server
 
 Prerequisiti: il pacchetto mcp, psycopg e numpy; la DSN di sola lettura nella
 variabile d'ambiente MCP_DB_DSN; per il viewer un interprete con open3d ed ezc3d
-e i C3D canonici nella cartella dei dati elaborati.
+e i C3D canonici nella cartella dei dati elaborati; per la scrittura dalla chat,
+BIOMECH_INGEST_ENABLED=1 e la DSN di scrittura in INGEST_DB_DSN.
 """
 import os
 import subprocess
 import sys
 import tempfile
+from datetime import datetime, timezone
 from pathlib import Path
 
 import numpy as np
@@ -25,7 +32,9 @@ from mcp.server.fastmcp import FastMCP
 
 from . import core
 from ..conversion import anatomy as bodyparts
+from ..conversion import canonical
 from ..conversion import process
+from ..conversion import readers
 from ..conversion import segmentation
 from ..database import similarity
 
@@ -38,6 +47,16 @@ DATA_ROOT = Path(os.environ.get("BIOMECH_DATA_ROOT",
 VIEWER_PY = os.environ.get("BIOMECH_VIEWER_PYTHON", sys.executable)
 VIEWER_MODULE = "src.visualization.viewer_open3d"
 VIEWER_DISABLED = bool(os.environ.get("BIOMECH_VIEWER_DISABLED"))
+
+# Scrittura dalla chat: spenta di default. Le radici ammesse per una sorgente
+# indicata per percorso, e dove va il log dei tentativi -- un canale che non
+# passa dal modello, per quando la risposta in chat non basta.
+INGEST_ENABLED = bool(os.environ.get("BIOMECH_INGEST_ENABLED"))
+INGEST_DB_DSN = os.environ.get("INGEST_DB_DSN")
+INGEST_ROOTS = [r for r in os.environ.get(
+    "BIOMECH_INGEST_ROOTS", process.RADICE_DEFAULT).split(os.pathsep) if r]
+INGEST_LOG = Path(os.environ.get("BIOMECH_INGEST_LOG", str(DATA_ROOT / "ingest.log")))
+INGEST_TIMEOUT = 600
 
 mcp = FastMCP("Biomech MCP")
 
@@ -579,9 +598,16 @@ def list_alerts(session_key: str, severity: str | None = None):
 # --- Strumento: rendering ---
 # Apre il viewer sul C3D canonico della sessione.
 @mcp.tool()
-def visualize_session(session_key: str, show_coord_frames: bool = False):
-    """Apre il viewer Open3D (finestra nativa locale) come processo separato."""
-    spec = {"session_key": session_key, "show_coord_frames": show_coord_frames}
+def visualize_session(session_key: str, show_coord_frames: bool = False,
+                      show_alerts: bool = True, show_arrows: bool = True):
+    """Apre il viewer Open3D (finestra nativa locale) come processo separato.
+
+    show_alerts colora di rosso i giunti fuori dai riferimenti di letteratura,
+    nei soli fotogrammi in cui lo sono; show_arrows aggiunge una freccia su
+    ciascuno. show_arrows senza show_alerts non ha effetto.
+    """
+    spec = {"session_key": session_key, "show_coord_frames": show_coord_frames,
+            "show_alerts": show_alerts, "show_arrows": show_arrows}
     if VIEWER_DISABLED:
         return {"input_spec": spec, "selected_data": {}, "result": None,
                 "explain": "Viewer disattivato su questa istanza (BIOMECH_VIEWER_DISABLED): "
@@ -596,6 +622,10 @@ def visualize_session(session_key: str, show_coord_frames: bool = False):
     cmd = [VIEWER_PY, "-m", VIEWER_MODULE, "--c3d", str(c3d)]
     if show_coord_frames:
         cmd.append("--coord")
+    if not show_alerts:
+        cmd.append("--no-alert")
+    elif not show_arrows:
+        cmd.append("--no-frecce")
     log = tempfile.TemporaryFile()
     try:
         proc = subprocess.Popen(cmd, cwd=str(REPO_ROOT), stdout=subprocess.DEVNULL,
@@ -618,6 +648,289 @@ def visualize_session(session_key: str, show_coord_frames: bool = False):
     return {"input_spec": spec, "selected_data": {"c3d": str(c3d)},
             "result": {"launched": True, "pid": proc.pid},
             "explain": "Viewer Open3D lanciato come processo separato.", "warnings": []}
+
+
+# --- Scrittura dalla chat: supporto ---
+# La connessione del server resta di sola lettura; questi strumenti scrivono
+# lanciando process e ingest come sottoprocessi, con la DSN di scrittura
+# nell'ambiente e mai negli argomenti -- lo stesso schema di `src/ui/server.py`.
+# Tre funzioni fanno il lavoro: risoluzione della sorgente contro le radici
+# ammesse, il sottoprocesso con la sua gestione di errore e timeout, e il log
+# su file che non passa dal modello.
+def _ingest_disabilitato(spec):
+    return {"input_spec": spec, "selected_data": {}, "result": None,
+            "explain": "Scrittura disattivata su questa istanza (manca "
+                       "BIOMECH_INGEST_ENABLED): il server resta di sola lettura. "
+                       "Usa la UI locale (src.ui.server) o la riga di comando.",
+            "warnings": ["ingest_disabled"]}
+
+
+def _radici_ingest():
+    radici = []
+    for r in INGEST_ROOTS:
+        p = Path(r)
+        radici.append(p if p.is_absolute() else REPO_ROOT / p)
+    return radici
+
+
+def _sorgenti_disponibili():
+    viste = {}
+    for radice in _radici_ingest():
+        for percorso in readers.discover(str(radice)):
+            nome = os.path.splitext(os.path.basename(percorso.rstrip("/\\")))[0]
+            viste.setdefault(nome, percorso)
+    return viste
+
+
+def _risolvi_sorgente(source):
+    if not source:
+        return None, "source mancante."
+    disponibili = _sorgenti_disponibili()
+    if source in disponibili:
+        return disponibili[source], None
+    candidato = Path(source)
+    if not candidato.is_absolute():
+        candidato = REPO_ROOT / candidato
+    try:
+        candidato = candidato.resolve()
+    except OSError:
+        return None, f"'{source}' non e' un percorso leggibile."
+    for radice in _radici_ingest():
+        try:
+            candidato.relative_to(radice.resolve())
+        except ValueError:
+            continue
+        if candidato.exists():
+            return str(candidato), None
+        return None, f"'{source}' e' sotto una radice ammessa ma non esiste."
+    return None, (f"'{source}' non e' fra le sorgenti di list_sources() ne' un "
+                  f"percorso sotto le radici ammesse "
+                  f"({', '.join(str(r) for r in _radici_ingest())}).")
+
+
+def _chiavi_in_db(nomi):
+    nomi = list(nomi)
+    if not nomi:
+        return set()
+    with core.connect() as conn, conn.cursor() as cur:
+        cur.execute("SELECT session_key FROM sessions WHERE session_key = ANY(%s)",
+                    (nomi,))
+        return {r[0] for r in cur.fetchall()}
+
+
+def _ricevuta_sessione(nome):
+    with core.connect() as conn, conn.cursor() as cur:
+        cur.execute("SELECT n_frames, ingested_at FROM sessions "
+                    "WHERE session_key = %s", (nome,))
+        riga = cur.fetchone()
+    return None if not riga else {"n_frames": riga[0], "ingested_at": riga[1]}
+
+
+def _sport_del_canonico(c3d):
+    try:
+        dati = canonical.read(str(c3d))
+    except Exception:
+        return None
+    return bodyparts.canonical_sport(dati["meta"].get("sport"))
+
+
+def _passo(cmd, etichetta, extra_env=None):
+    ambiente = dict(os.environ, **(extra_env or {}))
+    try:
+        proc = subprocess.run(cmd, cwd=str(REPO_ROOT), capture_output=True,
+                              text=True, timeout=INGEST_TIMEOUT, env=ambiente)
+    except subprocess.TimeoutExpired:
+        return False, "", f"{etichetta}: oltre il tempo massimo ({INGEST_TIMEOUT} s)"
+    if proc.returncode == 0:
+        return True, proc.stdout, None
+    if proc.returncode < 0:
+        return False, proc.stdout, (
+            f"{etichetta}: terminata dal segnale {-proc.returncode} "
+            "(file probabilmente malformato)")
+    errore = (proc.stderr.strip().splitlines() or ["errore sconosciuto"])[-1]
+    return False, proc.stdout, f"{etichetta}: {errore}"
+
+
+def _passo_conversione(sorgente, sport):
+    cmd = [sys.executable, "-m", "src.conversion.process", sorgente,
+           "--uscita", str(DATA_ROOT)]
+    if sport:
+        cmd += ["--sport", sport]
+    return _passo(cmd, "conversione")
+
+
+def _passo_caricamento(c3d, subject_id):
+    cmd = [sys.executable, "-m", "src.database.ingest", str(c3d)]
+    if subject_id:
+        cmd += ["--subject-id", subject_id]
+    return _passo(cmd, "caricamento", {"INGEST_DB_DSN": INGEST_DB_DSN or ""})
+
+
+def _registra(nome, sport, subject_id, passo, ok, errore):
+    try:
+        INGEST_LOG.parent.mkdir(parents=True, exist_ok=True)
+        ultima = (errore or "").strip().splitlines()[-1] if errore else "-"
+        riga = "\t".join([
+            datetime.now(timezone.utc).isoformat(timespec="seconds"),
+            nome, sport or "-", subject_id or "-", passo,
+            "ok" if ok else "fallito", ultima])
+        with open(INGEST_LOG, "a", encoding="utf-8") as f:
+            f.write(riga + "\n")
+    except OSError:
+        pass  # il log e' un aiuto, non deve far fallire lo strumento su un disco pieno
+
+
+def _suggerimento(passo, errore):
+    if passo == "conversione" and errore and "gesto non riconosciuto" in errore:
+        return f"Rilancia con sport fra {', '.join(bodyparts.SPORTS)}."
+    if passo == "caricamento" and errore and "nome di sessione non ammesso" in errore:
+        return "Rinomina il file sorgente con un nome semplice e riconverti."
+    return "Controlla l'errore riportato; il tentativo resta in DatiElaborati/ingest.log."
+
+
+def _fallimento(spec, nome, passo, errore, esplicito):
+    return {"input_spec": spec,
+            "selected_data": {"sorgente": nome, "passo_fallito": passo,
+                              "esito": "fallito"},
+            "result": None, "errore": errore, "explain": esplicito,
+            "azione_suggerita": _suggerimento(passo, errore),
+            "warnings": [f"{passo}_fallita"]}
+
+
+# --- Strumenti: scrittura dalla chat ---
+# Convertire e caricare una sessione senza uscire dalla conversazione. La
+# connessione resta di sola lettura: la scrittura vera passa dai sottoprocessi
+# sopra. Spenti finche' BIOMECH_INGEST_ENABLED non e' impostata.
+@mcp.tool()
+def list_sources():
+    """Sorgenti sotto le cartelle ammesse (BIOMECH_INGEST_ROOTS), con lo stato.
+
+    Tre stati, non due: 'convertita' non vuol dire 'nel database'.
+    da_convertire       nessun C3D canonico ancora
+    convertita_non_caricata   C3D presente, nessuna riga in sessions
+    nel_database         C3D presente e caricata
+
+    Non scrive nulla; usa `ingest_session` per far avanzare una sorgente.
+    """
+    spec = {}
+    if not INGEST_ENABLED:
+        return _ingest_disabilitato(spec)
+    disponibili = _sorgenti_disponibili()
+    in_db = _chiavi_in_db(disponibili.keys())
+    righe = []
+    for nome, percorso in sorted(disponibili.items()):
+        c3d = DATA_ROOT / f"{nome}.c3d"
+        if nome in in_db:
+            stato = "nel_database"
+        elif c3d.is_file():
+            stato = "convertita_non_caricata"
+        else:
+            stato = "da_convertire"
+        righe.append({"source": nome, "percorso": percorso, "stato": stato})
+    return {"input_spec": spec,
+            "selected_data": {"radici": [str(r) for r in _radici_ingest()]},
+            "result": {"sorgenti": righe},
+            "explain": "readers.discover sulle radici ammesse; 'nel_database' letto "
+                       "da sessions, 'convertita_non_caricata' dal C3D gia' presente "
+                       "in DatiElaborati.",
+            "warnings": [] if righe else ["nessuna_sorgente"]}
+
+
+@mcp.tool()
+def ingest_session(source: str, sport: str | None = None,
+                   subject_id: str | None = None, only_convert: bool = False):
+    """Converte e, salvo diversa richiesta, carica una sessione dalla chat.
+
+    source e' un nome elencato da list_sources(), o un percorso sotto una
+    radice ammessa (BIOMECH_INGEST_ROOTS). Se dopo la conversione la sessione
+    resta senza gesto -- perche' la sorgente non lo dichiara e non ne e' stato
+    passato uno -- lo strumento si ferma li' invece di indovinare: risponde
+    con i gesti ammessi, ed e' cosi' che chiede di essere richiamato con
+    sport=. Il C3D gia' prodotto resta a disposizione: la conversione e'
+    deterministica sulla stessa sorgente, quindi il richiamo non la rifa'
+    inutilmente.
+
+    subject_id non viene verificato: biomech_mcp non vede l'anagrafica dei
+    soggetti (solo la UI locale, con ADMIN_DSN, ce l'ha), quindi un
+    identificativo inventato viene accettato in silenzio e la risposta lo
+    dichiara.
+    """
+    spec = {"source": source, "sport": sport, "subject_id": subject_id,
+            "only_convert": only_convert}
+    if not INGEST_ENABLED:
+        return _ingest_disabilitato(spec)
+
+    sorgente, errore = _risolvi_sorgente(source)
+    if errore:
+        return {"input_spec": spec, "selected_data": {"sorgente": source,
+                                                       "esito": "fallito"},
+                "result": None, "errore": None, "explain": errore,
+                "warnings": ["sorgente_non_valida"]}
+
+    nome = os.path.splitext(os.path.basename(sorgente.rstrip("/\\")))[0]
+
+    ok, _, err = _passo_conversione(sorgente, sport)
+    _registra(nome, sport, subject_id, "conversione", ok, err)
+    if not ok:
+        return _fallimento(spec, nome, "conversione", err,
+                           f"La conversione e' fallita: {err}")
+
+    c3d = DATA_ROOT / f"{nome}.c3d"
+    if _sport_del_canonico(c3d) is None and sport is None and not only_convert:
+        msg = (f"Conversione riuscita ma nessun gesto e' stato riconosciuto: "
+               f"la sorgente non lo dichiara e non ne hai passato uno. Il C3D "
+               f"resta in {c3d} e verra' riusato, non riconvertito, al "
+               f"prossimo tentativo.")
+        _registra(nome, sport, subject_id, "sport_mancante", False,
+                  "sport non dichiarato")
+        return {"input_spec": spec,
+                "selected_data": {"sorgente": nome, "passo_fallito": "sport",
+                                  "esito": "fallito", "c3d": str(c3d)},
+                "result": None, "errore": None, "explain": msg,
+                "azione_suggerita": (f"Richiama con sport fra "
+                                     f"{', '.join(bodyparts.SPORTS)}."),
+                "warnings": ["sport_mancante"]}
+
+    if only_convert:
+        _registra(nome, sport, subject_id, "solo_conversione", True, None)
+        return {"input_spec": spec,
+                "selected_data": {"sorgente": nome, "esito": "riuscito",
+                                  "c3d": str(c3d)},
+                "result": {"convertita": True, "caricata": False},
+                "explain": "Conversione eseguita, caricamento saltato "
+                           "(only_convert=True).",
+                "warnings": []}
+
+    ok, _, err = _passo_caricamento(c3d, subject_id)
+    _registra(nome, sport, subject_id, "caricamento", ok, err)
+    if not ok:
+        return _fallimento(spec, nome, "caricamento", err,
+                           f"Il caricamento e' fallito: {err}")
+
+    ricevuta = _ricevuta_sessione(nome)
+    if ricevuta is None:
+        # Il sottoprocesso e' uscito senza errori ma la sessione non e' visibile
+        # da qui: non ci si fida del codice di uscita, si verifica.
+        msg = ("Il caricamento e' terminato senza errori ma la sessione non "
+               "risulta in sessions: non dichiaro riuscito cio' che non vedo.")
+        _registra(nome, sport, subject_id, "verifica", False, msg)
+        return {"input_spec": spec,
+                "selected_data": {"sorgente": nome, "passo_fallito": "verifica",
+                                  "esito": "fallito"},
+                "result": None, "errore": None, "explain": msg,
+                "azione_suggerita": "Riprova; se persiste, guarda DatiElaborati/ingest.log.",
+                "warnings": ["verifica_fallita"]}
+
+    avvisi = ["sessione_senza_soggetto"] if not subject_id else ["subject_id_non_verificato"]
+    return {"input_spec": spec,
+            "selected_data": {"sorgente": nome, "esito": "riuscito",
+                              "c3d": str(c3d), **ricevuta},
+            "result": {"convertita": True, "caricata": True},
+            "explain": "Convertita e caricata; la sessione e' verificata in "
+                       "sessions (n_frames, ingested_at) prima di dichiarare "
+                       "riuscito. biomech_mcp non vede l'anagrafica: subject_id "
+                       "non e' verificato contro subjects_identity.",
+            "warnings": avvisi}
 
 
 if __name__ == "__main__":
