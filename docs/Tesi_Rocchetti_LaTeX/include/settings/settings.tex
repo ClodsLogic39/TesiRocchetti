@@ -112,4 +112,20 @@
   \vspace{13cm}
   \begin{quote} \begin{flushright}}
 {\end{flushright} \end{quote}}
+% ------------------------------------ Segnaposto immagini -------------------------------------- %
+% Riquadro provvisorio al posto di una figura non ancora inserita. Quando
+% l'immagine c'e', si sostituisce la riga \segnaposto{...} con
+% \includegraphics[width=0.9\textwidth]{figures/...} lasciando intatti
+% \caption e \label, cosi' i riferimenti nel testo continuano a funzionare.
+\newcommand{\segnaposto}[2][0.28\textheight]{%
+  \setlength{\fboxsep}{0pt}%
+  \fbox{\begin{minipage}[c][#1][c]{0.9\textwidth}%
+    \centering\small\itshape\color{lstgray}[#2]%
+  \end{minipage}}%
+}
+% Nome dei listati in italiano.
+\renewcommand{\lstlistingname}{Listato}
+\renewcommand{\lstlistlistingname}{Elenco dei listati}
+% Testo ancora da completare, visibile nel PDF in grigio corsivo.
+\newcommand{\dacompletare}[1]{{\itshape\color{lstgray}[Da completare: #1]}}
 \usepackage{calligra}

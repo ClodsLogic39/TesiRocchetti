@@ -4,6 +4,15 @@
 \addvspace {10\p@ }
 \addvspace {10\p@ }
 \addvspace {10\p@ }
+\contentsline {table}{\numberline {4.1}{\ignorespaces Alert del campione per superficie, letti con \texttt {list\_alerts}. La colonna ``con alert'' conta le sessioni con almeno una segnalazione. Nessuna sessione del campione ha alert \texttt {data\_quality}.}}{24}{table.caption.24}%
+\contentsline {table}{\numberline {4.2}{\ignorespaces Alert del campione per soggetto, diciotto sessioni ciascuno. Le colonne per superficie riportano gli alert per sessione; l'ultima lo scostamento più frequente, con il numero di occorrenze. L'iperestensione del ginocchio conta le sole righe rispetto all'intervallo del cammino.}}{25}{table.caption.26}%
+\contentsline {table}{\numberline {4.3}{\ignorespaces Le metriche della sessione \texttt {Ref01\_sss\_le\_shoes04}, uguali nei due caricamenti, confrontate con gli intervalli del cammino e della corsa. Valori in gradi; in grassetto i tre valori segnalati quando la sessione è caricata come corsa.}}{26}{table.caption.27}%
+\contentsline {table}{\numberline {4.4}{\ignorespaces Le cinque proprietà nei tre casi d'uso.}}{31}{table.caption.32}%
+\addvspace {10\p@ }
+\contentsline {table}{\numberline {5.1}{\ignorespaces Posizionamento sui tre assi. Il simbolo $\bullet $ indica copertura piena, $\circ $ copertura parziale, ``---'' assenza o non applicabilità.}}{34}{table.caption.33}%
+\addvspace {10\p@ }
+\contentsline {table}{\numberline {6.1}{\ignorespaces Contromisure per un'esposizione in rete associate alla minaccia che affrontano.}}{36}{table.caption.37}%
+\contentsline {table}{\numberline {6.2}{\ignorespaces Gli scostamenti su una singola prova su rampa al 10\%. La stessa prova in piano dello stesso soggetto non ne produce nessuno. Valori in gradi.}}{37}{table.caption.39}%
 \addvspace {10\p@ }
 \addvspace {10\p@ }
-\addvspace {10\p@ }
+\contentsline {table}{\numberline {A.1}{\ignorespaces Validazione della convenzione angolare contro un modello clinico calibrato, su 118 prove. Escursioni e residui in gradi; il residuo è lo scarto quadratico medio sulla serie temporale. Il caso peggiore è in grassetto.}}{44}{table.caption.53}%

@@ -25,16 +25,38 @@ Trainingpeaks mcp (connettore non ufficiale).
 {American Academy of Orthopaedic Surgeons}.
 \newblock Riferimenti di goniometria clinica per le escursioni articolari normali.
 
+\bibitem{bazarevsky2020blazepose}
+V.~Bazarevsky, I.~Grishchenko, K.~Raveendran, T.~Zhu, F.~Zhang, and M.~Grundmann.
+\newblock {BlazePose}: On-device real-time body pose tracking.
+\newblock arXiv:2006.10204. CVPR Workshop on Computer Vision for Augmented and Virtual Reality, 2020.
+
+\bibitem{chung2010trunk}
+C.~Chung, M.~Park, S.~Lee, S.~Kong, and K.~Lee.
+\newblock Kinematic aspects of trunk motion and gender effect in normal adults.
+\newblock {\em Journal of NeuroEngineering and Rehabilitation}, 7:9, 2010.
+\newblock Fonte degli intervalli sull'escursione frontale e trasversa del tronco rispetto al bacino nel cammino.
+
 \bibitem{fukuchi2019}
-C.~A. Fukuchi et~al.
-\newblock A public dataset of overground and treadmill walking kinematics and kinetics in healthy individuals.
-\newblock {\em Scientific Reports}, 2019.
-\newblock Confronto cammino-corsa citato nel testo.
+C.~A. Fukuchi, R.~K. Fukuchi, and M.~Duarte.
+\newblock Comparison of lower extremity joint mechanics between healthy active young and middle age people in walking and running gait.
+\newblock {\em Scientific Reports}, 9, 2019.
+\newblock Fonte degli intervalli di riferimento di anca, ginocchio, caviglia e tronco per cammino e corsa.
 
 \bibitem{groodsuntay1983}
 E.~S. Grood and W.~J. Suntay.
 \newblock A joint coordinate system for the clinical description of three-dimensional motions: application to the knee.
 \newblock {\em Journal of Biomechanical Engineering}, 1983.
+
+\bibitem{liu2021knee}
+R.~Liu, D.~Qian, Y.~Chen, J.~Zou, S.~Zheng, B.~Bai, Z.~Lin, Y.~Zhang, and Y.~Chen.
+\newblock Investigation of normal knees kinematics in walking and running at different speeds using a portable motion analysis system.
+\newblock {\em Sports Biomechanics}, 23(4):417--430, 2024.
+\newblock Pubblicato online nel 2021. Fonte degli intervalli sull'escursione e sulla flessione massima del ginocchio in cammino e corsa.
+
+\bibitem{lugaresi2019mediapipe}
+C.~Lugaresi, J.~Tang, H.~Nash, C.~McClanahan, E.~Uboweja, M.~Hays, F.~Zhang, C.-L. Chang, M.~G. Yong, J.~Lee, W.-T. Chang, W.~Hua, M.~Georg, and M.~Grundmann.
+\newblock {MediaPipe}: A framework for building perception pipelines.
+\newblock arXiv:1906.08172, 2019.
 
 \bibitem{perryburnfield}
 J.~Perry and J.~M. Burnfield.
@@ -54,8 +76,8 @@ J.~Perry and J.~M. Burnfield.
 \bibitem{vielemeyer2026}
 J.~Vielemeyer, L.~Tronicke, L.~Schreff, R.~Abel, K.~Lechler, and R.~M{\"u}ller.
 \newblock A full-body motion capture gait dataset of healthy young adults walking ramps up and down.
-\newblock {\em Scientific Data}, 2026.
-\newblock Codice: \url{https://github.com/jvielemeyer/human-ramp-walking}. Dataset di laboratorio (marker Plug-in Gait full body e uscite di modello nello stesso file) su cui poggia la riconfigurazione della lettura e della processazione dei dati grezzi e la validazione della convenzione angolare.
+\newblock {\em Scientific Data}, 13(1):18, 2026.
+\newblock Dati: \url{https://doi.org/10.6084/m9.figshare.29300888.v1}; codice: \url{https://github.com/jvielemeyer/human-ramp-walking}. Dataset di laboratorio (marker Plug-in Gait full body e uscite di modello nello stesso file) su cui poggia la riconfigurazione della lettura e della processazione dei dati grezzi e la validazione della convenzione angolare.
 
 \bibitem{wu2002isb}
 G.~Wu et~al.

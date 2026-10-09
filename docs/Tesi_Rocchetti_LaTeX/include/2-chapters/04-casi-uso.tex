@@ -1,2 +1,470 @@
-\chapter{Tre casi d'uso reali}
+\chapter{Casi d'uso e dimostrazioni}
 \label{chap:casi-uso}
+
+Questo capitolo mostra che cosa il sistema permette di fare ed è diviso in due
+blocchi. Il primo raccoglie tre dimostrazioni delle funzionalità eseguite con un
+solo agente, mentre il secondo raccoglie tre casi d'uso eseguiti con due agenti
+diversi, così da osservare come presentano lo stesso materiale
+restituito dagli strumenti.
+
+\section{Il materiale}
+\label{sec:ch4:materiale}
+
+Le prove sono state eseguite sull'archivio caricato che contiene 653 sessioni
+provenienti da tre gruppi di sorgenti diversi.
+
+Il gruppo principale viene dal dataset di laboratorio pubblicato da Vielemeyer e
+colleghi\cite{vielemeyer2026}, cioè file C3D a marker con le uscite di un modello
+clinico e gli eventi di appoggio che riprendono adulti sani mentre camminano su
+una rampa strumentata. L'archivio contiene 645 prove di cammino di undici
+soggetti, indicati con il codice del dataset che va da \texttt{Ref01} a
+\texttt{Ref13} con l'assenza di \texttt{Ref03} e \texttt{Ref04}, nelle sei condizioni
+previste. Le prove in piano nei due sensi di marcia sono 132, quelle su rampa al
+7.5\% in salita ed in discesa sono 252 e quelle su rampa al 10\% in salita ed in
+discesa sono 261. Per otto soggetti le prove sono sessanta, dodici in piano e
+ventiquattro per ciascuna rampa. Le
+118 prove dei primi due soggetti sono quelle usate per la validazione
+dell'Appendice\ref{app:validazione}.
+Il dataset contiene anche prove statiche, in cui il soggetto resta fermo in
+posizione eretta come riferimento di posa. Queste prove sono state escluse
+dall'archivio, perché non descrivono un gesto e, giudicate come camminate,
+producono scostamenti fittizi dato che le loro escursioni sono vicine a zero.
+
+Il secondo gruppo è formato da cinque riprese di corsa su tapis roulant fatte con
+un telefono, a 30 fotogrammi al secondo e con una durata compresa fra 12 e 65
+secondi. I punti dai video sono stati estratti con
+MediaPipe\cite{lugaresi2019mediapipe}, che per la posa usa il modello
+BlazePose\cite{bazarevsky2020blazepose}, poi rinominati e salvati in file
+JSON e CSV, il sistema legge direttamente questi file già prodotti.
+L'angolazione è dichiarata nei metadati, tre riprese sono frontali e due laterali
+dal lato sinistro. In quattro riprese su cinque l'arto inferiore è visibile solo
+in una piccola parte dei fotogrammi ed i cicli si ricavano dal ripiego sulla
+spalla, mentre nella quinta nessun segnale risulta ciclico e la prova resta un
+unico segmento.
+
+Completano l'archivio i tre file di esempio di C3D.org\cite{c3dorg}, che sono
+stati usati per collaudare il riconoscimento delle etichette.
+
+\section{Il disegno delle prove}
+\label{sec:ch4:disegno}
+
+Le prove sono state eseguite sull'archivio appena descritto con
+due agenti, Claude nell'applicazione desktop con il modello Opus 5.5 e Codex con
+il modello 6 Luna, entrambi con il livello di ragionamento alto. Ogni prova si
+svolge in una conversazione nuova con la memoria dell'agente disattivata, i
+messaggi vengono inviati uno alla volta e senza suggerimenti, quindi se l'agente
+chiede qualcosa riceve solo l'informazione richiesta. Prima del caso d'uso in cui la sorgente 
+va caricata, la sessione corrispondente viene cancellata dal database così che ogni agente la
+reinserisca da capo. Le trascrizioni complete delle conversazioni sono conservate.
+
+\section{Dimostrazioni delle funzionalità}
+\label{sec:ch4:dimostrazioni}
+
+\subsection{Gli scostamenti più frequenti, in piano e su rampa}
+\label{subsec:ch4:demo-statistica}
+
+La prima dimostrazione è una statistica ricavata usando il sistema attraverso un
+agente. In una conversazione con Claude, nell'applicazione desktop collegata al
+server MCP, si chiede quanti alert ci siano nelle sessioni di cammino divisi per
+superficie, cioè in piano, su rampa al 7.5\% e su rampa al 10\%, quali siano i
+più ricorrenti per giunto, piano anatomico e metrica, ed infine quale scostamento
+ricorra più spesso per ciascun soggetto.
+
+Il server non ha uno strumento che aggreghi gli alert di più sessioni, perché
+\texttt{list\_alerts} risponde per una sessione alla volta, quindi l'agente
+lavora su un campione. Per ciascuno degli undici soggetti e per ciascuna
+superficie prende sei prove, le prime tre per numero in salita e le prime tre in
+discesa. Il campione conta 198 sessioni, l'agente chiama
+\texttt{list\_alerts} 198 volte, una per sessione, e somma le risposte. Gli stessi
+conteggi, ricalcolati dai file C3D con il codice del caricamento, coincidono in
+tutte le 198 sessioni.
+
+Un alert è una riga della tabella \texttt{alerts}, cioè una metrica di un giunto
+che cade fuori da un intervallo, e lo stesso valore può superare due intervalli
+diversi. Un ginocchio che si iperestende oltre $-10$ gradi, ad esempio, esce sia
+dall'intervallo del cammino, che parte da $-8$, sia dal limite anatomico, e
+produce quindi un \texttt{warning} ed un \texttt{critical}. Nel campione questo
+succede 68 volte.
+
+\begin{table}[htbp]
+\centering
+\caption{Alert del campione per superficie, letti con \texttt{list\_alerts}. La
+colonna ``con alert'' conta le sessioni con almeno una segnalazione. Nessuna
+sessione del campione ha alert \texttt{data\_quality}.}
+\label{tab:ch4:alert-superficie}
+\small
+\begin{tabular}{lrrrrrrr}
+\toprule
+\textbf{Superficie} & \textbf{Sessioni} & \textbf{Con alert} & \textbf{Alert} &
+  \textbf{Per sessione} & \texttt{critical} & \texttt{warning} & \texttt{info} \\
+\midrule
+piano       &  66 &  38 & 110 & 1.67 & 19 & 69 & 22 \\
+rampa 7.5\% &  66 &  62 & 293 & 4.44 & 30 & 234 & 29 \\
+rampa 10\%  &  66 &  66 & 397 & 6.02 & 20 & 338 & 39 \\
+\midrule
+totale      & 198 & 166 & 800 & 4.04 & 69 & 641 & 90 \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+Come mostra la Tabella\ref{tab:ch4:alert-superficie}, il numero di alert cresce
+con la pendenza, passando da 1.67 per sessione in piano a 4.44 sulla rampa al
+7.5\% ed a 6.02 su quella al 10\%. Sulle 645 sessioni di cammino dell'archivio gli
+stessi valori sono 1.64, 4.62 e 6.21, quindi il campione rappresenta bene
+l'insieme. In piano poco più di metà delle sessioni ha almeno un alert, mentre
+sulla rampa al 10\% le hanno tutte. La salita inoltre pesa più della discesa, con
+6.07 alert per sessione contro 3.40 al 7.5\% e 7.27 contro 4.76 al 10\%.
+
+\begin{figure}[htbp]
+\centering
+\includegraphics[width=\textwidth]{figures/cap4/cap4_statistica.pdf}
+\caption{A sinistra gli alert per sessione del campione nelle tre superfici,
+divisi per gravità. A destra i sette tipi di scostamento più frequenti, con la
+frequenza per sessione in ciascuna superficie. Le due voci sull'iperestensione
+del ginocchio vengono dallo stesso valore confrontato con due riferimenti.}
+\label{fig:ch4:statistica}
+\end{figure}
+
+Con la pendenza cambia anche il tipo di scostamento, come si vede nella
+Figura\ref{fig:ch4:statistica}. In piano domina l'iperestensione del ginocchio,
+con 67 alert su 110, cioè il 61\%, fra intervallo del cammino e limite anatomico.
+Sulle rampe invece circa metà degli alert riguarda l'anca sul piano sagittale, con
+tre metriche, la flessione massima oltre i 40 gradi attesi, l'escursione fuori
+dall'intervallo da 30 a 60 gradi ed un'estensione che non arriva ai $-5$ gradi
+attesi a fine appoggio. Le prime due prevalgono in salita, quando l'anca flette di
+più per alzare il piede, mentre la terza e l'escursione ampia del ginocchio
+prevalgono in discesa. Gli intervalli descrivono il cammino in piano, quindi sulle
+rampe gli alert registrano in buona parte la pendenza. Questo limite è discusso nel
+Paragrafo\ref{sec:ch6:sport}.
+
+\begin{table}[htbp]
+\centering
+\caption{Alert del campione per soggetto, diciotto sessioni ciascuno. Le colonne
+per superficie riportano gli alert per sessione; l'ultima lo scostamento più
+frequente, con il numero di occorrenze. L'iperestensione del ginocchio conta le
+sole righe rispetto all'intervallo del cammino.}
+\label{tab:ch4:alert-soggetti}
+\small
+\begin{tabular}{lrrrrl}
+\toprule
+\textbf{Soggetto} & \textbf{Alert} & \textbf{Piano} & \textbf{7.5\%} &
+  \textbf{10\%} & \textbf{Scostamento più frequente} \\
+\midrule
+\texttt{Ref01} &  50 & 0.00 & 2.67 &  5.67 & anca, escursione sagittale (15) \\
+\texttt{Ref02} &  85 & 3.17 & 6.17 &  4.83 & ginocchio, iperestensione (32) \\
+\texttt{Ref05} & 112 & 2.83 & 7.83 &  8.00 & ginocchio, iperestensione (17) \\
+\texttt{Ref06} &  37 & 0.33 & 1.50 &  4.33 & anca, flessione massima ed escursione (13) \\
+\texttt{Ref07} &  61 & 1.67 & 2.83 &  5.67 & anca, escursione sagittale (15) \\
+\texttt{Ref08} &  48 & 0.00 & 3.17 &  4.83 & anca, flessione massima (12) \\
+\texttt{Ref09} &  49 & 0.00 & 3.50 &  4.67 & anca, estensione insufficiente (21) \\
+\texttt{Ref10} & 111 & 3.83 & 5.83 &  8.83 & ginocchio, iperestensione (31) \\
+\texttt{Ref11} &  44 & 0.00 & 2.83 &  4.50 & anca, escursione sagittale (19) \\
+\texttt{Ref12} &  65 & 1.50 & 4.50 &  4.83 & anca, estensione insufficiente (22) \\
+\texttt{Ref13} & 138 & 5.00 & 8.00 & 10.00 & anca, escursione frontale (34) \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+Il quadro per soggetto, riportato nella Tabella\ref{tab:ch4:alert-soggetti}, è
+invece vario. Quattro soggetti, \texttt{Ref01}, \texttt{Ref08}, \texttt{Ref09} e
+\texttt{Ref11}, non hanno nessun alert in piano, quindi per loro ogni
+segnalazione viene dalle rampe. \texttt{Ref02}, \texttt{Ref10} e \texttt{Ref13}
+raccolgono 91 delle 121 righe sull'iperestensione del ginocchio, che per i primi
+due è anche lo scostamento più frequente, e poiché compare su tutte e tre le
+superfici dipende più dal soggetto che dalla pendenza. \texttt{Ref13} ha il numero
+più alto di alert, 7.67 per sessione, ed il più frequente è l'escursione frontale
+dell'anca oltre i 20 gradi, che la nota del riferimento associa alla caduta del
+bacino, ha gravità \texttt{info} e compare in 34 delle sue 138 righe. Per
+\texttt{Ref01}, \texttt{Ref06} e \texttt{Ref11} infine una parte degli alert
+sull'escursione sagittale dell'anca, rispettivamente 8 su 15, 7 su 13 e 7 su 19,
+segnala un'escursione sotto i 30 gradi, cioè nella direzione opposta rispetto agli
+altri soggetti.
+
+\subsection{La stessa sessione come camminata e come corsa}
+\label{subsec:ch4:demo-gesto}
+
+La seconda dimostrazione mostra come lo sport dichiarato determini il giudizio.
+La prova di laboratorio in piano \texttt{Ref01\_sss\_le\_shoes04} non dichiara il
+gesto, quindi viene prima caricata come camminata ed interrogata con
+\texttt{describe\_session}, \texttt{metric} e \texttt{list\_alerts}, poi viene
+cancellata e ricaricata come corsa e le stesse domande vengono ripetute. La
+cancellazione è necessaria perché la stessa sorgente produce la stessa chiave, e
+le due versioni non possono stare insieme nell'archivio. Anche questa prova è
+stata eseguita con Claude attraverso il server MCP.
+
+Le risposte su contenuto e valori sono identiche nei due caricamenti. La sessione
+ha 330 fotogrammi a 200 Hz, tredici giunti sui tre piani tutti misurati e due
+cicli ricavati dagli eventi della sorgente, e le metriche restituite da
+\texttt{metric} coincidono al decimale, come mostra la
+Tabella\ref{tab:ch4:gesto}. Il giudizio invece cambia, perché come camminata la sessione
+non ha nessun alert ed ogni valore cade dentro l'intervallo del cammino, mentre
+come corsa ne ha tre, tutti \texttt{warning}. La flessione massima del ginocchio
+resta sotto i 70 gradi attesi nella corsa su entrambi i lati, a 66.7 e 60.9 gradi,
+e l'escursione sagittale dell'anca sinistra si ferma a 39.9 gradi contro un minimo
+di 40.
+
+\begin{table}[htbp]
+\centering
+\caption{Le metriche della sessione \texttt{Ref01\_sss\_le\_shoes04}, uguali nei
+due caricamenti, confrontate con gli intervalli del cammino e della corsa. Valori
+in gradi; in grassetto i tre valori segnalati quando la sessione è caricata come
+corsa.}
+\label{tab:ch4:gesto}
+\small
+\begin{tabular}{llrrcc}
+\toprule
+\textbf{Giunto} & \textbf{Metrica} & \textbf{Sx} & \textbf{Dx} &
+  \textbf{Cammino} & \textbf{Corsa} \\
+\midrule
+anca      & flessione massima    & 27.0  & 28.2  & 20 -- 40     & 25 -- 55 \\
+anca      & estensione massima   & $-12.9$ & $-14.2$ & $-25$ -- $-5$ & $-30$ -- $-5$ \\
+anca      & escursione sagittale & \textbf{39.9} & 42.3 & 30 -- 60 & 40 -- 80 \\
+anca      & escursione frontale  & 8.7   & 9.8   & 5 -- 20      & 5 -- 25 \\
+ginocchio & flessione massima    & \textbf{66.7} & \textbf{60.9} & 50 -- 75 & 70 -- 120 \\
+ginocchio & estensione massima   & $-0.9$ & $-2.0$ & $-8$ -- 12   & $-5$ -- 25 \\
+ginocchio & escursione sagittale & 67.5  & 62.9  & 50 -- 75     & 60 -- 100 \\
+caviglia  & dorsiflessione massima & 14.9 & 13.4 & 5 -- 20     & 10 -- 35 \\
+caviglia  & flessione plantare massima & $-15.4$ & $-22.4$ & $-35$ -- $-10$ & $-45$ -- $-15$ \\
+caviglia  & escursione sagittale & 30.3  & 35.8  & 20 -- 45     & 30 -- 65 \\
+tronco    & inclinazione in avanti & \multicolumn{2}{c}{5.9} & $-5$ -- 15 & 0 -- 20 \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+La prova resta comunque una camminata, il gesto dichiarato al caricamento cambia
+gli intervalli applicati e con loro gli avvisi. I tre scostamenti descrivono
+quindi una camminata giudicata con il metro della corsa, inoltre due valori
+della caviglia sinistra restano dentro l'intervallo della corsa per pochi decimi
+di grado, $-15.4$ contro $-15$ e 30.3 contro 30.
+
+\subsection{La visualizzazione degli scostamenti}
+\label{subsec:ch4:demo-rendering}
+
+La terza dimostrazione apre nel visualizzatore una sessione con alert e mostra
+due degli scostamenti presenti, uno ampio, riconoscibile guardando il manichino,
+ed uno di pochi gradi, che ad occhio non si percepisce ma che il sistema rileva e
+colloca nei fotogrammi in cui si produce. La sessione è
+\texttt{Ref02\_ramp10\_shoes35}, una salita al 10\% vista dal fianco destro. Al
+fotogramma 137 l'anca destra flette 54.9 gradi contro un massimo atteso di 40 per
+il cammino, cioè quindici gradi in più, ben visibili nella posa. Al fotogramma 13
+invece il ginocchio destro si iperestende fino a $-10.5$ gradi, mezzo grado oltre
+il limite anatomico di $-10$, una differenza che nessun osservatore distinguerebbe
+ad occhio nudo e che il sistema segnala con la gravità massima. La flessione ampia
+dell'anca è dovuta alla salita, perché gli intervalli descrivono il cammino in
+piano. I due fotogrammi sono riportati nella Figura\ref{fig:ch4:rendering}.
+
+\begin{figure}[H]
+\centering
+\subfloat[Fotogramma 137: anca destra, 14.9 gradi oltre l'atteso (warning).]{\includegraphics[height=7.5cm]{figures/cap4/cap4_demo3_anca_ritaglio.png}}\hspace{1.5cm}
+\subfloat[Fotogramma 13: ginocchio destro, 0.5 gradi oltre il limite anatomico (critical).]{\includegraphics[height=7.5cm]{figures/cap4/cap4_demo3_ginocchio_ritaglio.png}}
+\caption{Due scostamenti della sessione \texttt{Ref02\_ramp10\_shoes35}, vista dal
+fianco destro. Il primo si vede a occhio, il secondo no; il colore più acceso del
+ginocchio indica la gravità maggiore, che dipende dal tipo di riferimento superato
+e non dall'ampiezza dello scostamento.}
+\label{fig:ch4:rendering}
+\end{figure}
+
+\section{Casi d'uso con due agenti}
+\label{sec:ch4:casi}
+
+\subsection{Le proprietà osservate}
+\label{subsec:ch4:proprieta}
+
+Ogni caso viene eseguito con Claude e con Codex usando gli stessi messaggi e le
+risposte vengono valutate su cinque proprietà.
+
+\begin{enumerate}[label=\textbf{P\arabic*.},leftmargin=*]
+  \item Il valore, cioè se l'agente riporta il numero restituito senza alterarlo.
+  \item La qualità del dato, cioè se riporta copertura e provenienza del segnale.
+  \item Gli avvisi, cioè se li riporta invece di lasciarli in sordina.
+  \item Il rifiuto, cioè se, quando lo strumento non risponde, riferisce il motivo
+    invece di stimare un valore.
+  \item L'interpretazione non richiesta, cioè se si astiene da conclusioni che il
+    dato non sostiene.
+\end{enumerate}
+
+\subsection{Caso 1: dalla sorgente grezza alla risposta}
+\label{subsec:ch4:caso1}
+
+Il primo caso mostra il percorso completo all'interno di una sola conversazione 
+sulla prova di laboratorio in piano \texttt{Ref02\_le\_sss\_shoes15} che non
+dichiara il gesto. Il primo messaggio chiede quali sorgenti siano disponibili per
+il caricamento, il secondo chiede di convertire e caricare la sorgente senza
+indicare lo sport. Se l'agente chiama lo strumento senza dichiararlo il sistema
+rifiuta, ed un terzo messaggio, ``è una camminata'', è pronto per quel caso.
+Seguono tre domande: che cosa contiene la sessione, se ci siano scostamenti dai
+valori di riferimento ed infine la richiesta di mostrarla nel visualizzatore con
+gli alert attivi. Prima di iniziare la conversazione con un nuovo agente, la sessione viene cancellata.
+
+In nessuno dei due casi è scattato il rifiuto di inserimento della sessione per la mancanza dello sport dichiarato. Entrambi gli agenti hanno chiamato
+\texttt{ingest\_session} con \texttt{sport=walking} già al primo tentativo,
+deducendo il gesto dal contesto. Claude lo ha dichiarato scrivendo ``ho impostato
+io il gesto su walking, come per tutte le altre prove di cammino'', mentre Codex
+ha scritto solo che la sessione era stata caricata come camminata, quindi il
+terzo messaggio non è servito. Il controllo del server intercetta le chiamate in
+cui il gesto manca, e quando è l'agente a sceglierlo la scelta passa senza
+conferma dell'utente. Questo limite è discusso nel
+Paragrafo\ref{sec:ch6:difetti}.
+
+Sull'elenco delle sorgenti invece i due agenti divergono. Le sorgenti convertite
+e non caricate sono quaranta, cioè la prova di cammino e le trentanove statiche. Claude le conta correttamente
+e nota che due file anomali coprono proprio le statiche che mancano a
+\texttt{Ref04} ed a \texttt{Ref08}, deducendone la natura. Codex invece classifica
+gli stessi due file come prove dinamiche, giudicando dal nome anche se il percorso
+restituito dallo strumento li colloca nella cartella delle statiche, ed
+attribuisce a \texttt{Ref04} una statica in più.
+
+Sulle domande successive i due agenti riportano gli stessi dati, cioè 405
+fotogrammi, 39 segnali misurati su tredici giunti, due cicli ricavati dagli eventi
+della sorgente e quattro alert che corrispondono ad un solo scostamento
+bilaterale. Il ginocchio arriva a $-12.3$ gradi a sinistra ed a $-11.1$ a destra,
+oltre il limite anatomico ed oltre l'intervallo del cammino, con dati misurati e
+copertura piena. Codex chiude ricordando che si tratta di alert automatici e non
+di una diagnosi. Claude invece aggiunge ipotesi non richieste, sempre presentate
+come tali, come uno spostamento sistematico dello zero del ginocchio o la
+scarsità di due soli cicli, ed in un punto è impreciso, quando colloca il picco
+``durante il ciclo'' mentre il valore è calcolato sull'intera prova. Entrambi
+infine aprono il visualizzatore con gli alert attivi.
+
+\subsection{Caso 2: confronti fra sessioni e fra condizioni}
+\label{subsec:ch4:caso2}
+
+Il secondo caso è composto da tre domande. La prima chiede i cicli più simili al
+primo ciclo della sessione \texttt{Ref01\_sss\_le\_shoes04}, tramite
+\texttt{find\_similar\_cycles}. La seconda chiede di confrontare l'escursione
+sagittale dell'anca sinistra fra \texttt{Ref01\_sss\_le\_shoes04} e
+\texttt{Ref01\_sss\_ramp10\_shoes05}, cioè lo stesso soggetto in piano e su rampa
+al 10\%, tramite \texttt{compare\_sessions}. La terza chiede quanto sia
+simmetrica la forma delle curve fra lato destro e sinistro nella prima sessione,
+tramite \texttt{side\_shape\_symmetry}, ed in questo caso il punto da osservare è
+l'avviso sulla controfase.
+
+I valori sono identici nelle due conversazioni e coincidono con quelli del
+server. I cinque cicli più simili appartengono a prove in piano dello stesso
+soggetto, con distanze fra 0.0047 e 0.0071 su 646 sessioni confrontate.
+L'escursione dell'anca sinistra passa da 39.87 a 28.88 gradi, con una differenza
+di $-10.99$. Nella simmetria il ginocchio ha la forma più simile fra i due lati,
+con distanza 0.0046, mentre il gomito ha la meno simile, con 0.058 e 8.8 gradi di
+differenza di escursione. Entrambi gli agenti riportano l'avviso sulla controfase.
+
+Le due conversazioni si separano invece su ciò che viene aggiunto, come si vede
+nella Figura\ref{fig:ch4:caso2}. Codex risponde alla domanda e si ferma, però nel
+confronto dell'anca non indica la copertura. Claude invece allarga ogni risposta,
+mostra dieci vicini invece di cinque con la condizione dedotta dal percorso e ne
+trae che la forma distingue il soggetto prima della condizione. Affianca inoltre
+al confronto sull'intera prova quello sul solo ciclo sinistro, $-14.8$ gradi, e
+consiglia quale usare. Nella simmetria calcola un indice "$1-|S-D|/\mathrm{media}$"
+aritmeticamente corretto ma che non è restituito dal serve, ed osserva che con
+distanze così basse la controfase non pesa sulla lettura. Queste aggiunte sono
+coerenti con i dati, però vanno oltre ciò che il sistema garantisce.
+
+\begin{figure}[H]
+\vspace{14mm}
+\centering
+\subfloat[Codex.]{\includegraphics[width=0.85\textwidth]{figures/cap4/cap4_caso2_codex.png}}
+\end{figure}
+
+\begin{figure}[H]
+\ContinuedFloat
+\centering
+\subfloat[Claude.]{\includegraphics[width=0.78\textwidth]{figures/cap4/cap4_caso2_claude.png}}
+\caption{La stessa domanda sulla simmetria nelle due conversazioni, Codex su
+sfondo chiaro e Claude su sfondo scuro: valori identici, con un indice di
+simmetria calcolato da Claude e non restituito dal server.}
+\label{fig:ch4:caso2}
+\end{figure}
+
+\subsection{Caso 3: quando la risposta corretta è un rifiuto}
+\label{subsec:ch4:caso3}
+
+Il terzo caso usa la ripresa da telefono \texttt{running\_20260220\_121922}. La
+prima domanda chiede l'escursione sagittale del ginocchio destro, ed in questo
+caso \texttt{metric} deve rispondere che il segnale non esiste. La seconda chiede
+perché manchi e che cosa contenga la sessione, \texttt{describe\_session}
+mostra che il lato destro dell'arto inferiore non compare. La terza chiede quanto
+sia ripetibile il movimento dell'arto superiore, tramite
+\texttt{session\_repeatability} limitato alla parte superiore del corpo. Il punto
+da osservare è se qualche agente prova comunque a stimare un valore.
+
+Nessuno dei due agenti stima l'escursione del ginocchio destro, come mostra la
+Figura\ref{fig:ch4:caso3}. Entrambi riferiscono che il segnale non esiste ed alla
+seconda domanda descrivono diciassette segnali tutti derivati, l'assenza
+dell'intero arto inferiore destro, 82 cicli ricavati dalla flessione della spalla
+ed i due avvisi del server sul ripiego e sulla bassa copertura del segnale
+principale. Codex dichiara di non poter stabilire se il dato mancasse
+all'origine, Claude invece legge la copertura segnale per segnale e propone, come
+inferenza, una stima di posa da video con il lato destro nascosto alla camera, che
+è compatibile con il modo in cui le riprese sono state fatte e descritto nel
+Paragrafo\ref{sec:ch4:materiale}.
+
+Sulla ripetibilità i valori coincidono, con una distanza mediana fra 0.43 e 0.64
+per spalle e gomiti, 78 o 58 cicli ed una copertura minima dell'82\% sul lato
+sinistro. Codex la definisce limitata ed invita alla cautela per il lato sinistro.
+Claude invece interroga anche i cicli e conclude che con questi dati la
+ripetibilità non si può stimare, perché i cicli durano da 9 a 70 fotogrammi. Fra
+il fotogramma 1277 ed il 1499 non ce n'è nessuno ed il confronto mescola cicli
+segmentati sulle due spalle. Nella risposta precedente aveva già segnalato
+escursioni di 185 gradi per il tronco e di 212 per la spalla sinistra, che sono
+fisicamente impossibili. Queste tre osservazioni sono corrette ed indicano dei
+difetti del sistema, che sono raccolti nel Paragrafo\ref{sec:ch6:difetti}.
+
+\begin{figure}[H]
+\centering
+\subfloat[Codex.]{\includegraphics[width=0.68\textwidth]{figures/cap4/cap4_caso3_codex.png}}\\[2mm]
+\subfloat[Claude.]{\includegraphics[width=0.68\textwidth]{figures/cap4/cap4_caso3_claude.png}}
+\caption{La richiesta di un segnale che non esiste, Codex su sfondo chiaro e
+Claude su sfondo scuro: entrambi riportano l'assenza e nessuno stima un valore.}
+\label{fig:ch4:caso3}
+\end{figure}
+
+\section{Che cosa mostrano le prove}
+\label{sec:ch4:sintesi}
+
+Le dimostrazioni mostrano che cosa il sistema offre a chi lo interroga, cioè una
+statistica costruita sessione per sessione con 198 chiamate e coerente con
+l'intero archivio, lo stesso dato giudicato in modo diverso a seconda del gesto
+dichiarato e gli scostamenti collocati nei fotogrammi anche quando ad occhio non
+si vedono.
+
+\begin{table}[htbp]
+\centering
+\caption{Le cinque proprietà nei tre casi d'uso.}
+\label{tab:ch4:proprieta}
+\small
+\begin{tabular}{lp{0.40\textwidth}p{0.40\textwidth}}
+\toprule
+ & \textbf{Claude} & \textbf{Codex} \\
+\midrule
+P1 & valori esatti in tutti i casi & valori esatti; nel caso 1 errori nel conteggio
+  e nella classificazione delle sorgenti \\
+P2 & copertura e provenienza sempre riportate & riportate, con un'omissione nel
+  caso 2 \\
+P3 & avvisi riportati e discussi & avvisi riportati, nel caso 3 in forma generica \\
+P4 & nessuna stima del segnale mancante; rifiuto sul gesto non osservato & nessuna
+  stima del segnale mancante; rifiuto sul gesto non osservato \\
+P5 & interpretazioni frequenti, dichiarate come ipotesi; due affermazioni non
+  verificate & quasi assenti \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+Nei casi d'uso i due agenti coincidono sui numeri, come riassume la
+Tabella\ref{tab:ch4:proprieta}. Nessuno altera un valore restituito dagli
+strumenti, entrambi riportano gli avvisi e nessuno stima un segnale che non
+esiste. L'unico errore di valore riguarda l'elenco delle sorgenti, dove Codex
+giudica un file dal nome invece che dal percorso. Il contratto di risposta regge
+quindi il passaggio fra due modelli diversi, il dato che arriva all'utente è
+esattamente quello calcolato dal server.
+
+Gli agenti divergono invece su ciò che aggiungono, Codex riferisce mentre Claude
+interpreta, propone ipotesi e passi successivi ed in due occasioni afferma più di
+quanto il dato sostenga. Queste stesse aggiunte però hanno portato ad individuare
+due difetti reali: le escursioni oltre i 180 gradi non sono segnalate, i cicli dei due
+lati mescolati nella ripetibilità ed alert vengono calcolati anche fuori dai cicli. Il
+contratto garantisce che il dato non cambi, mentre quanto un agente lo commenti
+dipende unicamente dal modello ed il sistema non può controllarlo.
+
+Il caso 1 infine mostra un limite del disegno delle prove, il rifiuto sul gesto
+mancante non è stato osservato perché entrambi gli agenti hanno dedotto il gesto
+da soli. Il controllo intercetta solo le chiamate in cui il gesto manca, quindi
+una scelta dell'agente arriva al database come se fosse dell'utente.

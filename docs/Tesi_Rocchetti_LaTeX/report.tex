@@ -12,17 +12,17 @@
 \input{include/1-front/titlepage} 
 \clearpage
 
-%   QUOTE (OPTIONAL)
-\input{include/1-front/quote}
-\newpage
+%   QUOTE (OPTIONAL) -- disattivata: la pagina e' vuota. Per usarla, scrivere
+%   la citazione in include/1-front/quote.tex e togliere il commento qui sotto.
+%\input{include/1-front/quote}
+%\newpage
 
 %   ABSTRACT
-\afterpage{\null\thispagestyle{empty}\clearpage} % Blank page
-\input{include/1-front/abstract} 
+\input{include/1-front/abstract}
 
 %   TOC - LOF - LOT
 \begin{singlespace}
- \tableofcontents 	
+ \tableofcontents
  \addcontentsline{toc}{chapter}{\listfigurename}
  \listoffigures
  \addcontentsline{toc}{chapter}{\listtablename}
@@ -68,13 +68,10 @@
 \nocite{*}
 \bibliography{include/3-back/bibliography}
 
-%   APPENDIX (facoltativa: nessuna appendice nella struttura attuale della
-%   tesi. Il file include/3-back/appendix/appendix_A.tex resta pronto se
-%   servisse in seguito: basta togliere il commento alla riga sotto e dargli
-%   un titolo vero.)
+%   APPENDIX
 \cleardoublepage
 \appendix % to tell LaTeX that the following chapters are appendices
-%\input{include/3-back/appendix/appendix_A}
+\input{include/3-back/appendix/appendix_A}
 
 %   ACKNOWLEDGEMENTS
 \cleardoublepage

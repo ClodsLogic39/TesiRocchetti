@@ -1,0 +1,180 @@
+\chapter{Background e problem statement}
+\label{chap:background}
+
+\section{Il dato grezzo e la sua trasformazione}
+\label{sec:ch2:dato}
+
+\subsection{Sorgenti diverse, contenuti diversi}
+\label{subsec:ch2:sorgenti}
+
+C3D è il formato standard dell'analisi del movimento e contiene traiettorie, canali analogici, eventi e gruppi di parametri
+estensibili, a cui ogni produttore può aggiungere ciò che il formato non prevede come analog. Un
+file di laboratorio contiene, oltre ai marker, le uscite del modello clinico
+applicato (angoli, momenti, orientamenti dei segmenti) e gli eventi di appoggio
+marcati dal sistema di acquisizione.
+
+All'estremo opposto, un modello di stima di posa applicato al video di un
+telefono restituisce un insieme fisso di punti per fotogramma, ciascuno con una
+visibilità dichiarata, senza calibrazione sul soggetto e senza eventi di
+appoggio.
+
+Le due famiglie differiscono per ciò che contengono prima ancora che per
+precisione. Una pipeline che presuppone la completezza di un file di laboratorio
+non funziona su una ripresa da telefono, ed una che si accontenta del telefono
+scarta ciò che il laboratorio ha già misurato. Il primo problema è far convivere
+le due famiglie nello stesso sistema.
+
+\subsection{Precisione}
+\label{subsec:ch2:precisione}
+
+La precisione varia anche all'interno della stessa sessione. Nelle riprese da telefono la
+profondità è stimata ed un punto fuori campo riceve comunque una coordinata, solo
+la visibilità bassa rivela che il valore è estrapolato. Un'escursione calcolata
+su un ginocchio visibile nel diciotto per cento dei fotogrammi descrive un
+sottoinsieme del gesto e restituirla senza dirlo è un errore anche quando il
+calcolo è corretto. Il problema è che il numero, da solo, non porta con sé la
+propria affidabilità.
+
+\subsection{Trasformazione}
+\label{subsec:ch2:trasformazione}
+
+Dal dato grezzo alle grandezze articolari servono molti passaggi: riconoscere le
+etichette, ricostruire i centri articolari, costruire i sistemi di riferimento
+dei segmenti e calcolare gli angoli. Ogni passaggio contiene una scelta, ed alcune di esse
+sono difficili da compiere. I nomi non denotano sempre la stessa cosa, alcuni indicano un
+marker sull'articolazione, altri l'origine del sistema di riferimento di un
+segmento che nei modelli clinici cade sul giunto distale. Gli orientamenti già
+calcolati in un file hanno assi il cui ordine dipende dal modello che li ha
+prodotti e leggerli nell'ordine sbagliato dà angoli plausibili su piani
+sbagliati. Il problema è rendere queste scelte esplicite e ripetibili, scritte 
+dove si possano leggere e controllare.
+
+\subsection{Misurazione}
+\label{subsec:ch2:misurazione}
+
+Un giunto ha tre piani di movimento ed una formula per ciascuno ma quanti se ne
+possano misurare dipende dai punti che descrivono i segmenti. Un segmento
+costruito su due soli punti ha una direzione ma non un orientamento completo e la
+rotazione attorno al proprio asse non è osservata. La formula però non lo dice, e
+applicata a un piano non osservabile, restituisce comunque una serie con un
+massimo ed un'escursione. Misurato rispetto ad un modello clinico un piano di questo
+tipo ha dato 105 gradi contro gli 11 reali, con correlazione nulla. Il problema è
+distinguere ciò che si misura da ciò che si calcola soltanto e rendere visibile
+la differenza a chi riceve la risposta.
+
+\section{Garantire l'accuratezza biomeccanica}
+\label{sec:ch2:accuratezza}
+
+La rotazione fra due segmenti adiacenti si può esprimere in molti modi.
+ Due standard fissano le convenzioni più comuni: la
+raccomandazione della International Society of Biomechanics\cite{wu2002isb},
+che rende confrontabili i risultati fra laboratori, e la decomposizione di Grood
+e Suntay\cite{groodsuntay1983}, che scompone la rotazione in tre angoli con un
+significato anatomico riconoscibile.
+
+Anche lo zero di un segmento è una definizione. Definire il piede come l'asse
+dalla caviglia alla punta fa leggere un angolo che il
+soggetto non ha, dando in posizione neutra fra i dodici ed i venticinque gradi.
+Lo scostamento nasce dalla definizione del segmento, quindi una misura più precisa
+non lo ridurrebbe.
+
+Anche con le convenzioni adottate un errore di mappatura può produrre valori
+plausibili e sbagliati, che nessun controllo interno al sistema è in grado di
+riconoscere. Il problema è dimostrare che gli angoli calcolati sono corretti
+confrontandoli con un riferimento esterno.
+
+\section{Il problema della riproducibilità}
+\label{sec:ch2:riproducibilita}
+
+Un risultato di analisi deve poter essere richiamato a distanza di tempo e ritrovato
+uguale. Molte grandezze vanno derivate, ed ogni derivazione richiede decisioni come
+l'individuazione dei cicli e l'utilizzabilità del segnale. Se
+queste decisioni si prendono al momento della domanda, lo stesso file darà
+risultati diversi dopo un aggiornamento del codice senza che nessuno possa accorgersene.
+
+Collegato a questo c'è il problema di dove conservare il materiale derivato. Le
+alternative sono tre: caricare i dati direttamente nel database senza conservare nulla
+di intermedio rendendo il database l'unica copia e si perderebbe ciò
+che non trova un posto in esso; utilizzare un formato proprietario che possa conservare tutto ma isolerebbe il
+file dagli strumenti del settore; estendere il formato standard mantenendo la leggibilità
+da parte di quegli strumenti al prezzo di un'estensione che solo questo sistema saprebbe
+interpretare.
+
+\section{Cicli e confronto fra gesti}
+\label{sec:ch2:cicli}
+
+Il movimento sportivo è fatto di ripetizioni, e molte domande riguardano i
+cicli: quanto si somigliano due gesti, quanto un gesto si ripete, quanto i
+due lati si corrispondono\dots Individuare i cicli però non è banale. Il segnale
+migliore è il contatto del piede con il suolo, che il laboratorio marca ed il
+telefono spesso non vede; quando manca, occorre ripiegare su un altro segnale
+periodico, ma cicli individuati con metodi diversi sono oggetti diversi.
+
+Confrontarli pone altri problemi. Un gesto si ripete ma mai identico, e la
+differenza fra due ripetizioni può essere il gesto che varia o il tracciamento
+che oscilla. Un ciclo è chiuso, quindi la fase da cui parte è arbitraria. Nel
+passo i due arti sono in controfase e la distanza fra le loro curve misura in
+buona parte quello sfasamento. Infine due curve possono avere la stessa forma e
+ampiezze diverse, o la stessa ampiezza e andamenti diversi, ed un confronto fra
+singoli numeri non distinguerebbe i due casi. Serve una rappresentazione del gesto
+che si possa confrontare e cercare in un archivio.
+
+\section{Rispetto a che cosa si giudica un movimento}
+\label{sec:ch2:alert}
+
+Segnalare uno scostamento richiede un riferimento e le strade considerate sono
+due. La prima confronta la sessione con altre sessioni prese come riferimento rendendolo 
+più aderente al gesto, ma richiede sessioni che rappresentino il movimento
+ideale e dati di questo tipo sono difficili da reperire. La seconda confronta
+con valori fissi presi dalla letteratura che quindi hanno una fonte citabile e sono
+disponibili, ma valgono solo per la condizione in cui sono stati stabiliti.
+
+C'è poi il problema di come scrivere le regole. Una grammatica dedicata alle
+soglie è flessibile, ma introduce un interprete che legge file e produce errori,
+ quindi una superficie da difendere. Un formato dichiarativo chiuso è meno
+espressivo, ma non deve eseguire nulla.
+
+\section{Come esporre il sistema a un agente}
+\label{sec:ch2:mcp}
+
+Il Model Context Protocol\cite{mcpspec} standardizza il modo in cui un agente
+scopre degli strumenti, ne legge la firma e li invoca. Risolve il collegamento fra
+modello e sistema ma non stabilisce che cosa debba contenere una risposta.
+
+Restano due modi di esporre i dati. Un linguaggio formale di interrogazione è
+verificabile, ma chiude l'insieme delle domande nel momento in cui lo si scrive e
+non sa esprimere quella più importante: \emph{che cosa si può chiedere a questi
+dati, e quanto ci si può fidare}. Un insieme di operazioni componibili lascia la
+composizione all'agente e sposta le garanzie dentro ogni operazione. Il problema
+è definire strumenti e forma della risposta in modo che l'agente non possa
+ricevere un numero senza le sue riserve.
+
+\section{Un numero non mostra il gesto}
+\label{sec:ch2:vedere}
+
+Un'escursione di tot gradi non dice in quale momento del ciclo si produca, né se
+la curva somigli a un movimento o a un tracciamento che ha perso il punto. Lo
+stesso vale per un avviso: sapere che un giunto è fuori dai riferimenti non dice
+dove, nel gesto, questo accada. Il problema è offrire un modo di tornare a
+guardare il movimento, collegando ciò che il sistema segnala a ciò che si vede.
+
+\section{I problemi di sicurezza}
+\label{sec:ch2:sicurezza}
+
+I dati di movimento sono dati personali perché l'andatura identifica una
+persona. A questo si aggiungono due rischi legati al destinatario. Un agente che
+interroga legge testo che arriva insieme al dato come nomi di sessione e note. 
+Un caso concreto è la chiave di sessione, cioè l'identificativo con cui l'agente
+nomina una sessione. Se nasce dal nome del file, un nome che contiene dei dati personali come il nome dell'atleta 
+arriva all'agente in ogni risposta, inoltre due file diversi ma con lo stesso nome finirebbero nel database con la stessa chiave.
+
+\section{Sintesi del problema}
+\label{sec:ch2:sintesi}
+
+Un software che renda il dato di movimento interrogabile da un agente deve far
+convivere sorgenti eterogenee, dichiarare la qualità di ogni valore e ciò che non
+è osservabile, dimostrare l'accuratezza dei propri angoli, produrre risultati
+riproducibili, individuare e confrontare i cicli, giudicare il movimento rispetto
+a riferimenti citabili, offrire all'agente strumenti che non perdano le riserve,
+permettere di vedere il gesto e proteggere i dati personali. Il capitolo
+seguente affronta questi problemi nello stesso ordine.

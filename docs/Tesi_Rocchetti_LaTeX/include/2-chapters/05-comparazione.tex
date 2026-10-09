@@ -1,2 +1,98 @@
-\chapter{Comparazione con strumenti esistenti}
+\chapter{Differenziazione dagli strumenti esistenti}
 \label{chap:comparazione}
+
+\section{Su quali assi ci si differenzia}
+\label{sec:ch5:assi}
+
+Nessuno degli strumenti considerati prova a fare ciò che fa questo sistema, quindi
+su ciascun terreno, preso da solo, il risultato del confronto è scontato. La
+differenza emerge solo tenendo insieme tre assi.
+
+\begin{enumerate}[label=\textbf{A\arabic*.},leftmargin=*]
+  \item La profondità biomeccanica, ovvero quanto il sistema arriva vicino alla
+    cinematica articolare e con quale modello.
+  \item L'interrogabilità, ovvero quanto si possono porre domande in linguaggio
+    naturale da parte di una persona o di un agente.
+  \item L'onestà dichiarata, ovvero quanto il sistema comunica, insieme al
+    risultato, la qualità del dato su cui si basa.
+\end{enumerate}
+
+Gli strumenti esistenti ne coprono al massimo due, mentre lo spazio in cui si
+colloca questo lavoro è proprio la combinazione dei tre.
+
+\section{Prima famiglia, chat su metriche di allenamento}
+\label{sec:ch5:allenamento}
+
+La prima famiglia comprende le piattaforme che rendono conversazionali i dati di
+allenamento. Kailo\cite{kailo}, che in precedenza si chiamava GetFast, affianca all'analisi
+dell'allenamento una chat rivolta all'atleta, AI Endurance\cite{aiendurance} pubblica
+un server MCP ufficiale, mentre per TrainingPeaks\cite{trainingpeaksmcp} esiste un
+connettore MCP non ufficiale, segno che la domanda di
+integrazione con gli agenti è già presente.
+
+L'interrogabilità è pienamente coperta ed il motivo è lo stesso che tiene queste
+piattaforme lontane dalla biomeccanica articolare, perché le grandezze esposte,
+come passo, cadenza e carico, sono già aggregate ed interpretate. Non esiste
+quindi, ad esempio, un angolo del ginocchio da sbagliare e per la stessa ragione il problema
+dell'onestà sul dato articolare non si pone. Il sistema proposto prova invece a
+portare l'interrogabilità dentro il dominio articolare.
+
+\section{Seconda famiglia, biomeccanica markerless professionale}
+\label{sec:ch5:markerless}
+
+La seconda famiglia ricostruisce la cinematica articolare da video con
+un'accuratezza validata. OpenCap\cite{opencap}, sviluppato a Stanford ed open source, lo fa a
+partire da due telecamere di smartphone, mentre Theia3D\cite{theia3d} è una
+soluzione commerciale a corpo intero basata su video
+multicamera.
+
+Sulla profondità biomeccanica questi sistemi sono migliori di questo lavoro 
+perché stimano i punti con più precisione ed usano più telecamere e modelli
+muscoloscheletrici completi. L'accuratezza di cattura dei dati di posa, però, non fa parte 
+dell'ambito di questa tesi, la differenza sta negli altri due assi. Quei sistemi
+producono file, report e curve costruiti per un esperto che sa leggere ciò che
+riceve, senza un canale interrogabile che dichiari la propria affidabilità ad ogni
+risposta. Il sistema proposto è quindi complementare, le loro uscite potrebbero
+diventare una sorgente come le altre, conservate come misurate, e ricevere così
+il canale interrogabile che oggi non hanno.
+
+\section{Il protocollo non è il contributo}
+\label{sec:ch5:protocollo}
+
+Esporre degli strumenti attraverso il Model Context Protocol\cite{mcpspec} è
+ormai alla portata di chiunque abbia un archivio. Un server che esponesse le
+stesse venti funzioni restituendo numeri nudi sarebbe conforme quanto questo,
+però non ne offrirebbe le proprietà, cioè il contratto di risposta, gli alert con
+la loro fonte, il confronto di forma e la separazione dei privilegi.
+
+\section{Tabella di comparazione}
+\label{sec:ch5:sintesi}
+
+La Tabella\ref{tab:ch5:sintesi} riassume il posizionamento di ciascuno strumento
+citato. Le valutazioni riassumono gli argomenti dei paragrafi precedenti, quindi
+non vanno lette come delle misure.
+
+\begin{table}[htbp]
+\centering
+\caption{Posizionamento sui tre assi. Il simbolo $\bullet$ indica copertura
+piena, $\circ$ copertura parziale, ``---'' assenza o non applicabilità.}
+\label{tab:ch5:sintesi}
+\begin{tabularx}{\textwidth}{Xlccc}
+\toprule
+\textbf{Strumento} & \textbf{Accesso per agenti} & \textbf{A1} & \textbf{A2} &
+  \textbf{A3} \\
+\midrule
+Kailo (ex GetFast) & chat propria & --- & $\bullet$ & --- \\
+AI Endurance & MCP ufficiale & --- & $\bullet$ & --- \\
+TrainingPeaks & MCP non ufficiale & --- & $\bullet$ & --- \\
+OpenCap & nessuno & $\bullet$ & --- & $\circ$ \\
+Theia3D & nessuno & $\bullet$ & --- & $\circ$ \\
+Questo lavoro & MCP proprietario & $\circ$ & $\bullet$ & $\bullet$ \\
+\bottomrule
+\end{tabularx}
+\end{table}
+
+La riga di questo lavoro porta un cerchio vuoto sulla profondità biomeccanica 
+perché con i soli centri articolari alcuni piani non sono osservabili e vengono
+registrati come assenze. Dichiarare una copertura piena sarebbe incoerente con
+il resto della tesi.

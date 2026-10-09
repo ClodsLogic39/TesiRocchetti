@@ -1,11 +1,33 @@
-\thispagestyle{plain}			% Supress header 
+\thispagestyle{plain}			% Supress header
 \setlength{\parskip}{0pt plus 1.0pt}
 \section*{Abstract}
-% TODO: scrivere l'abstract.
+
+I sistemi di cattura del movimento umano producono valori che un agente 
+intelligente non è in grado di interpretare in modo verificabile, a meno che non 
+abbia accesso ad uno strato intermedio che ne dia un significato biomeccanico esplicito.
+
+Questo lavoro costruisce esattamente questo strato mancante. Una pipeline riconosce 
+diciotto centri articolari comuni in una sorgente di acquisizione e ne deriva 
+terne di segmento, quaternioni ed angoli articolari; segmenta le sessioni in cicli ricavandoli 
+dalla sorgente, quando possibie, o calcolandoli; scrive un file C3D canonico che porta con se 
+i dati, la loro provenienza, le assenze dichiarate e motivate ed i cicli.
+
+Questo file serve a popolare un database PostgreSQL con estensione pgvector. Un 
+server MCP locale espone venti tool ad un agente, diciassette di questi servono ad 
+interrogare i dati, due, che richiedono abilitazione esplicità, permettono di far 
+partire l'intera pipeline di conversione direttamente dalla chat con l'agente conversazionale 
+mentre l'ultimo permette la visualizzazione 3D delle singole sessioni presenti nel DB.
+
+La conversione angolare è validata sperimentalmente su 118 sessioni di laboratorio 
+confrontate con un modello clinico calibrato. Ogni giunto confrontabile ricade entro 
+3.2 gradi di scarto quadratico medio facendo ottenere correlazioni comprese tra 0.95 ed 1.00. 
+L’indipendenza del contratto di risposta dal modello linguistico è verificata utilizzando il 
+sistema, sulle stesse domande, con due agenti differenti.
 
 % KEYWORDS (MAXIMUM 10 WORDS)
 \vfill
-Keywords: 
+Keywords: sistemi di cattura, agente intelligente, biomeccanio, centri articolari, C3D, 
+PostgreSQL, pgvector, MCP.
 
 \thispagestyle{empty}
 \mbox{}

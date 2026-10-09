@@ -1,12 +1,105 @@
 \babel@toc {italian}{}\relax 
 \babel@toc {italian}{}\relax 
-\contentsline {chapter}{Elenco delle figure}{iv}{chapter*.2}%
+\contentsline {chapter}{Elenco delle figure}{iii}{chapter*.2}%
 \contentsline {chapter}{Elenco delle tabelle}{v}{chapter*.3}%
 \contentsline {chapter}{\numberline {1}Introduzione}{1}{chapter.1}%
-\contentsline {chapter}{\numberline {2}Background e problem statement}{2}{chapter.2}%
-\contentsline {chapter}{\numberline {3}Approccio proposto e architettura}{3}{chapter.3}%
-\contentsline {chapter}{\numberline {4}Tre casi d'uso reali}{4}{chapter.4}%
-\contentsline {chapter}{\numberline {5}Comparazione con strumenti esistenti}{5}{chapter.5}%
-\contentsline {chapter}{\numberline {6}Discussione interna: miglioramenti realistici e applicabili}{6}{chapter.6}%
-\contentsline {chapter}{\numberline {7}Conclusioni}{7}{chapter.7}%
-\contentsline {chapter}{Bibliografia}{8}{chapter.7}%
+\contentsline {section}{\numberline {1.1}Il dato da solo non può rispondere alle domande}{1}{section.1.1}%
+\contentsline {section}{\numberline {1.2}Gli agenti conversazionali ed il cambio di paradigma}{1}{section.1.2}%
+\contentsline {section}{\numberline {1.3}Obiettivi progettuali}{1}{section.1.3}%
+\contentsline {section}{\numberline {1.4}Struttura della tesi}{2}{section.1.4}%
+\contentsline {chapter}{\numberline {2}Background e problem statement}{3}{chapter.2}%
+\contentsline {section}{\numberline {2.1}Il dato grezzo e la sua trasformazione}{3}{section.2.1}%
+\contentsline {subsection}{\numberline {2.1.1}Sorgenti diverse, contenuti diversi}{3}{subsection.2.1.1}%
+\contentsline {subsection}{\numberline {2.1.2}Precisione}{3}{subsection.2.1.2}%
+\contentsline {subsection}{\numberline {2.1.3}Trasformazione}{3}{subsection.2.1.3}%
+\contentsline {subsection}{\numberline {2.1.4}Misurazione}{4}{subsection.2.1.4}%
+\contentsline {section}{\numberline {2.2}Garantire l'accuratezza biomeccanica}{4}{section.2.2}%
+\contentsline {section}{\numberline {2.3}Il problema della riproducibilità}{4}{section.2.3}%
+\contentsline {section}{\numberline {2.4}Cicli e confronto fra gesti}{4}{section.2.4}%
+\contentsline {section}{\numberline {2.5}Rispetto a che cosa si giudica un movimento}{5}{section.2.5}%
+\contentsline {section}{\numberline {2.6}Come esporre il sistema a un agente}{5}{section.2.6}%
+\contentsline {section}{\numberline {2.7}Un numero non mostra il gesto}{5}{section.2.7}%
+\contentsline {section}{\numberline {2.8}I problemi di sicurezza}{6}{section.2.8}%
+\contentsline {section}{\numberline {2.9}Sintesi del problema}{6}{section.2.9}%
+\contentsline {chapter}{\numberline {3}Approccio proposto e architettura}{7}{chapter.3}%
+\contentsline {section}{\numberline {3.1}Visione d'insieme}{7}{section.3.1}%
+\contentsline {section}{\numberline {3.2}La trasformazione del dato grezzo}{8}{section.3.2}%
+\contentsline {subsection}{\numberline {3.2.1}Il riconoscimento della sorgente}{8}{subsection.3.2.1}%
+\contentsline {subsection}{\numberline {3.2.2}Il vocabolario anatomico}{8}{subsection.3.2.2}%
+\contentsline {subsection}{\numberline {3.2.3}Angoli e piani osservabili}{10}{subsection.3.2.3}%
+\contentsline {section}{\numberline {3.3}L'accuratezza biomeccanica}{10}{section.3.3}%
+\contentsline {section}{\numberline {3.4}Il C3D canonico}{10}{section.3.4}%
+\contentsline {paragraph}{Ogni valore dichiara la propria provenienza,}{11}{section*.8}%
+\contentsline {paragraph}{Ogni serie dichiara la propria copertura,}{11}{section*.9}%
+\contentsline {paragraph}{L'assenza è un dato.}{11}{section*.10}%
+\contentsline {paragraph}{Un valore mancante non diventa mai zero.}{11}{section*.11}%
+\contentsline {section}{\numberline {3.5}Cicli, database e rappresentazione vettoriale}{11}{section.3.5}%
+\contentsline {subsection}{\numberline {3.5.1}La scelta dei cicli e il ripiego}{12}{subsection.3.5.1}%
+\contentsline {subsection}{\numberline {3.5.2}Dal ciclo al vettore della forma}{12}{subsection.3.5.2}%
+\contentsline {subsection}{\numberline {3.5.3}Quali giunti diventano vettori}{14}{subsection.3.5.3}%
+\contentsline {subsection}{\numberline {3.5.4}Il database}{15}{subsection.3.5.4}%
+\contentsline {section}{\numberline {3.6}Calcolo e inserimento degli alert}{15}{section.3.6}%
+\contentsline {section}{\numberline {3.7}Il server MCP ed i suoi strumenti}{17}{section.3.7}%
+\contentsline {subsection}{\numberline {3.7.1}Il contratto nella risposta}{17}{subsection.3.7.1}%
+\contentsline {subsection}{\numberline {3.7.2}Gli strumenti}{18}{subsection.3.7.2}%
+\contentsline {subsection}{\numberline {3.7.3}Il caricamento dalla conversazione}{18}{subsection.3.7.3}%
+\contentsline {section}{\numberline {3.8}Il rendering 3D e la visualizzazione degli alert}{19}{section.3.8}%
+\contentsline {section}{\numberline {3.9}La sicurezza}{20}{section.3.9}%
+\contentsline {paragraph}{Privilegio minimo.}{20}{section*.17}%
+\contentsline {paragraph}{Permessi per colonna.}{20}{section*.18}%
+\contentsline {paragraph}{Pseudonimizzazione.}{20}{section*.19}%
+\contentsline {paragraph}{Cifratura del canale.}{20}{section*.20}%
+\contentsline {paragraph}{Nessun interprete.}{20}{section*.21}%
+\contentsline {paragraph}{Testo come dato.}{20}{section*.22}%
+\contentsline {section}{\numberline {3.10}Stack tecnologico e messa in opera}{21}{section.3.10}%
+\contentsline {section}{\numberline {3.11}Verifica}{22}{section.3.11}%
+\contentsline {chapter}{\numberline {4}Casi d'uso e dimostrazioni}{23}{chapter.4}%
+\contentsline {section}{\numberline {4.1}Il materiale}{23}{section.4.1}%
+\contentsline {section}{\numberline {4.2}Il disegno delle prove}{24}{section.4.2}%
+\contentsline {section}{\numberline {4.3}Dimostrazioni delle funzionalità}{24}{section.4.3}%
+\contentsline {subsection}{\numberline {4.3.1}Gli scostamenti più frequenti, in piano e su rampa}{24}{subsection.4.3.1}%
+\contentsline {subsection}{\numberline {4.3.2}La stessa sessione come camminata e come corsa}{26}{subsection.4.3.2}%
+\contentsline {subsection}{\numberline {4.3.3}La visualizzazione degli scostamenti}{26}{subsection.4.3.3}%
+\contentsline {section}{\numberline {4.4}Casi d'uso con due agenti}{27}{section.4.4}%
+\contentsline {subsection}{\numberline {4.4.1}Le proprietà osservate}{27}{subsection.4.4.1}%
+\contentsline {subsection}{\numberline {4.4.2}Caso 1: dalla sorgente grezza alla risposta}{28}{subsection.4.4.2}%
+\contentsline {subsection}{\numberline {4.4.3}Caso 2: confronti fra sessioni e fra condizioni}{28}{subsection.4.4.3}%
+\contentsline {subsection}{\numberline {4.4.4}Caso 3: quando la risposta corretta è un rifiuto}{30}{subsection.4.4.4}%
+\contentsline {section}{\numberline {4.5}Che cosa mostrano le prove}{31}{section.4.5}%
+\contentsline {chapter}{\numberline {5}Differenziazione dagli strumenti esistenti}{33}{chapter.5}%
+\contentsline {section}{\numberline {5.1}Su quali assi ci si differenzia}{33}{section.5.1}%
+\contentsline {section}{\numberline {5.2}Prima famiglia, chat su metriche di allenamento}{33}{section.5.2}%
+\contentsline {section}{\numberline {5.3}Seconda famiglia, biomeccanica markerless professionale}{34}{section.5.3}%
+\contentsline {section}{\numberline {5.4}Il protocollo non è il contributo}{34}{section.5.4}%
+\contentsline {section}{\numberline {5.5}Tabella di comparazione}{34}{section.5.5}%
+\contentsline {chapter}{\numberline {6}Limiti e sviluppi futuri}{35}{chapter.6}%
+\contentsline {section}{\numberline {6.1}La leggibilità dei dati grezzi ed il modello di riconoscimento}{35}{section.6.1}%
+\contentsline {section}{\numberline {6.2}La località del software ed il lancio in rete}{36}{section.6.2}%
+\contentsline {paragraph}{Ricezione del contenuto.}{36}{section*.34}%
+\contentsline {paragraph}{Identità di chi carica.}{36}{section*.35}%
+\contentsline {paragraph}{Il database in rete.}{36}{section*.36}%
+\contentsline {paragraph}{Un'interfaccia web.}{37}{section*.38}%
+\contentsline {section}{\numberline {6.3}Gli sport e le condizioni coperti dagli alert}{37}{section.6.3}%
+\contentsline {section}{\numberline {6.4}Il visualizzatore esterno e la visualizzazione in chat}{38}{section.6.4}%
+\contentsline {section}{\numberline {6.5}Difetti noti degli strumenti e correzioni previste}{38}{section.6.5}%
+\contentsline {paragraph}{Il ciclo interrogato non è scelto per rappresentatività.}{38}{section*.40}%
+\contentsline {paragraph}{Gli alert usano l'intera prova.}{38}{section*.41}%
+\contentsline {paragraph}{Escursioni oltre 180 gradi non segnalate.}{38}{section*.42}%
+\contentsline {paragraph}{La ripetibilità mescola i cicli dei due lati.}{38}{section*.43}%
+\contentsline {paragraph}{Il gesto può essere scelto dall'agente.}{38}{section*.44}%
+\contentsline {section}{\numberline {6.6}I limiti dei dati}{39}{section.6.6}%
+\contentsline {paragraph}{Le riprese da telefono non contengono l'arto inferiore.}{39}{section*.45}%
+\contentsline {paragraph}{Il modello di segmento.}{39}{section*.46}%
+\contentsline {chapter}{\numberline {7}Conclusioni}{40}{chapter.7}%
+\contentsline {section}{\numberline {7.1}Contributi}{40}{section.7.1}%
+\contentsline {paragraph}{O1. Una pipeline verso un formato canonico.}{40}{section*.47}%
+\contentsline {paragraph}{O2. Un archivio con la forma dei gesti.}{40}{section*.48}%
+\contentsline {paragraph}{O3. Alert dichiarativi con fonti.}{40}{section*.49}%
+\contentsline {paragraph}{O4. Un server MCP con contratto di risposta.}{40}{section*.50}%
+\contentsline {paragraph}{O5. La visualizzazione degli scostamenti.}{41}{section*.51}%
+\contentsline {section}{\numberline {7.2}Che cosa il lavoro non dimostra}{41}{section.7.2}%
+\contentsline {section}{\numberline {7.3}Prospettive}{41}{section.7.3}%
+\contentsline {chapter}{Bibliografia}{42}{section.7.3}%
+\contentsline {chapter}{\numberline {A}Validazione della convenzione angolare}{44}{appendix.Alph1}%
+\contentsline {section}{\numberline {A.1}Metodo}{44}{section.Alph1.1}%
+\contentsline {section}{\numberline {A.2}Risultati per giunto}{44}{section.Alph1.2}%

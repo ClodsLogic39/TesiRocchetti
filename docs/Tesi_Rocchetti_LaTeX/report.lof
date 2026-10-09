@@ -3,7 +3,30 @@
 \addvspace {10\p@ }
 \addvspace {10\p@ }
 \addvspace {10\p@ }
+\contentsline {figure}{\numberline {3.1}{\ignorespaces Architettura del sistema. Il C3D canonico separa la parte che interpreta una sorgente da quella che interroga un dato già interpretato. La freccia tratteggiata indica il caricamento avviato dalla conversazione.}}{7}{figure.caption.5}%
+\contentsline {figure}{\numberline {3.2}{\ignorespaces A sinistra i diciotto centri articolari del vocabolario, in un fotogramma della sessione di laboratorio \texttt {Ref01\_sss\_le\_shoes04}. A destra il piede destro in vista laterale: l'asse tallone-punta e l'asse caviglia-punta non coincidono, e la differenza fra i due diventerebbe un angolo fittizio della caviglia.}}{9}{figure.caption.6}%
+\contentsline {figure}{\numberline {3.3}{\ignorespaces Contenuto del C3D canonico. I gruppi standard portano punti, angoli e orientamenti, leggibili da qualunque strumento; il gruppo proprietario \texttt {BIOMECH} porta le annotazioni del contratto di risposta.}}{11}{figure.caption.7}%
+\contentsline {figure}{\numberline {3.4}{\ignorespaces Scelta del metodo di segmentazione per le due sessioni. Per ogni metodo è indicata la copertura del segnale da cui dipende; la linea tratteggiata è la soglia del 50\%. Nel laboratorio bastano gli eventi del file; nel telefono piede e anca vengono scartati e il segmentatore ripiega sulla spalla.}}{12}{figure.caption.12}%
+\contentsline {figure}{\numberline {3.5}{\ignorespaces Dalla serie al vettore della forma, per le due sessioni. (a) la serie con i confini dei cicli: nel laboratorio la caviglia destra con i cicli dagli eventi, nel telefono la spalla destra, da cui vengono i cicli di ripiego; in evidenza il ciclo usato. (b) il ciclo ricampionato e ruotato sul minimo. (c) il vettore a 32 componenti.}}{13}{figure.caption.13}%
+\contentsline {figure}{\numberline {3.6}{\ignorespaces Ripresa da telefono \texttt {running\_20260220\_121922}: per ogni segnale, quanti degli 82 cicli producono un vettore della forma. Le voci senza barra sono assenze dichiarate, con il motivo.}}{14}{figure.caption.14}%
+\contentsline {figure}{\numberline {3.7}{\ignorespaces Schema essenziale del database. Le frecce indicano le dipendenze principali; l'anagrafica è separata e le sessioni portano solo uno pseudonimo.}}{15}{figure.caption.15}%
+\contentsline {figure}{\numberline {3.8}{\ignorespaces Lo stesso fotogramma (26) della sessione \texttt {Ref02\_ramp10\_shoes35}, vista dal fianco sinistro. Con gli alert attivi l'anca sinistra, che flette 59.7 gradi contro un massimo atteso di 40, si ingrandisce, diventa rossa ed è indicata da una freccia; l'intensità del rosso cresce con la gravità.}}{20}{figure.caption.16}%
+\contentsline {subfigure}{\numberline {(a)}{\ignorespaces {Senza alert.}}}{20}{subfigure.8.1}%
+\contentsline {subfigure}{\numberline {(b)}{\ignorespaces {Con alert.}}}{20}{subfigure.8.2}%
+\contentsline {figure}{\numberline {3.9}{\ignorespaces Messa in opera in ambito locale. Il server MCP comunica con il client sullo standard input e output e con il database su TLS, con il ruolo di sola lettura; i sottoprocessi di caricamento usano il ruolo di scrittura.}}{21}{figure.caption.23}%
+\addvspace {10\p@ }
+\contentsline {figure}{\numberline {4.1}{\ignorespaces A sinistra gli alert per sessione del campione nelle tre superfici, divisi per gravità. A destra i sette tipi di scostamento più frequenti, con la frequenza per sessione in ciascuna superficie. Le due voci sull'iperestensione del ginocchio vengono dallo stesso valore confrontato con due riferimenti.}}{25}{figure.caption.25}%
+\contentsline {figure}{\numberline {4.2}{\ignorespaces Due scostamenti della sessione \texttt {Ref02\_ramp10\_shoes35}, vista dal fianco destro. Il primo si vede a occhio, il secondo no; il colore più acceso del ginocchio indica la gravità maggiore, che dipende dal tipo di riferimento superato e non dall'ampiezza dello scostamento.}}{27}{figure.caption.28}%
+\contentsline {subfigure}{\numberline {(a)}{\ignorespaces {Fotogramma 137: anca destra, 14.9 gradi oltre l'atteso (warning).}}}{27}{subfigure.2.1}%
+\contentsline {subfigure}{\numberline {(b)}{\ignorespaces {Fotogramma 13: ginocchio destro, 0.5 gradi oltre il limite anatomico (critical).}}}{27}{subfigure.2.2}%
+\contentsline {subfigure}{\numberline {(a)}{\ignorespaces {Codex.}}}{29}{subfigure.3.1}%
+\contentsline {figure}{\numberline {4.2}{\ignorespaces La stessa domanda sulla simmetria nelle due conversazioni, Codex su sfondo chiaro e Claude su sfondo scuro: valori identici, con un indice di simmetria calcolato da Claude e non restituito dal server.}}{30}{figure.caption.30}%
+\contentsline {subfigure}{\numberline {(b)}{\ignorespaces {Claude.}}}{30}{subfigure.2.2}%
+\contentsline {figure}{\numberline {4.3}{\ignorespaces La richiesta di un segnale che non esiste, Codex su sfondo chiaro e Claude su sfondo scuro: entrambi riportano l'assenza e nessuno stima un valore.}}{31}{figure.caption.31}%
+\contentsline {subfigure}{\numberline {(c)}{\ignorespaces {Codex.}}}{31}{subfigure.3.3}%
+\contentsline {subfigure}{\numberline {(d)}{\ignorespaces {Claude.}}}{31}{subfigure.3.4}%
 \addvspace {10\p@ }
 \addvspace {10\p@ }
 \addvspace {10\p@ }
 \addvspace {10\p@ }
+\contentsline {figure}{\numberline {A.1}{\ignorespaces Validazione per giunto su 118 prove. A sinistra l'escursione media secondo il modello clinico e secondo la pipeline; a destra lo scarto quadratico medio sulla serie temporale, con la correlazione.}}{45}{figure.caption.54}%

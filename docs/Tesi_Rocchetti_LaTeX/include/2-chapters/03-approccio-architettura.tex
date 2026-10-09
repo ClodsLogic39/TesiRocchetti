@@ -1,2 +1,665 @@
 \chapter{Approccio proposto e architettura}
 \label{chap:architettura}
+
+Questo capitolo descrive le soluzioni adottate, seguendo lo stesso ordine con cui
+il Capitolo~\ref{chap:background} ha presentato i problemi. Il sistema non
+presuppone un modello linguistico particolare, quindi tutto ciò che segue vale per
+qualunque agente in grado di usare il Model Context Protocol.
+
+\section{Visione d'insieme}
+\label{sec:ch3:visione}
+
+L'architettura è mostrata nella Figura~\ref{fig:ch3:pipeline}. La conversione legge
+una sorgente e scrive un C3D canonico; il caricamento legge quel file, popola il
+database e valuta gli alert rispetto ai riferimenti di letteratura; il server MCP
+infine espone il database ad un agente che può anche aprire il visualizzatore.
+
+\begin{figure}[H]
+\centering
+\includegraphics[width=0.92\textwidth]{figures/cap3/cap3_pipeline.pdf}
+\caption{Architettura del sistema. Il C3D canonico separa la parte che interpreta
+una sorgente da quella che interroga un dato già interpretato. La freccia
+tratteggiata indica il caricamento avviato dalla conversazione.}
+\label{fig:ch3:pipeline}
+\end{figure}
+
+Il file canonico è il confine dell'architettura. Prima di esso c'è tutto ciò che
+decide il significato dei numeri di una sorgente, dopo di esso c'è tutto ciò che
+li usa, ed il database si può ricostruire per intero a partire da quei file.
+
+Il principio della conversione è che lo script si adatta ai dati. Una prima
+versione presupponeva di sapere cosa avrebbe trovato però le sorgenti reali
+l'hanno smentita, ricalcolava grandezze già presenti, si bloccava dove mancavano
+cicli o base temporale e trattava come completa una ripresa quasi priva di arti
+inferiori. La regola che l'ha sostituita vale per ogni grandezza. Se la sorgente
+la contiene, viene conservata come misurata e non viene mai ricalcolata; se manca
+ma si può derivare viene calcolata e marcata come derivata o dipendente da un
+modello; se invece manca e non si può derivare viene registrata come assenza
+insieme al relativo motivo.
+
+\section{La trasformazione del dato grezzo}
+\label{sec:ch3:trasformazione}
+
+\subsection{Il riconoscimento della sorgente}
+\label{subsec:ch3:riconoscimento}
+
+Un file dichiarativo elenca le convenzioni di nomenclatura conosciute e la
+corrispondenza fra le loro etichette ed il vocabolario del sistema, quindi la
+convenzione di un file si deduce confrontando le sue etichette con quelle
+registrate. Aggiungere un nuovo laboratorio significa semplicemente aggiungere
+delle righe ad un file di dati.
+
+Le etichette sconosciute che appartengono a categorie riconoscibili, come uscite
+di modello, momenti o canali di piattaforma, vengono classificate ed ignorate.
+Quelle che potrebbero essere anatomiche invece fermano la conversione, che
+restituisce l'elenco di ciò che non ha capito.
+
+Lo stesso criterio vale per gli orientamenti che un file di laboratorio porta già
+calcolati. L'ordine dei loro assi dipende dal modello che li ha prodotti, e
+dedurlo file per file confrontandolo con la ricostruzione dai marker fa dipendere
+il risultato dal soggetto, tanto che sui dati disponibili la deduzione sbagliava
+di novanta gradi su nove soggetti con un'andatura atipica. L'ordine viene quindi
+deciso una volta sola per ogni convenzione e registrato. Se manca, l'orientamento
+del file viene scartato con un avviso e si usa la ricostruzione dai marker.
+
+\subsection{Il vocabolario anatomico}
+\label{subsec:ch3:vocabolario}
+
+Il vocabolario è l'insieme minimo di centri articolari che entrambe le famiglie
+di sorgenti sono in grado di fornire, cioè diciotto punti che comprendono: testa,
+centro delle spalle, spalle, gomiti, polsi, anche, ginocchia, caviglie, talloni e
+punte dei piedi~\ref{fig:ch3:vocabolario}. Da questi punti
+derivano quindici segmenti e tredici giunti. I talloni servono a definire il
+piede sull'asse tallone-punta, senza di essi il piede andrebbe definito dalla
+caviglia alla punta ed in posizione neutra comparirebbe, come già detto, un angolo che il soggetto
+non ha.
+
+\begin{figure}[htbp]
+\centering
+\includegraphics[width=0.92\textwidth]{figures/cap3/cap3_vocabolario.pdf}
+\caption{A sinistra i diciotto centri articolari del vocabolario, in un
+fotogramma della sessione di laboratorio \texttt{Ref01\_sss\_le\_shoes04}. A
+destra il piede destro in vista laterale: l'asse tallone-punta e l'asse
+caviglia-punta non coincidono, e la differenza fra i due diventerebbe un angolo
+fittizio della caviglia.}
+\label{fig:ch3:vocabolario}
+\end{figure}
+
+Un segmento ha bisogno di tre punti non allineati per avere un orientamento. Con i
+soli centri articolari il terzo punto è spesso il giunto adiacente, e l'assunzione
+che il segmento ruoti nel piano dei tre punti viene dichiarata marcando come
+dipendenti da un modello i piani che ne derivano. I punti derivati, come i centri
+delle spalle e del bacino, vengono calcolati solo se ciò da cui dipendono è visibile oltre una certa soglia.
+
+Il vocabolario anatomico inoltre non vive nel codice, quindi punti, segmenti, giunti, piani,
+provenienze e motivi di assenza sono tabelle del database con chiavi esterne.
+
+\subsection{Angoli e piani osservabili}
+\label{subsec:ch3:piani}
+
+Dai centri articolari si costruiscono le terne di riferimento dei segmenti e da
+queste gli angoli articolari come rotazione relativa fra segmento prossimale e
+distale. Un piano che il modello di segmento non osserva viene registrato come
+assente con motivo \texttt{not\_observable}, perché uno zero, o un numero piccolo
+accompagnato da un avviso, resterebbe comunque un valore che chi legge potrebbe
+usare.
+
+Con i soli centri articolari il tronco rispetto al laboratorio conserva tutti e
+tre i piani. La colonna, cioè il tronco rispetto al bacino, conserva il frontale
+ed il trasverso, mentre il sagittale è nullo per costruzione perché i due segmenti
+condividono la direzione da cui si ricaverebbe. Collo, spalle ed anche conservano
+il sagittale ed il frontale, mentre gomiti, ginocchia e caviglie solo il
+sagittale. Questa regola vale per gli angoli calcolati, quelli che una sorgente
+porta da un modello calibrato vengono invece conservati come misurati.
+
+\section{L'accuratezza biomeccanica}
+\label{sec:ch3:angoli}
+
+Gli angoli seguono la raccomandazione della International Society of
+Biomechanics~\cite{wu2002isb}, le terne dei segmenti sono calcolate come
+quaternioni e la rotazione relativa viene scomposta in angoli di Eulero nella
+sequenza di Grood e Suntay~\cite{groodsuntay1983}. Ogni serie porta nel file il
+nome della convenzione con cui è stata prodotta.
+
+La convenzione è verificata rispetto ad un riferimento esterno. Uno strumento del
+progetto prende i file di laboratorio che contengono anche le uscite di un
+modello clinico calibrato, svuota gli angoli della sorgente, li ricalcola dai soli
+centri articolari e li confronta con quelli del modello. Lo svuotamento è
+necessario altrimenti la conversione conserverebbe i valori originali ed
+il confronto darebbe uno scarto pari a zero.
+
+La prima esecuzione ha prodotto residui di 13--17 gradi su anca e ginocchio. La
+causa era un errore di lettura, nei modelli clinici l'origine del sistema di
+riferimento di un segmento è il giunto distale mentre il lettore assumeva
+il prossimale, spostando così l'intero arto inferiore di un giunto. Le curve prodotte
+avevano un aspetto credibile e nessuna rilettura del codice le avrebbe smentite,
+un errore di questo tipo emerge solo confrontandolo con un riferimento
+indipendente, ed è per questo che la validazione è rimasta uno strumento
+permanente del progetto.
+
+Una volta corretta la mappatura, su 118 prove ogni giunto confrontabile rientra
+entro 3.2 gradi di scarto quadratico medio, con correlazioni comprese fra 0.95 e
+1.00. Un test blocca la soglia a quattro
+gradi così che l'errore non possa tornare senza essere notato. I risultati per
+ogni giunto sono riportati nell'Appendice~\ref{app:validazione}.
+
+\section{Il C3D canonico}
+\label{sec:ch3:canonico}
+
+Fra le tre alternative per conservare il materiale derivato, il sistema estende
+il formato standard del settore. È l'unica che non rende il database l'unica copia
+e che non isola il file dagli strumenti del dominio. Il contenuto del file è
+mostrato nella Figura~\ref{fig:ch3:canonico}.
+
+\begin{figure}[htbp]
+\centering
+\includegraphics[width=0.95\textwidth]{figures/cap3/cap3_c3d_canonico.pdf}
+\caption{Contenuto del C3D canonico. I gruppi standard portano punti, angoli e
+orientamenti, leggibili da qualunque strumento; il gruppo proprietario
+\texttt{BIOMECH} porta le annotazioni del contratto di risposta.}
+\label{fig:ch3:canonico}
+\end{figure}
+
+Nel gruppo dei punti si trovano i diciotto centri articolari e, per ogni giunto,
+un canale con gli angoli sui tre piani. Nel gruppo dei canali analogici si trovano
+quaternione, velocità ed accelerazione angolare di ogni segmento. Nel gruppo
+proprietario \texttt{BIOMECH} si trovano invece le annotazioni che il formato non
+prevede, cioè versione e convenzione, sorgente e sistema di acquisizione,
+provenienza e copertura di punti, segmenti ed angoli, la frazione di valori
+implausibili, ciò che manca con il motivo ed il dettaglio, ed infine i confini dei
+cicli con metodo, lato ed avvisi.
+
+Il file è definitivo, contiene tutto ciò che serve a costruire ogni riga del
+database e le decisioni della conversione vengono prese una volta sola. Chi lo
+riapre, oggi o con una versione futura del codice, trova gli stessi cicli e le
+stesse assenze, quindi il risultato è riproducibile. Scrivere un file senza cicli
+è un errore, e rileggerne uno che non li contiene porta ad un rifiuto, perché
+``nessun ciclo trovato'' è un esito legittimo mentre ``cicli mai cercati'' indica
+un file incompleto.
+
+Qui si implementa il contratto di risposta del sistema, pensato perché il sistema
+possa rifiutarsi di rispondere quando il dato non sostiene una risposta, ed è
+formato da quattro regole.
+
+\paragraph{Ogni valore dichiara la propria provenienza,} che è
+\texttt{measured} se il valore è letto dalla sorgente, \texttt{derived} se è
+calcolato in modo deterministico, \texttt{modelled} se dipende da un'assunzione di
+modello oppure \texttt{filled} se è interpolato su un'interruzione breve.
+
+\paragraph{Ogni serie dichiara la propria copertura,} cioè la frazione di
+fotogrammi in cui è stata vista.
+
+\paragraph{L'assenza è un dato.} Il file registra ciò che manca ed il perché, con
+cinque motivi possibili, cioè: assente nella sorgente, copertura troppo bassa,
+punti mancanti per costruirlo, base temporale mancante e piano non osservabile.
+
+\paragraph{Un valore mancante non diventa mai zero.} Un'interruzione resta tale
+fino al valore nullo nel database ed ogni filtro lavora su tratti contigui così
+da non far figurare valori inventati su campioni buoni.
+
+\section{Cicli, database e rappresentazione vettoriale}
+\label{sec:ch3:cicli}
+
+Questo paragrafo segue due sessioni reali, la prova di laboratorio
+\texttt{Ref01\_sss\_le\_shoes04}, un cammino in piano registrato a 200Hz con gli
+eventi di appoggio nel file, e la ripresa da telefono
+\texttt{running\_20260220\_121922}, una corsa a 30Hz. Le due sessioni servono a
+mostrare come lo stesso codice si comporta su dati molto diversi.
+
+\subsection{La scelta dei cicli e il ripiego}
+\label{subsec:ch3:ripiego}
+
+Per cammino e corsa il segmentatore prova i metodi in un ordine fisso:
+eventi di appoggio del file, traiettoria della punta del piede, passo della punta,
+flessione dell'anca ed infine flessione della spalla. Viene usato il primo metodo
+il cui segnale è coperto almeno per metà della prova, e se nessuno produce dei
+cicli la prova resta un unico segmento.
+
+Nella prova di laboratorio gli eventi ci sono e vengono usati subito, come si vede
+nella Figura~\ref{fig:ch3:ripiego}. Ricavare i cicli dalle coordinate portava
+invece a leggere mezzi passi da 0.55s dove il laboratorio aveva marcato falcate
+intere, mentre con gli eventi la durata mediana del ciclo torna a 1.08s, cioè la
+falcata attesa.
+
+Nella ripresa da telefono gli eventi mancano, piede ed anca sono visibili solo
+nel 5\% dei fotogrammi quindi i metodi che dipendono da loro vengono scartati. Il
+segmentatore ripiega sulla flessione della spalla, coperta all'81\%, e produce 82
+cicli che portano due avvisi, ``cicli da surrogato'' e ``segnale primario poco
+coperto''. Metodo ed avvisi del ripiego viaggiano con ogni ciclo, dal file
+canonico fino alla risposta che riceve l'agente.
+
+\begin{figure}[htbp]
+\centering
+\includegraphics[width=\textwidth]{figures/cap3/cap3_ripiego_cicli.pdf}
+\caption{Scelta del metodo di segmentazione per le due sessioni. Per ogni metodo
+è indicata la copertura del segnale da cui dipende; la linea tratteggiata è la
+soglia del 50\%. Nel laboratorio bastano gli eventi del file; nel telefono piede
+e anca vengono scartati e il segmentatore ripiega sulla spalla.}
+\label{fig:ch3:ripiego}
+\end{figure}
+
+\subsection{Dal ciclo al vettore della forma}
+\label{subsec:ch3:forma}
+
+L'unità di confronto è l'atomo, cioè la terna formata da ciclo, giunto e piano. La
+curva del ciclo viene ricampionata a 101 punti, ruotata in modo da partire dal
+proprio minimo, ridotta a 32 componenti ed infine portata a media nulla e norma
+unitaria, come mostra la Figura~\ref{fig:ch3:forma}. Il vettore descrive quindi
+solo la forma, mentre ampiezza, picco e valle restano colonne numeriche separate.
+
+\begin{figure}[htbp]
+\centering
+\includegraphics[width=\textwidth]{figures/cap3/cap3_vettore_forma.pdf}
+\caption{Dalla serie al vettore della forma, per le due sessioni. (a) la serie con
+i confini dei cicli: nel laboratorio la caviglia destra con i cicli dagli eventi,
+nel telefono la spalla destra, da cui vengono i cicli di ripiego; in evidenza il
+ciclo usato. (b) il ciclo ricampionato e ruotato sul minimo. (c) il vettore a 32
+componenti.}
+\label{fig:ch3:forma}
+\end{figure}
+
+Dal punto di vista informatico, su vettori a media nulla e norma unitaria la
+distanza coseno vale uno meno la correlazione di Pearson fra le due curve quindi
+0 per lo stesso andamento, 1 per nessuna relazione e 2 per andamenti opposti. La
+distanza ha perciò un significato leggibile. Ogni atomo porta inoltre la versione
+dell'encoder che lo ha prodotto, e le query filtrano su quella versione così che
+vettori calcolati in modi diversi non si mescolino.
+
+Dal punto di vista biomeccanico confrontare le forme significa confrontare
+l'andamento del gesto nel tempo indipendentemente dalla sua ampiezza. Gli angoli
+portano scostamenti propri del soggetto e del modello, quindi fra persone diverse
+l'andamento è più confrontabile del valore assoluto. La rotazione sul minimo
+risolve l'arbitrarietà della fase, perché senza di essa due passate identiche
+sfasate di mezzo ciclo risultavano anti-correlate. Nella
+Figura~\ref{fig:ch3:forma}, ad esempio, la rotazione sposta visibilmente la curva
+della caviglia, il cui minimo cade a circa due terzi del ciclo. Nella riga del
+telefono invece il ciclo di ripiego non si chiude su se stesso e la rotazione
+produce un salto iniziale, che è l'effetto di un ciclo definito dalla spalla e non
+dal contatto al suolo.
+
+Su questa rappresentazione si basano quattro operazioni: cercare in altre
+sessioni i cicli più simili, misurare quanto due sessioni si somigliano giunto per
+giunto, misurare quanto un gesto si ripete all'interno della stessa sessione e
+confrontare la forma dei due lati. Ogni confronto usa solo cicli prodotti dallo
+stesso metodo e riporta su quante coppie di giunto e piano è stato
+calcolato. Nel confronto fra i due lati, inoltre, la risposta avvisa della
+controfase del passo, senza la quale uno sfasamento verrebbe letto come
+un'asimmetria.
+
+\subsection{Quali giunti diventano vettori}
+\label{subsec:ch3:copertura}
+
+Un ciclo produce un atomo solo se il segnale è coperto almeno all'80\%
+all'interno di quel ciclo, e l'effetto di questa soglia sulla ripresa da telefono
+è mostrato nella Figura~\ref{fig:ch3:copertura}. Tronco, colonna e collo producono
+un vettore in tutti gli 82 cicli, spalla e gomito destri in 78 e quelli sinistri
+in 57. Anca, ginocchio e caviglia sinistri lo producono solo in 4 cicli, mentre il
+lato destro dell'arto inferiore non esiste nemmeno come serie, perché manca il
+segmento da cui si calcolerebbe. La flessione della colonna infine è assente per
+costruzione.
+
+\begin{figure}[H]
+\centering
+\includegraphics[width=0.68\textwidth]{figures/cap3/cap3_copertura_telefono.pdf}
+\caption{Ripresa da telefono \texttt{running\_20260220\_121922}: per ogni segnale,
+quanti degli 82 cicli producono un vettore della forma. Le voci senza barra sono
+assenze dichiarate, con il motivo.}
+\label{fig:ch3:copertura}
+\end{figure}
+
+\subsection{Il database}
+\label{subsec:ch3:database}
+
+Il database è PostgreSQL con l'estensione pgvector ed è popolato interamente dal
+file canonico, con diciotto tabelle e quattro viste organizzate come nella
+Figura~\ref{fig:ch3:database}. Le tabelle di vocabolario vincolano con chiavi
+esterne ogni nome usato altrove. Le serie temporali sono salvate in colonne di
+array lunghe quanto la sessione, con valori nulli dove il dato manca e con
+copertura e provenienza dichiarate. Ogni ciclo porta il metodo che lo ha prodotto
+e gli avvisi della segmentazione, mentre gli atomi sono colonne
+\texttt{vector(32)} con un indice HNSW sulla distanza coseno.
+
+\begin{figure}[H]
+\centering
+\includegraphics[width=0.85\textwidth]{figures/cap3/cap3_database.pdf}
+\caption{Schema essenziale del database. Le frecce indicano le dipendenze
+principali; l'anagrafica è separata e le sessioni portano solo uno pseudonimo.}
+\label{fig:ch3:database}
+\end{figure}
+
+\section{Calcolo e inserimento degli alert}
+\label{sec:ch3:alert}
+
+Fra le due strade possibili per giudicare un movimento il sistema adotta i valori
+fissi di letteratura, perché costruire un insieme di sessioni di riferimento
+richiederebbe nuove acquisizioni. Una prima versione definiva le soglie con una
+grammatica dedicata, che è stata poi sostituita da un file di dati a struttura
+chiusa così che non esista un interprete da confinare. Un estratto di questo file
+è riportato nel Listato~\ref{lst:ch3:riferimenti}.
+
+\begin{lstlisting}[caption={Estratto di \texttt{reference\_ranges.json}: una
+fonte, un limite anatomico e un intervallo atteso per il cammino.},
+label={lst:ch3:riferimenti},basicstyle=\footnotesize\ttfamily]
+"sources": {
+  "perry": { "label": "Perry J., Burnfield J.M., Gait Analysis: ...",
+             "url": "https://musculoskeletalkey.com/normal-gait/" } },
+"anatomical": [
+  { "joint": "hip", "plane": "sagittal", "metric": "peak_max",
+    "max": 125, "severity": "critical", "source": "aaos",
+    "note": "flessione d'anca oltre il limite goniometrico" } ],
+"sports": { "walking": [
+  { "joint": "hip", "plane": "sagittal", "metric": "peak_max",
+    "min": 20, "max": 40, "severity": "warning", "source": "perry",
+    "note": "massima flessione d'anca in fase oscillante" } ] }
+\end{lstlisting}
+
+Le voci sono di due livelli. I limiti anatomici valgono per chiunque e dicono se
+un valore è compatibile con un corpo umano, quindi uscirne può significare una
+mobilità fuori norma oppure un errore di misura e l'avviso non sceglie fra le
+due. Gli intervalli di gesto invece descrivono ciò che ci si aspetta durante il
+cammino o la corsa, ed uscirne non è di per sé pericoloso. Il file contiene 19
+voci anatomiche, 13 per il cammino ed 11 per la corsa; una voce scritta per
+``ginocchio'' vale per entrambi i lati, e dopo questa espansione gli intervalli
+caricati sono 76. Le fonti sono la goniometria clinica~\cite{aaos}, la letteratura
+sul passo~\cite{perryburnfield}, il confronto fra cammino e corsa di Fukuchi e
+colleghi~\cite{fukuchi2019}, lo studio di Liu e colleghi sulla cinematica del ginocchio a
+velocità diverse~\cite{liu2021knee} e quello di Chung e colleghi sulla
+cinematica del tronco~\cite{chung2010trunk}.
+
+La valutazione avviene al caricamento, nella stessa transazione che scrive la
+sessione. Per ogni angolo si calcolano picco massimo, picco minimo ed escursione
+sull'intera serie, e questi valori vengono confrontati con gli intervalli
+applicabili, cioè i limiti anatomici, sempre, e quelli di gesto, solo se la sessione
+dichiara quel gesto. Il confronto è riportato nel Listato~\ref{lst:ch3:valuta}.
+
+\begin{lstlisting}[language=Python,caption={Il confronto fra metriche osservate
+e intervalli, in forma ridotta.},label={lst:ch3:valuta},
+basicstyle=\footnotesize\ttfamily]
+def valuta(osservate, riferimenti, coverage=None, provenance=None,
+           min_coverage=0.30):
+    ...
+    for (giunto, piano), valori in osservate.items():
+        cop = (coverage or {}).get((giunto, piano))
+        if cop is not None and cop < min_coverage:
+            continue                      # segnale troppo poco visto
+        for metrica, valore in valori.items():
+            for r in per_chiave.get((giunto, piano, metrica), []):
+                lo, hi = r.get("min_value"), r.get("max_value")
+                if lo is not None and valore < lo:   scarto = lo - valore
+                elif hi is not None and valore > hi: scarto = valore - hi
+                else: continue
+                fuori.append({"reference": r, "observed": valore,
+                              "deviation": scarto, "coverage": cop,
+                              "severity": _gravita(r, lo, hi, scarto), ...})
+    return fuori
+\end{lstlisting}
+
+Un segnale visto in meno del 30\% dei fotogrammi non viene giudicato. Ogni
+scostamento porta con sé la fonte dell'intervallo, la copertura e la provenienza
+del segnale che lo ha generato, perché un avviso su una serie modellata al 40\% di
+copertura non vale quanto uno su una serie misurata al 100\%. Uno scostamento più
+ampio del doppio dell'intervallo stesso riceve una gravità a parte, perché indica
+più probabilmente un errore di tracciamento che un soggetto fuori norma.
+Ricaricare una sessione cancella e ricalcola da zero i suoi scostamenti, così la
+stessa sessione dà sempre lo stesso giudizio.
+
+Il giudizio riguarda la sessione intera, coerentemente con riferimenti che
+descrivono un gesto e non una singola ripetizione. Il prezzo da pagare è che uno
+scostamento non dice in quale momento si produce, ed è per questo che il
+visualizzatore deve ricavarsi da solo i fotogrammi.
+
+\section{Il server MCP ed i suoi strumenti}
+\label{sec:ch3:mcp}
+
+Il server espone venti tool conformi al Model Context Protocol~\cite{mcpspec}.
+Fra le due impostazioni possibili adotta quella delle operazioni componibili,
+quindi le grandezze interrogabili sono le stesse che un linguaggio avrebbe
+esposto, però la composizione la fa l'agente e le garanzie stanno nella risposta.
+
+\subsection{Il contratto nella risposta}
+\label{subsec:ch3:risposta}
+
+Ogni strumento restituisce la stessa struttura, che riporta all'agente ciò che il
+file canonico dichiara, come mostra il Listato~\ref{lst:ch3:contratto}.
+
+\begin{lstlisting}[caption={La struttura comune delle risposte.},
+label={lst:ch3:contratto},basicstyle=\footnotesize\ttfamily]
+{
+  "input_spec":    cio' che e' stato chiesto, normalizzato
+  "selected_data": segnale usato, provenienza, copertura, fps,
+                   intervallo di fotogrammi, unita'
+  "result":        il valore, oppure null
+  "explain":       con quale formula
+  "warnings":      cio' di cui tenere conto
+}
+\end{lstlisting}
+
+Questa struttura permette di distinguere un risultato nullo con l'avviso che il
+segnale non esiste da uno con l'avviso di dato insufficiente, così chi legge sa se
+ha sbagliato la domanda oppure se il dato è mancante. Due avvisi nascono dal segnale
+stesso e non alterano il valore: la copertura sotto il 30\%, che è la stessa
+soglia usata dal caricamento, ed un piano diverso dal sagittale che dipende da
+un'assunzione di modello. Lo strumento più semplice è riportato nel
+Listato~\ref{lst:ch3:metric}.
+
+\begin{lstlisting}[language=Python,caption={Lo strumento \texttt{metric}.},
+label={lst:ch3:metric},basicstyle=\footnotesize\ttfamily]
+@mcp.tool()
+def metric(session_key: str, joint: str, side: str | None = None,
+           plane: str = "sagittal", metric: str = "rom",
+           frame_start: int | None = None, frame_end: int | None = None):
+    """ROM / picco flessione / picco estensione / media su un piano."""
+    spec = {"session_key": session_key, "joint": joint, "side": side,
+            "plane": plane, "metric": metric, ...}
+    ignota = _metrica_ignota(spec, metric)
+    if ignota:
+        return ignota
+    sig = _signal(joint, plane, side)
+    if not sig:
+        return _no_signal(spec)          # giunto o piano fuori vocabolario
+    fps, series, mask, n, fr, warns = _load(session_key, sig,
+                                            frame_start, frame_end)
+    val = core.scalar_metric(series, mask, metric)
+    return core.response(spec, sig, fps, n, fr, warns,
+                         None if val is None else {"value": val, "metric": metric},
+                         f"{metric} sul piano {plane}.")
+\end{lstlisting}
+
+Il testo libero che arriva all'agente, come le note dei riferimenti ed i nomi di
+sessione, viene troncato ed appiattito su una riga, così che un'istruzione
+nascosta in un nome o in una nota non arrivi all'agente come un'istruzione.
+
+\subsection{Gli strumenti}
+\label{subsec:ch3:strumenti}
+
+Gli strumenti si possono raggruppare in sei famiglie.
+
+Per orientarsi nell'archivio ci sono \texttt{list\_sessions}, che elenca le
+sessioni con pseudonimo, sport e data; \texttt{resolve\_session}, che trova una
+sessione partendo da un nome parziale e restituisce i candidati se il nome è
+ambiguo; e \texttt{describe\_session}, che dice quali giunti e piani sono
+interrogabili e con quale origine. Quest'ultimo è il più importante per il
+contratto di risposta, perché risponde alla domanda su che cosa si può chiedere a
+questi dati, che un linguaggio di interrogazione non saprebbe formulare.
+
+Per le misure su una sessione ci sono \texttt{metric}, che calcola escursione,
+picchi o media su un piano; \texttt{angular\_kinematics}, che restituisce velocità
+o accelerazione angolare; \texttt{peak\_timing}, che indica fotogramma ed istante
+del picco; \texttt{gesture\_detection}, che trova i tratti in cui un angolo supera
+o scende sotto una soglia per un numero minimo di fotogrammi;
+\texttt{relative\_phase}, che misura la fase relativa fra due giunti; ed infine
+\texttt{list\_cycles}, che elenca i cicli con il metodo che li ha prodotti.
+
+Per i confronti numerici ci sono \texttt{symmetry\_index}, l'indice di simmetria
+fra lato sinistro e destro; \texttt{compare\_sessions}, che confronta una metrica
+fra più sessioni prendendo la prima come riferimento; ed infine
+\texttt{compare\_sports}, che confronta la
+media di una metrica fra due sport.
+
+Per i confronti di forma, basati sui vettori, ci sono
+\texttt{find\_similar\_cycles}, che cerca in altre sessioni i cicli con
+l'andamento più simile; \texttt{compare\_session\_shapes}, che misura quanto due
+sessioni si somigliano giunto per giunto; \texttt{session\_repeatability}, che
+misura quanto il gesto si ripete uguale all'interno di una sessione; e
+\texttt{side\_shape\_symmetry}, che confronta la forma del lato destro con quella
+del sinistro.
+
+Per il giudizio e la visualizzazione ci sono \texttt{list\_alerts}, che
+restituisce gli scostamenti calcolati al caricamento con fonte, gravità,
+copertura e provenienza, e \texttt{visualize\_session}, che apre il
+visualizzatore sulla sessione esternamente.
+
+Per il caricamento infine ci sono \texttt{list\_sources}, che elenca le sorgenti
+presenti nelle cartelle ammesse con il loro stato, ed \texttt{ingest\_session},
+che converte e carica una sorgente direttamente dalla conversazione.
+
+\subsection{Il caricamento dalla conversazione}
+\label{subsec:ch3:ingest}
+
+I due strumenti di caricamento sono spenti se non vengono abilitati
+esplicitamente dall'utente e rispondono con un rifiuto spiegato nel caso in cui siano spenti. 
+La sorgente si indica per nome e deve trovarsi in una cartella ammessa perché un allegato è un
+flusso di byte nel contesto del modello e non un percorso sulla macchina del
+server. L'elenco delle sorgenti mostra tre stati: da convertire, convertita
+ma non caricata e già nel database.
+
+Conversione e caricamento girano come sottoprocessi e solo il caricamento riceve
+nel proprio ambiente la credenziale di scrittura, mentre la connessione del server
+resta di sola lettura. Se la sessione resta senza un gesto(sport) dichiarato, lo
+strumento si ferma ed elenca i gesti ammessi, perché il gesto decide come si
+segmenta e quali riferimenti si applicano. Terminato il caricamento, lo strumento
+controlla con la propria connessione di sola lettura che la sessione esista
+realmente prima di dichiarare il successo, ed ogni tentativo finisce in un
+registro che non passa dal modello. Il rifiuto sul gesto è riportato nel
+Listato~\ref{lst:ch3:ingest}.
+
+\begin{lstlisting}[language=Python,caption={Il rifiuto di
+\texttt{ingest\_session} quando il gesto non è dichiarato, in forma ridotta.},
+label={lst:ch3:ingest},basicstyle=\footnotesize\ttfamily]
+c3d = DATA_ROOT / f"{nome}.c3d"
+if _sport_del_canonico(c3d) is None and sport is None and not only_convert:
+    return {"input_spec": spec,
+            "selected_data": {"sorgente": nome, "passo_fallito": "sport",
+                              "esito": "fallito", "c3d": str(c3d)},
+            "result": None,
+            "explain": "Conversione riuscita ma nessun gesto e' stato "
+                       "riconosciuto: la sorgente non lo dichiara e non "
+                       "ne hai passato uno.",
+            "azione_suggerita": f"Richiama con sport fra "
+                                f"{', '.join(bodyparts.SPORTS)}.",
+            "warnings": ["sport_mancante"]}
+\end{lstlisting}
+
+\section{Il rendering 3D e la visualizzazione degli alert}
+\label{sec:ch3:rendering}
+
+Il visualizzatore ricostruisce un manichino a partire dai centri articolari del
+file canonico dove ogni segmento è un volume fra due punti con spessori
+proporzionati alla lunghezza del tronco del soggetto. Il manichino mostra solo ciò
+che il file contiene, quindi una ripresa senza gambe produce un manichino senza
+gambe. Il visualizzatore gira come processo separato, viene aperto su richiesta
+dall'agente o da riga di comando e può anche scrivere un singolo fotogramma su
+file senza aprire nessuna finestra.
+
+Il giunto fuori dai riferimenti diventa rosso solo nei fotogrammi che producono
+lo scostamento, con una freccia dello stesso colore che lo indica. Poiché il giudizio è di sessione,
+il visualizzatore ricalcola i fotogrammi con le stesse funzioni e gli stessi
+riferimenti del caricamento, quindi funziona anche su un file mai caricato. Un eccesso sui picchi si localizza nei
+fotogrammi che superano la soglia, ed un'escursione eccessiva nei due fotogrammi
+estremi da cui è calcolata. Una carenza, come un'escursione più piccola
+dell'atteso, appartiene invece all'intera serie e colorarne gli estremi
+indicherebbe proprio i momenti di massimo movimento, per questo le carenze restano
+in legenda come proprietà della sessione. La Figura~\ref{fig:ch3:rendering} mostra
+lo stesso fotogramma con gli alert spenti ed accesi.
+
+\begin{figure}[H]
+\centering
+\subfloat[Senza alert.]{\includegraphics[height=7.5cm]{figures/cap3/cap3_rendering_senza_alert_ritaglio.png}}\hspace{1.5cm}
+\subfloat[Con alert.]{\includegraphics[height=7.5cm]{figures/cap3/cap3_rendering_alert_ritaglio.png}}
+\caption{Lo stesso fotogramma (26) della sessione \texttt{Ref02\_ramp10\_shoes35},
+vista dal fianco sinistro. Con gli alert attivi l'anca sinistra, che flette
+59.7 gradi contro un massimo atteso di 40, si ingrandisce, diventa rossa ed è
+indicata da una freccia; l'intensità del rosso cresce con la gravità.}
+\label{fig:ch3:rendering}
+\end{figure}
+
+\section{La sicurezza}
+\label{sec:ch3:sicurezza}
+
+La sicurezza è una proprietà trasversale del sistema e riguarda l'ambito locale,
+dove database e server girano sulla stessa macchina senza essere esposti ad
+Internet.
+
+\paragraph{Privilegio minimo.} Ci sono due ruoli con permessi disgiunti. Il ruolo
+di interrogazione, usato dal server, ha solo permessi di lettura. Il ruolo di
+caricamento scrive i dati di sessione e può aggiornare i riferimenti, però non può
+cancellarli.
+
+\paragraph{Permessi per colonna.} Il percorso del file sul disco è escluso dal
+ruolo di interrogazione, perché non ha nessun motivo di arrivare al contesto di un
+modello.
+
+\paragraph{Pseudonimizzazione.} L'anagrafica è l'unica tabella con dati
+personali e nessun ruolo applicativo può leggerla e le sessioni ne portano solo
+uno pseudonimo.
+
+\paragraph{Cifratura del canale.} La connessione richiede TLS e, se TLS non è
+disponibile, fallisce senza ripiegare su un canale in chiaro.
+
+\paragraph{Nessun interprete.} Le soglie degli alert sono dati in una struttura
+chiusa quindi non esistono file di regole da confinare né errori di un parser da
+cui possano uscire frammenti di file.
+
+\paragraph{Testo come dato.} Il testo libero diretto all'agente viene troncato ed
+appiattito su una sola riga, così da impedire istruzioni nascoste(prompt injection).
+
+Resta un limite dichiarato che riguarda la chiave di sessione. La chiave nasce
+dal nome del file e l'agente la vede sempre, quindi la pseudonimizzazione dipende
+dal fatto che chi carica non usi nomi che contengono l'identità della persona.
+Inoltre due sorgenti con lo stesso nome producono la stessa chiave, e l'ultima
+caricata sostituisce la precedente senza nessun avviso. Con la scrittura dalla
+conversazione abilitata, infine, il processo del server conosce la credenziale di
+scrittura anche se la passa solo al sottoprocesso di caricamento, una situazione
+accettabile in ambito locale.
+
+\section{Stack tecnologico e messa in opera}
+\label{sec:ch3:stack}
+
+Il codice è scritto in Python, con numpy e scipy per la cinematica, ezc3d per
+leggere e scrivere i file C3D, psycopg e pgvector per il database, la libreria MCP
+per il server ed Open3D per il visualizzatore. Il visualizzatore ha un ambiente
+separato, perché Open3D non serve a conversione, caricamento ed interrogazione.
+
+La disposizione dei componenti è mostrata nella
+Figura~\ref{fig:ch3:messa-in-opera}. Il database è l'immagine PostgreSQL 16 con
+pgvector, avviata con Docker Compose e pubblicata solo sull'indirizzo locale, ed
+al primo avvio il container crea lo schema ed i ruoli, a cui vengono poi
+assegnate le password, mentre la variante con TLS monta i certificati. Un secondo
+servizio, avviato solo su richiesta, esegue conversione e caricamento da riga di
+comando, cioè l'elenco delle sorgenti, la conversione di un file o di una cartella
+con il gesto dichiarato, il caricamento nel database ed il caricamento iniziale
+dei riferimenti.
+
+\begin{figure}[htbp]
+\centering
+\includegraphics[width=0.95\textwidth]{figures/cap3/cap3_messa_in_opera.pdf}
+\caption{Messa in opera in ambito locale. Il server MCP comunica con il client
+sullo standard input e output e con il database su TLS, con il ruolo di sola
+lettura; i sottoprocessi di caricamento usano il ruolo di scrittura.}
+\label{fig:ch3:messa-in-opera}
+\end{figure}
+
+Un agente si collega al server dichiarandolo nella configurazione MCP del proprio
+client, insieme alla stringa di connessione del ruolo di sola lettura. Due
+variabili abilitano il caricamento dalla conversazione ed indicano le cartelle
+ammesse, mentre una terza può disattivare il visualizzatore su una macchina
+condivisa.
+
+\section{Verifica}
+\label{sec:ch3:verifica}
+
+La suite conta 128 test automatici, che si possono eseguire senza un server
+PostgreSQL perché le istruzioni SQL vengono provate contro un cursore finto ed un
+controllo confronta ogni stringa SQL del codice con lo schema reale. Il criterio è
+che ogni difetto risolto abbia un test che ne impedisca il ritorno, come la soglia
+a quattro gradi sull'errore di mappatura.

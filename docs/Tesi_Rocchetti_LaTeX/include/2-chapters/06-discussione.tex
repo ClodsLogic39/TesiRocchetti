@@ -1,2 +1,244 @@
-\chapter{Discussione interna: miglioramenti realistici e applicabili}
+\chapter{Limiti e sviluppi futuri}
 \label{chap:discussione}
+
+Questo capitolo accoppia ogni limite misurato allo sviluppo che lo
+affronterebbe provando a risolverlo. Quando uno sviluppo tocca la sicurezza, indica anche che cosa
+servirebbe perché le garanzie del Paragrafo\ref{sec:ch3:sicurezza} continuino a
+valere.
+
+\section{La leggibilità dei dati grezzi ed il modello di riconoscimento}
+\label{sec:ch6:ml-riconoscimento}
+
+Il riconoscimento della sorgente, descritto nel
+Paragrafo\ref{subsec:ch3:riconoscimento}, funziona per convenzioni note, quindi è
+verificabile ma non copre nulla che non sia già stato registrato. Un file con
+etichette che non si possono interpretare senza la convenzione del laboratorio che
+le ha prodotte viene rifiutato inoltre un formato di ingresso nuovo richiederebbe un
+intervento sul codice. Questo comportamento è corretto perché indovinare
+riprodurrebbe l'errore del Paragrafo\ref{sec:ch3:angoli} senza un modello clinico
+a fianco con cui accorgersene, però limita i dati che il sistema può leggere.
+
+Lo sviluppo proposto è un modello di machine learning che deduca l'identità
+anatomica di un punto dalla geometria e dal movimento, indipendentemente dal nome
+assegnato da chi ha prodotto il file. L'informazione necessaria è già nei dati, le
+distanze fra punti dello stesso segmento sono stabili nel tempo, il corpo è
+approssimativamente simmetrico ed un punto distale si muove in modo diverso da uno prossimale. Anche il materiale
+di addestramento esiste già, cioè le sessioni convertite con la corrispondenza
+registrata fra etichetta originale e punto canonico.
+
+Le conseguenze di questo sviluppo sarebbero due. Se l'identità dei punti non dipende dai nomi,
+aggiungere un formato significa solamente saperne leggere i numeri integrando la
+libreria adatta, quindi i formati diffusi nell'animazione, le uscite dei sistemi
+markerless ed altre librerie di stima di posa diventerebbero sorgenti ugualmente utilizzabili.
+Inoltre poter leggere qualunque archivio pubblico di pose cambierebbe di molto la scala dei
+dati disponibili.
+
+Il vincolo da mantenere è che un riconoscimento appreso può sbagliare 
+quindi il modello va affiancato al riconoscimento per convenzioni, non lo
+sostituisce. Il modello propone un'assegnazione con la propria confidenza, sopra
+una soglia alta la proposta viene sottoposta a chi carica, mentre sotto la soglia
+il file resta rifiutato. I punti identificati in questo modo porterebbero inoltre
+una provenienza propria.
+
+\section{La località del software ed il lancio in rete}
+\label{sec:ch6:mcp-online}
+
+Oggi server e database funzionano in locale ed una sessione si carica indicandone
+il nome in una cartella ammessa perché il server legge solo il proprio
+filesystem. Lo sviluppo naturale è un server raggiungibile in rete che accetti la
+sessione grezza inserita direttamente nella chat, dove l'utente allega il file.
+L'agente lo passa allo strumento, la pipeline lo converte e lo carica, la sessione
+diventa interrogabile nella stessa conversazione. Questo lavoro riguarda ogni
+garanzia esistente, oltre al trasporto.
+
+\paragraph{Ricezione del contenuto.} Il file arriverebbe come flusso di byte, che
+andrebbe confinato in un'area temporanea con limiti su dimensione, frequenza e
+formato. Poiché un file malformato può far terminare la libreria nativa che legge
+il C3D, la conversione resterebbe inoltre isolata in un sottoprocesso.
+
+\paragraph{Identità di chi carica.} Servirebbero l'autenticazione degli agenti ed
+una nozione di proprietà delle sessioni. Con chiavi uniche nell'archivio, due
+utenti che caricano file con lo stesso nome si sovrascriverebbero, quindi una
+chiave di sessione opaca generata al caricamento, con il nome originale
+conservato come metadato non visibile all'agente, diventa un prerequisito. 
+Risolve anche il limite di pseudonimizzazione della chiave attuale.
+
+\paragraph{Il database in rete.} Le garanzie locali restano valide però non
+bastano più, perché cadono tre assunzioni. La prima è che chi raggiunge il
+database sia legittimo, in locale accedere alla porta significa accedere alla
+macchina mentre in rete la password del ruolo diventa l'unica barriera. La seconda
+è che i dati siano pochi e di prova, invece un archivio condiviso contiene persone
+reali ed il legame fra pseudonimo ed identità diventa un bersaglio. La terza è che
+il volume delle richieste sia benigno, mentre il costo della ricerca completa
+presuppone un solo interrogante alla volta. La Tabella\ref{tab:ch6:sicurezza}
+associa a ciascuna minaccia la sua contromisura.
+
+\begin{table}[htbp]
+\centering
+\caption{Contromisure per un'esposizione in rete associate alla minaccia che
+affrontano.}
+\label{tab:ch6:sicurezza}
+\begin{tabularx}{\textwidth}{XXl}
+\toprule
+\textbf{Minaccia} & \textbf{Contromisura} \\
+\midrule
+Accesso non autorizzato alla porta del database &
+  Il database non è esposto: solo il server applicativo lo raggiunge, in rete
+  privata \\
+Credenziale applicativa compromessa &
+  Autenticazione a certificato client, rotazione periodica, segreti da un
+  gestore esterno \\
+Agente non identificato &
+  Autenticazione degli agenti e proprietà delle sessioni \\
+Esaurimento di risorse &
+  Limiti sulla frequenza delle richieste e sul costo per interrogazione \\
+Correlazione fra pseudonimo e identità &
+  Chiave di sessione opaca generata al caricamento \\
+Compromissione dell'host &
+  Cifratura a riposo del volume & da fare \\
+Assenza di tracciabilità &
+  Registro degli accessi per agente e per sessione \\
+\bottomrule
+\end{tabularx}
+\end{table}
+
+La scrittura dalla conversazione, che in locale tiene la credenziale di scrittura
+nel processo del server, in rete ne diventerebbe la parte più esposta. La strada
+corretta è separare i due processi, con un servizio di caricamento che possiede
+la propria credenziale e che il server di interrogazione può soltanto sollecitare.
+
+\paragraph{Un'interfaccia web.} Con il software online diventa utile anche
+un'interfaccia web per caricare le sessioni e gestire i soggetti senza passare
+dalla chat, compresa la cancellazione su richiesta dei dati di una persona. Anche
+questa interfaccia richiederebbe autenticazione ed un accesso all'anagrafica
+riservato ad un ruolo da amministratore.
+
+\section{Gli sport e le condizioni coperti dagli alert}
+\label{sec:ch6:sport}
+
+Gli intervalli di letteratura coprono oggi due sport, cammino e corsa, e
+descrivono la condizione in piano. Il sistema conosce il gesto ma non la
+condizione, quindi applica gli stessi intervalli anche alle prove in pendenza, che
+sono quattro delle sei condizioni del dataset di laboratorio\cite{vielemeyer2026}.
+
+Su una prova in piano di un soggetto, ad esempio, \texttt{list\_alerts} non
+riporta nessuno scostamento, mentre sulla prova dello stesso soggetto su rampa al
+10\% ne riporta sette, tutti su serie misurate con copertura 1.00, come mostra la
+Tabella\ref{tab:ch6:rampa}.
+
+\begin{table}[htbp]
+\centering
+\caption{Gli scostamenti su una singola prova su rampa al 10\%. La stessa prova
+in piano dello stesso soggetto non ne produce nessuno. Valori in gradi.}
+\label{tab:ch6:rampa}
+\begin{tabular}{llrrl}
+\toprule
+\textbf{Giunto} & \textbf{Metrica} & \textbf{Osservato} &
+  \textbf{Atteso} & \textbf{Direzione} \\
+\midrule
+ginocchio sx & escursione  & 78.60 & 50--75  & sopra \\
+ginocchio sx & picco max   & 78.56 & 50--75  & sopra \\
+ginocchio dx & escursione  & 76.75 & 50--75  & sopra \\
+anca sx      & escursione  & 28.88 & 30--60  & sotto \\
+anca dx      & escursione  & 29.28 & 30--60  & sotto \\
+anca sx      & picco min   & $-4.60$ & $-25$--$-5$ & sopra \\
+caviglia sx  & picco max   & 20.86 & 5--20   & sopra \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+Gli scostamenti non vanno tutti nella stessa direzione, il ginocchio flette più
+dell'atteso e l'anca meno, che è esattamente il profilo di un cammino in pendenza.
+Sull'intero archivio l'andamento è lo stesso, con 1.64 segnalazioni per sessione
+in piano, 4.62 su rampa al 7.5\% e 6.21 al 10\%, come già visto nel
+Paragrafo\ref{subsec:ch4:demo-statistica}. Sulle rampe quindi gli avvisi
+descrivono il protocollo più che il soggetto, perché il sistema applica un
+riferimento ad un caso che quel riferimento non copre, e lo dichiara nella fonte
+di ogni avviso.
+
+Per questo limite gli sviluppi possibili sono due. Il primo è estendere il file dei riferimenti con
+un ambito per condizione, come la pendenza, e con nuovi gesti accompagnati dai
+relativi dati di letteratura come è già stato fatto per cammino e corsa. Nella
+struttura questo è semplice, però richiede valori di letteratura per ogni
+condizione, che è un lavoro di dominio.
+
+Il secondo è affiancare ai valori fissi un secondo livello di sessioni di
+riferimento, come le
+sessioni precedenti della stessa persona, oppure un insieme di sessioni per uno
+sport non coperto dalla letteratura. L'infrastruttura esiste già, ma ci sono delle condizioni da rispettare. 
+Servono un ambito ed un'etichetta propri, così che non si confonda con un
+riferimento di letteratura;  serve un numero minimo di
+sessioni, perché una linea di base fatta di una sola prova coincide con la prova stessa.
+
+
+\section{Il visualizzatore esterno e la visualizzazione in chat}
+\label{sec:ch6:visualizzazione}
+
+Oggi il visualizzatore apre una finestra nativa sulla macchina che ospita il
+server, fuori dalla conversazione, e questo ha senso quando chi interroga e chi
+ospita sono la stessa persona ma non per un agente remoto. Lo sviluppo è una
+visualizzazione dentro la chat, restituita come immagine o come vista
+interattiva, con la possibilità di andare direttamente ai fotogrammi voluti, ad
+esempio quelli in cui compare un alert. Il visualizzatore sa già scrivere un
+fotogramma su file senza aprire finestre e sa già calcolare in quali fotogrammi si
+produce uno scostamento, quindi lo sviluppo consiste nel portare queste capacità direttamente 
+nella risposta dello strumento.
+
+\section{Difetti noti degli strumenti e correzioni previste}
+\label{sec:ch6:difetti}
+
+\paragraph{Il ciclo interrogato non è scelto per rappresentatività.} La ricerca di
+cicli simili usa il ciclo indicato, che per impostazione è il primo, e su una
+sessione con molta variabilità questa scelta conta. La correzione è proporre il
+ciclo più vicino alla mediana della sessione, oppure avvisare quando la
+dispersione fra i cicli è alta.
+
+\paragraph{Gli alert usano l'intera prova.} Le metriche giudicate al caricamento
+sono calcolate sull'intera registrazione, compresi i fotogrammi fuori dai cicli.
+Su una prova di laboratorio con due soli cicli, ad esempio, il ginocchio sinistro
+arriva a $-12.3$ gradi sulla prova ed a $-10.7$ sul ciclo, ed uno degli
+scostamenti cade prima dell'inizio del primo ciclo. La correzione coincide con la
+valutazione per ciclo indicata sopra, con la sessione riportata come sintesi.
+
+\paragraph{Escursioni oltre 180 gradi non segnalate.} Nelle riprese da telefono
+alcuni angoli derivati superano i $\pm180$ gradi e producono escursioni
+fisicamente impossibili. Nella sessione \texttt{running\_\allowbreak 20260220\_\allowbreak 121922}, ad
+esempio, il tronco arriva a 185 gradi e la spalla sinistra a 212, e né la
+conversione né gli strumenti lo rilevano. La correzione è svolgere gli angoli prima del
+calcolo delle metriche ed aggiungere un controllo di plausibilità che segnali con
+un avviso le escursioni fuori dai limiti fisici.
+
+\paragraph{La ripetibilità mescola i cicli dei due lati.} Quando i cicli vengono
+dal ripiego sulla spalla, la sessione contiene cicli segmentati sull'una e
+sull'altra spalla, spesso sovrapposti, e lo strumento
+\texttt{session\_repeatability} li confronta tutti per ogni giunto, quindi una parte della distanza misura in realtà
+lo sfasamento fra i due lati. La correzione è confrontare per ogni giunto solo i
+cicli del lato corrispondente, o almeno dichiarare nella risposta da quale lato vengono.
+
+\paragraph{Il gesto può essere scelto dall'agente.} Il caricamento rifiuta una
+sorgente senza gesto, però il controllo riguarda la chiamata, quindi un agente che
+deduce il gesto e lo passa allo strumento carica senza chiedere conferma, come è
+successo con entrambi gli agenti nel caso 1 del
+Paragrafo\ref{subsec:ch4:caso1}. Il server non può sapere chi abbia scelto il
+gesto, però può renderlo visibile riportandolo nella risposta come gesto da
+confermare quando la sorgente non lo dichiara, così che l'agente debba
+presentarlo all'utente.
+
+\section{I limiti dei dati}
+\label{sec:ch6:dati}
+
+\paragraph{Le riprese da telefono non contengono l'arto inferiore.} Nelle riprese
+usate in questo lavoro l'inquadratura esclude le gambe, quindi quelle sessioni
+sono dati di tronco ed arto superiore. Il sistema dichiara le assenze, però non può
+recuperare ciò che la ripresa non contiene. Lo sviluppo è un protocollo di ripresa
+con il soggetto intero nel fotogramma, ad una distanza tale che occupi circa un
+terzo dell'immagine con i piedi dentro il bordo.
+
+\paragraph{Il modello di segmento.} Con i soli centri articolari la caviglia porta
+uno scostamento sistematico di circa dodici gradi in assenza di una prova statica,
+quindi le escursioni restano confrontabili mentre i valori assoluti no. L'anca
+conserva un guadagno di scala di circa 1.25, perché il bacino nasce dai centri
+articolari e non dalle spine iliache, ed il varo-valgo del ginocchio non è
+osservabile. Tutti questi limiti sono dichiarati nel dato, e lo sviluppo è usare
+marker aggiuntivi o una prova statica quando la sorgente li fornisce.
+

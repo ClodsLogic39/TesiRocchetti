@@ -1,2 +1,65 @@
 \chapter{Conclusioni}
 \label{chap:conclusioni}
+
+\section{Contributi}
+\label{sec:ch7:contributi}
+
+Questo lavoro ha costruito un sistema che rende il dato di movimento
+interrogabile da un agente conversazionale senza perdere il controllo sulla sua qualità. I
+contributi seguono i cinque obiettivi presentati nell'introduzione.
+
+\paragraph{O1. Una pipeline verso un formato canonico.} Le sorgenti di
+laboratorio e le riprese da telefono vengono ricondotte a diciotto centri
+articolari e scritte in un C3D esteso che porta con sé provenienza, copertura,
+assenze e cicli. Il file è definitivo ed il database si ricostruisce a partire da
+esso, quindi i risultati sono riproducibili. Gli angoli ricalcolati riproducono
+inoltre quelli di un modello clinico entro 3.2 gradi su 118 prove.
+
+\paragraph{O2. Un archivio con la forma dei gesti.} Ogni ciclo diventa un vettore
+a 32 componenti che descrive solo la forma, e su questo vettore si basano la
+ricerca di gesti simili, la ripetibilità e la simmetria. La scelta dei cicli ed i
+giunti esclusi per copertura insufficiente sono dichiarati. Nei casi d'uso la
+ricerca dei cicli simili ha restituito per primi cinque cicli in piano della
+stessa persona su 646 sessioni confrontate, mentre la ripetibilità di una ripresa
+da telefono ha mostrato i limiti dei cicli ricavati dal ripiego.
+
+\paragraph{O3. Alert dichiarativi con fonti.} Le soglie sono dati in un file
+chiuso, con 76 intervalli e le loro fonti, la valutazione avviene al caricamento
+ed ogni avviso riporta fonte, copertura e provenienza. Su un campione di 198
+sessioni gli alert per sessione crescono con la pendenza, da 1.67 in piano a 6.02
+sulla rampa al 10\%, e la stessa prova caricata come corsa passa da zero a tre
+scostamenti senza che cambi nessun valore.
+
+\paragraph{O4. Un server MCP con contratto di risposta.} Venti strumenti
+restituiscono la stessa struttura, che dichiara segnale, intervallo, formula,
+copertura ed avvisi, e rifiutano ciò che il dato non permette di dire. Nei tre
+casi d'uso Claude e Codex hanno riportato gli stessi valori del server e gli
+stessi avvisi, nessuno dei due ha stimato il segnale che mancava.
+
+\paragraph{O5. La visualizzazione degli scostamenti.} Il manichino colora il
+giunto fuori dai riferimenti solo nei fotogrammi che producono lo scostamento, e
+lascia in legenda le carenze che nessun fotogramma è in grado di localizzare.
+
+\section{Che cosa il lavoro non dimostra}
+\label{sec:ch7:limiti}
+
+Il sistema non è validato clinicamente, applica gli intervalli di riferimento in
+modo tracciabile ma non ne giustifica l'uso diagnostico. Inoltre non migliora
+l'accuratezza di cattura, e su quell'asse resta indietro rispetto ai sistemi
+markerless. L'indipendenza dal modello linguistico riguarda i dati che l'agente
+riceve, quindi il contratto garantisce che il materiale su cui l'agente lavora
+contenga le proprie riserve. Che l'agente poi le riporti, e quanto vi aggiunga,
+dipende invece dal modello. Nei casi d'uso entrambi gli agenti le hanno riportate,
+però uno dei due ha aggiunto interpretazioni che il dato non sempre sosteneva.
+
+\section{Prospettive}
+\label{sec:ch7:prospettive}
+
+Una volta che il software dichiara ciò che non sa, il vincolo principale diventa
+la disponibilità di dati e di riferimenti. Lo sviluppo più utile è quindi quello
+che allarga i dati elaborabili, cioè il riconoscimento delle parti del corpo dalla
+loro geometria, seguito dall'estensione dei riferimenti ad altre condizioni ed
+altri sport. La messa online con il caricamento diretto dalla chat renderebbe
+infine il sistema utilizzabile da più persone, a condizione di estendere al
+servizio in rete tutte le garanzie di sicurezza che oggi valgono per l'uso locale
+e che sono discusse nel Paragrafo\ref{sec:ch6:mcp-online}.

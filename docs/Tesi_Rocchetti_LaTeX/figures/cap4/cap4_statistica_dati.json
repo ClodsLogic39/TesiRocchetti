@@ -1,0 +1,2448 @@
+{
+ "sessioni": {
+  "piano": 66,
+  "rampa75": 66,
+  "rampa10": 66
+ },
+ "severita": {
+  "piano": {
+   "critical": 19,
+   "warning": 69,
+   "info": 22
+  },
+  "rampa75": {
+   "critical": 30,
+   "warning": 234,
+   "info": 29
+  },
+  "rampa10": {
+   "critical": 20,
+   "warning": 338,
+   "info": 39
+  }
+ },
+ "tipi": {
+  "piano": {
+   "knee|sagittal|peak_min|warning": 48,
+   "knee|sagittal|peak_min|critical": 19,
+   "hip|frontal|rom|info": 16,
+   "hip|sagittal|peak_max|warning": 12,
+   "ankle|sagittal|peak_max|warning": 6,
+   "hip|sagittal|peak_min|warning": 1,
+   "trunk|sagittal|peak_max|info": 6,
+   "ankle|sagittal|rom|warning": 2
+  },
+  "rampa75": {
+   "hip|sagittal|peak_max|warning": 70,
+   "hip|sagittal|rom|warning": 51,
+   "ankle|sagittal|rom|warning": 13,
+   "knee|sagittal|peak_max|warning": 5,
+   "knee|sagittal|rom|warning": 11,
+   "ankle|sagittal|peak_max|warning": 6,
+   "knee|sagittal|peak_min|critical": 29,
+   "knee|sagittal|peak_min|warning": 39,
+   "hip|sagittal|peak_min|warning": 32,
+   "ankle|sagittal|peak_max|critical": 1,
+   "spine|frontal|rom|info": 5,
+   "hip|frontal|rom|info": 15,
+   "ankle|sagittal|peak_min|warning": 7,
+   "spine|transverse|rom|info": 1,
+   "trunk|sagittal|peak_max|info": 8
+  },
+  "rampa10": {
+   "trunk|sagittal|peak_max|info": 10,
+   "hip|sagittal|peak_max|warning": 71,
+   "hip|sagittal|rom|warning": 92,
+   "hip|sagittal|peak_min|warning": 50,
+   "knee|sagittal|peak_max|warning": 16,
+   "knee|sagittal|rom|warning": 39,
+   "ankle|sagittal|peak_max|warning": 6,
+   "knee|sagittal|peak_min|warning": 34,
+   "knee|sagittal|peak_min|critical": 20,
+   "hip|frontal|rom|info": 22,
+   "ankle|sagittal|rom|warning": 16,
+   "ankle|sagittal|peak_min|warning": 14,
+   "spine|frontal|rom|info": 6,
+   "spine|transverse|rom|info": 1
+  }
+ },
+ "campione": [
+  {
+   "sessione": "Ref01_sss_le_shoes07",
+   "soggetto": "Ref01",
+   "superficie": "piano",
+   "direzione": "discesa",
+   "alert": {
+    "critical": 0,
+    "warning": 0,
+    "info": 0,
+    "data_quality": 0
+   }
+  },
+  {
+   "sessione": "Ref01_sss_le_shoes09",
+   "soggetto": "Ref01",
+   "superficie": "piano",
+   "direzione": "discesa",
+   "alert": {
+    "critical": 0,
+    "warning": 0,
+    "info": 0,
+    "data_quality": 0
+   }
+  },
+  {
+   "sessione": "Ref01_sss_le_shoes11",
+   "soggetto": "Ref01",
+   "superficie": "piano",
+   "direzione": "discesa",
+   "alert": {
+    "critical": 0,
+    "warning": 0,
+    "info": 0,
+    "data_quality": 0
+   }
+  },
+  {
+   "sessione": "Ref01_sss_le_shoes06",
+   "soggetto": "Ref01",
+   "superficie": "piano",
+   "direzione": "salita",
+   "alert": {
+    "critical": 0,
+    "warning": 0,
+    "info": 0,
+    "data_quality": 0
+   }
+  },
+  {
+   "sessione": "Ref01_sss_le_shoes10",
+   "soggetto": "Ref01",
+   "superficie": "piano",
+   "direzione": "salita",
+   "alert": {
+    "critical": 0,
+    "warning": 0,
+    "info": 0,
+    "data_quality": 0
+   }
+  },
+  {
+   "sessione": "Ref01_sss_le_shoes12",
+   "soggetto": "Ref01",
+   "superficie": "piano",
+   "direzione": "salita",
+   "alert": {
+    "critical": 0,
+    "warning": 0,
+    "info": 0,
+    "data_quality": 0
+   }
+  },
+  {
+   "sessione": "Ref01_sss_ramp10_shoes05",
+   "soggetto": "Ref01",
+   "superficie": "rampa10",
+   "direzione": "discesa",
+   "alert": {
+    "critical": 0,
+    "warning": 7,
+    "info": 0,
+    "data_quality": 0
+   }
+  },
+  {
+   "sessione": "Ref01_sss_ramp10_shoes07",
+   "soggetto": "Ref01",
+   "superficie": "rampa10",
+   "direzione": "discesa",
+   "alert": {
+    "critical": 0,
+    "warning": 6,
+    "info": 0,
+    "data_quality": 0
+   }
+  },
+  {
+   "sessione": "Ref01_sss_ramp10_shoes09",
+   "soggetto": "Ref01",
+   "superficie": "rampa10",
+   "direzione": "discesa",
+   "alert": {
+    "critical": 0,
+    "warning": 6,
+    "info": 0,
+    "data_quality": 0
+   }
+  },
+  {
+   "sessione": "Ref01_sss_ramp10_shoes04",
+   "soggetto": "Ref01",
+   "superficie": "rampa10",
+   "direzione": "salita",
+   "alert": {
+    "critical": 0,
+    "warning": 4,
+    "info": 1,
+    "data_quality": 0
+   }
+  },
+  {
+   "sessione": "Ref01_sss_ramp10_shoes06",
+   "soggetto": "Ref01",
+   "superficie": "rampa10",
+   "direzione": "salita",
+   "alert": {
+    "critical": 0,
+    "warning": 4,
+    "info": 1,
+    "data_quality": 0
+   }
+  },
+  {
+   "sessione": "Ref01_sss_ramp10_shoes08",
+   "soggetto": "Ref01",
+   "superficie": "rampa10",
+   "direzione": "salita",
+   "alert": {
+    "critical": 0,
+    "warning": 4,
+    "info": 1,
+    "data_quality": 0
+   }
+  },
+  {
+   "sessione": "Ref01_sss_ramp75_shoes14",
+   "soggetto": "Ref01",
+   "superficie": "rampa75",
+   "direzione": "discesa",
+   "alert": {
+    "critical": 0,
+    "warning": 3,
+    "info": 0,
+    "data_quality": 0
+   }
+  },
+  {
+   "sessione": "Ref01_sss_ramp75_shoes16",
+   "soggetto": "Ref01",
+   "superficie": "rampa75",
+   "direzione": "discesa",
+   "alert": {
+    "critical": 0,
+    "warning": 2,
+    "info": 0,
+    "data_quality": 0
+   }
+  },
+  {
+   "sessione": "Ref01_sss_ramp75_shoes18",
+   "soggetto": "Ref01",
+   "superficie": "rampa75",
+   "direzione": "discesa",
+   "alert": {
+    "critical": 0,
+    "warning": 2,
+    "info": 0,
+    "data_quality": 0
+   }
+  },
+  {
+   "sessione": "Ref01_sss_ramp75_shoes11",
+   "soggetto": "Ref01",
+   "superficie": "rampa75",
+   "direzione": "salita",
+   "alert": {
+    "critical": 0,
+    "warning": 4,
+    "info": 0,
+    "data_quality": 0
+   }
+  },
+  {
+   "sessione": "Ref01_sss_ramp75_shoes13",
+   "soggetto": "Ref01",
+   "superficie": "rampa75",
+   "direzione": "salita",
+   "alert": {
+    "critical": 0,
+    "warning": 3,
+    "info": 0,
+    "data_quality": 0
+   }
+  },
+  {
+   "sessione": "Ref01_sss_ramp75_shoes15",
+   "soggetto": "Ref01",
+   "superficie": "rampa75",
+   "direzione": "salita",
+   "alert": {
+    "critical": 0,
+    "warning": 2,
+    "info": 0,
+    "data_quality": 0
+   }
+  },
+  {
+   "sessione": "Ref02_le_sss_shoes15",
+   "soggetto": "Ref02",
+   "superficie": "piano",
+   "direzione": "discesa",
+   "alert": {
+    "critical": 2,
+    "warning": 2,
+    "info": 0,
+    "data_quality": 0
+   }
+  },
+  {
+   "sessione": "Ref02_le_sss_shoes17",
+   "soggetto": "Ref02",
+   "superficie": "piano",
+   "direzione": "discesa",
+   "alert": {
+    "critical": 1,
+    "warning": 2,
+    "info": 0,
+    "data_quality": 0
+   }
+  },
+  {
+   "sessione": "Ref02_le_sss_shoes20",
+   "soggetto": "Ref02",
+   "superficie": "piano",
+   "direzione": "discesa",
+   "alert": {
+    "critical": 2,
+    "warning": 2,
+    "info": 0,
+    "data_quality": 0
+   }
+  },
+  {
+   "sessione": "Ref02_le_sss_shoes14",
+   "soggetto": "Ref02",
+   "superficie": "piano",
+   "direzione": "salita",
+   "alert": {
+    "critical": 0,
+    "warning": 2,
+    "info": 0,
+    "data_quality": 0
+   }
+  },
+  {
+   "sessione": "Ref02_le_sss_shoes16",
+   "soggetto": "Ref02",
+   "superficie": "piano",
+   "direzione": "salita",
+   "alert": {
+    "critical": 2,
+    "warning": 2,
+    "info": 0,
+    "data_quality": 0
+   }
+  },
+  {
+   "sessione": "Ref02_le_sss_shoes18",
+   "soggetto": "Ref02",
+   "superficie": "piano",
+   "direzione": "salita",
+   "alert": {
+    "critical": 0,
+    "warning": 2,
+    "info": 0,
+    "data_quality": 0
+   }
+  },
+  {
+   "sessione": "Ref02_ramp10_shoes18",
+   "soggetto": "Ref02",
+   "superficie": "rampa10",
+   "direzione": "discesa",
+   "alert": {
+    "critical": 0,
+    "warning": 2,
+    "info": 0,
+    "data_quality": 0
+   }
+  },
+  {
+   "sessione": "Ref02_ramp10_shoes20",
+   "soggetto": "Ref02",
+   "superficie": "rampa10",
+   "direzione": "discesa",
+   "alert": {
+    "critical": 0,
+    "warning": 1,
+    "info": 0,
+    "data_quality": 0
+   }
+  },
+  {
+   "sessione": "Ref02_ramp10_shoes22",
+   "soggetto": "Ref02",
+   "superficie": "rampa10",
+   "direzione": "discesa",
+   "alert": {
+    "critical": 0,
+    "warning": 4,
+    "info": 0,
+    "data_quality": 0
+   }
+  },
+  {
+   "sessione": "Ref02_ramp10_shoes21",
+   "soggetto": "Ref02",
+   "superficie": "rampa10",
+   "direzione": "salita",
+   "alert": {
+    "critical": 1,
+    "warning": 6,
+    "info": 0,
+    "data_quality": 0
+   }
+  },
+  {
+   "sessione": "Ref02_ramp10_shoes23",
+   "soggetto": "Ref02",
+   "superficie": "rampa10",
+   "direzione": "salita",
+   "alert": {
+    "critical": 1,
+    "warning": 6,
+    "info": 0,
+    "data_quality": 0
+   }
+  },
+  {
+   "sessione": "Ref02_ramp10_shoes25",
+   "soggetto": "Ref02",
+   "superficie": "rampa10",
+   "direzione": "salita",
+   "alert": {
+    "critical": 1,
+    "warning": 7,
+    "info": 0,
+    "data_quality": 0
+   }
+  },
+  {
+   "sessione": "Ref02_ramp75_shoes09",
+   "soggetto": "Ref02",
+   "superficie": "rampa75",
+   "direzione": "discesa",
+   "alert": {
+    "critical": 1,
+    "warning": 3,
+    "info": 0,
+    "data_quality": 0
+   }
+  },
+  {
+   "sessione": "Ref02_ramp75_shoes11",
+   "soggetto": "Ref02",
+   "superficie": "rampa75",
+   "direzione": "discesa",
+   "alert": {
+    "critical": 2,
+    "warning": 4,
+    "info": 0,
+    "data_quality": 0
+   }
+  },
+  {
+   "sessione": "Ref02_ramp75_shoes13",
+   "soggetto": "Ref02",
+   "superficie": "rampa75",
+   "direzione": "discesa",
+   "alert": {
+    "critical": 0,
+    "warning": 3,
+    "info": 0,
+    "data_quality": 0
+   }
+  },
+  {
+   "sessione": "Ref02_ramp75_shoes12",
+   "soggetto": "Ref02",
+   "superficie": "rampa75",
+   "direzione": "salita",
+   "alert": {
+    "critical": 2,
+    "warning": 6,
+    "info": 0,
+    "data_quality": 0
+   }
+  },
+  {
+   "sessione": "Ref02_ramp75_shoes14",
+   "soggetto": "Ref02",
+   "superficie": "rampa75",
+   "direzione": "salita",
+   "alert": {
+    "critical": 2,
+    "warning": 6,
+    "info": 0,
+    "data_quality": 0
+   }
+  },
+  {
+   "sessione": "Ref02_ramp75_shoes16",
+   "soggetto": "Ref02",
+   "superficie": "rampa75",
+   "direzione": "salita",
+   "alert": {
+    "critical": 2,
+    "warning": 6,
+    "info": 0,
+    "data_quality": 0
+   }
+  },
+  {
+   "sessione": "Ref05_le_sss_shoes06",
+   "soggetto": "Ref05",
+   "superficie": "piano",
+   "direzione": "discesa",
+   "alert": {
+    "critical": 0,
+    "warning": 2,
+    "info": 0,
+    "data_quality": 0
+   }
+  },
+  {
+   "sessione": "Ref05_le_sss_shoes20",
+   "soggetto": "Ref05",
+   "superficie": "piano",
+   "direzione": "discesa",
+   "alert": {
+    "critical": 0,
+    "warning": 2,
+    "info": 1,
+    "data_quality": 0
+   }
+  },
+  {
+   "sessione": "Ref05_le_sss_shoes32",
+   "soggetto": "Ref05",
+   "superficie": "piano",
+   "direzione": "discesa",
+   "alert": {
+    "critical": 1,
+    "warning": 2,
+    "info": 0,
+    "data_quality": 0
+   }
+  },
+  {
+   "sessione": "Ref05_le_sss_shoes02",
+   "soggetto": "Ref05",
+   "superficie": "piano",
+   "direzione": "salita",
+   "alert": {
+    "critical": 0,
+    "warning": 2,
+    "info": 1,
+    "data_quality": 0
+   }
+  },
+  {
+   "sessione": "Ref05_le_sss_shoes04",
+   "soggetto": "Ref05",
+   "superficie": "piano",
+   "direzione": "salita",
+   "alert": {
+    "critical": 1,
+    "warning": 2,
+    "info": 1,
+    "data_quality": 0
+   }
+  },
+  {
+   "sessione": "Ref05_le_sss_shoes11",
+   "soggetto": "Ref05",
+   "superficie": "piano",
+   "direzione": "salita",
+   "alert": {
+    "critical": 0,
+    "warning": 2,
+    "info": 0,
+    "data_quality": 0
+   }
+  },
+  {
+   "sessione": "Ref05_ramp10_shoes19",
+   "soggetto": "Ref05",
+   "superficie": "rampa10",
+   "direzione": "discesa",
+   "alert": {
+    "critical": 0,
+    "warning": 7,
+    "info": 0,
+    "data_quality": 0
+   }
+  },
+  {
+   "sessione": "Ref05_ramp10_shoes21",
+   "soggetto": "Ref05",
+   "superficie": "rampa10",
+   "direzione": "discesa",
+   "alert": {
+    "critical": 1,
+    "warning": 7,
+    "info": 0,
+    "data_quality": 0
+   }
+  },
+  {
+   "sessione": "Ref05_ramp10_shoes23",
+   "soggetto": "Ref05",
+   "superficie": "rampa10",
+   "direzione": "discesa",
+   "alert": {
+    "critical": 0,
+    "warning": 7,
+    "info": 0,
+    "data_quality": 0
+   }
+  },
+  {
+   "sessione": "Ref05_ramp10_shoes12",
+   "soggetto": "Ref05",
+   "superficie": "rampa10",
+   "direzione": "salita",
+   "alert": {
+    "critical": 0,
+    "warning": 7,
+    "info": 1,
+    "data_quality": 0
+   }
+  },
+  {
+   "sessione": "Ref05_ramp10_shoes14",
+   "soggetto": "Ref05",
+   "superficie": "rampa10",
+   "direzione": "salita",
+   "alert": {
+    "critical": 0,
+    "warning": 8,
+    "info": 2,
+    "data_quality": 0
+   }
+  },
+  {
+   "sessione": "Ref05_ramp10_shoes16",
+   "soggetto": "Ref05",
+   "superficie": "rampa10",
+   "direzione": "salita",
+   "alert": {
+    "critical": 0,
+    "warning": 7,
+    "info": 1,
+    "data_quality": 0
+   }
+  },
+  {
+   "sessione": "Ref05_ramp75_shoes03",
+   "soggetto": "Ref05",
+   "superficie": "rampa75",
+   "direzione": "discesa",
+   "alert": {
+    "critical": 0,
+    "warning": 6,
+    "info": 0,
+    "data_quality": 0
+   }
+  },
+  {
+   "sessione": "Ref05_ramp75_shoes05",
+   "soggetto": "Ref05",
+   "superficie": "rampa75",
+   "direzione": "discesa",
+   "alert": {
+    "critical": 0,
+    "warning": 7,
+    "info": 0,
+    "data_quality": 0
+   }
+  },
+  {
+   "sessione": "Ref05_ramp75_shoes07",
+   "soggetto": "Ref05",
+   "superficie": "rampa75",
+   "direzione": "discesa",
+   "alert": {
+    "critical": 1,
+    "warning": 7,
+    "info": 0,
+    "data_quality": 0
+   }
+  },
+  {
+   "sessione": "Ref05_ramp75_shoes08",
+   "soggetto": "Ref05",
+   "superficie": "rampa75",
+   "direzione": "salita",
+   "alert": {
+    "critical": 0,
+    "warning": 6,
+    "info": 2,
+    "data_quality": 0
+   }
+  },
+  {
+   "sessione": "Ref05_ramp75_shoes18",
+   "soggetto": "Ref05",
+   "superficie": "rampa75",
+   "direzione": "salita",
+   "alert": {
+    "critical": 0,
+    "warning": 7,
+    "info": 2,
+    "data_quality": 0
+   }
+  },
+  {
+   "sessione": "Ref05_ramp75_shoes44",
+   "soggetto": "Ref05",
+   "superficie": "rampa75",
+   "direzione": "salita",
+   "alert": {
+    "critical": 0,
+    "warning": 7,
+    "info": 2,
+    "data_quality": 0
+   }
+  },
+  {
+   "sessione": "Ref06_le_sss_shoes03",
+   "soggetto": "Ref06",
+   "superficie": "piano",
+   "direzione": "discesa",
+   "alert": {
+    "critical": 0,
+    "warning": 1,
+    "info": 0,
+    "data_quality": 0
+   }
+  },
+  {
+   "sessione": "Ref06_le_sss_shoes05",
+   "soggetto": "Ref06",
+   "superficie": "piano",
+   "direzione": "discesa",
+   "alert": {
+    "critical": 0,
+    "warning": 0,
+    "info": 0,
+    "data_quality": 0
+   }
+  },
+  {
+   "sessione": "Ref06_le_sss_shoes07",
+   "soggetto": "Ref06",
+   "superficie": "piano",
+   "direzione": "discesa",
+   "alert": {
+    "critical": 0,
+    "warning": 1,
+    "info": 0,
+    "data_quality": 0
+   }
+  },
+  {
+   "sessione": "Ref06_le_sss_shoes04",
+   "soggetto": "Ref06",
+   "superficie": "piano",
+   "direzione": "salita",
+   "alert": {
+    "critical": 0,
+    "warning": 0,
+    "info": 0,
+    "data_quality": 0
+   }
+  },
+  {
+   "sessione": "Ref06_le_sss_shoes08",
+   "soggetto": "Ref06",
+   "superficie": "piano",
+   "direzione": "salita",
+   "alert": {
+    "critical": 0,
+    "warning": 0,
+    "info": 0,
+    "data_quality": 0
+   }
+  },
+  {
+   "sessione": "Ref06_le_sss_shoes10",
+   "soggetto": "Ref06",
+   "superficie": "piano",
+   "direzione": "salita",
+   "alert": {
+    "critical": 0,
+    "warning": 0,
+    "info": 0,
+    "data_quality": 0
+   }
+  },
+  {
+   "sessione": "Ref06_ramp10_shoes04",
+   "soggetto": "Ref06",
+   "superficie": "rampa10",
+   "direzione": "discesa",
+   "alert": {
+    "critical": 0,
+    "warning": 5,
+    "info": 0,
+    "data_quality": 0
+   }
+  },
+  {
+   "sessione": "Ref06_ramp10_shoes06",
+   "soggetto": "Ref06",
+   "superficie": "rampa10",
+   "direzione": "discesa",
+   "alert": {
+    "critical": 0,
+    "warning": 5,
+    "info": 0,
+    "data_quality": 0
+   }
+  },
+  {
+   "sessione": "Ref06_ramp10_shoes08",
+   "soggetto": "Ref06",
+   "superficie": "rampa10",
+   "direzione": "discesa",
+   "alert": {
+    "critical": 0,
+    "warning": 4,
+    "info": 0,
+    "data_quality": 0
+   }
+  },
+  {
+   "sessione": "Ref06_ramp10_shoes03",
+   "soggetto": "Ref06",
+   "superficie": "rampa10",
+   "direzione": "salita",
+   "alert": {
+    "critical": 0,
+    "warning": 4,
+    "info": 0,
+    "data_quality": 0
+   }
+  },
+  {
+   "sessione": "Ref06_ramp10_shoes05",
+   "soggetto": "Ref06",
+   "superficie": "rampa10",
+   "direzione": "salita",
+   "alert": {
+    "critical": 0,
+    "warning": 4,
+    "info": 0,
+    "data_quality": 0
+   }
+  },
+  {
+   "sessione": "Ref06_ramp10_shoes07",
+   "soggetto": "Ref06",
+   "superficie": "rampa10",
+   "direzione": "salita",
+   "alert": {
+    "critical": 0,
+    "warning": 4,
+    "info": 0,
+    "data_quality": 0
+   }
+  },
+  {
+   "sessione": "Ref06_ramp75_shoes18",
+   "soggetto": "Ref06",
+   "superficie": "rampa75",
+   "direzione": "n.d.",
+   "alert": {
+    "critical": 0,
+    "warning": 4,
+    "info": 0,
+    "data_quality": 0
+   }
+  },
+  {
+   "sessione": "Ref06_ramp75_shoes40",
+   "soggetto": "Ref06",
+   "superficie": "rampa75",
+   "direzione": "n.d.",
+   "alert": {
+    "critical": 0,
+    "warning": 0,
+    "info": 0,
+    "data_quality": 0
+   }
+  },
+  {
+   "sessione": "Ref06_ramp75_shoes69",
+   "soggetto": "Ref06",
+   "superficie": "rampa75",
+   "direzione": "n.d.",
+   "alert": {
+    "critical": 0,
+    "warning": 3,
+    "info": 0,
+    "data_quality": 0
+   }
+  },
+  {
+   "sessione": "Ref06_ramp75_shoes75",
+   "soggetto": "Ref06",
+   "superficie": "rampa75",
+   "direzione": "n.d.",
+   "alert": {
+    "critical": 0,
+    "warning": 0,
+    "info": 0,
+    "data_quality": 0
+   }
+  },
+  {
+   "sessione": "Ref06_ramp75_shoes77",
+   "soggetto": "Ref06",
+   "superficie": "rampa75",
+   "direzione": "n.d.",
+   "alert": {
+    "critical": 0,
+    "warning": 1,
+    "info": 0,
+    "data_quality": 0
+   }
+  },
+  {
+   "sessione": "Ref06_ramp75_shoes79",
+   "soggetto": "Ref06",
+   "superficie": "rampa75",
+   "direzione": "n.d.",
+   "alert": {
+    "critical": 0,
+    "warning": 1,
+    "info": 0,
+    "data_quality": 0
+   }
+  },
+  {
+   "sessione": "Ref07_le_sss_shoes11",
+   "soggetto": "Ref07",
+   "superficie": "piano",
+   "direzione": "discesa",
+   "alert": {
+    "critical": 0,
+    "warning": 1,
+    "info": 0,
+    "data_quality": 0
+   }
+  },
+  {
+   "sessione": "Ref07_le_sss_shoes33",
+   "soggetto": "Ref07",
+   "superficie": "piano",
+   "direzione": "discesa",
+   "alert": {
+    "critical": 0,
+    "warning": 1,
+    "info": 0,
+    "data_quality": 0
+   }
+  },
+  {
+   "sessione": "Ref07_le_sss_shoes37",
+   "soggetto": "Ref07",
+   "superficie": "piano",
+   "direzione": "discesa",
+   "alert": {
+    "critical": 0,
+    "warning": 2,
+    "info": 0,
+    "data_quality": 0
+   }
+  },
+  {
+   "sessione": "Ref07_le_sss_shoes30",
+   "soggetto": "Ref07",
+   "superficie": "piano",
+   "direzione": "salita",
+   "alert": {
+    "critical": 1,
+    "warning": 2,
+    "info": 0,
+    "data_quality": 0
+   }
+  },
+  {
+   "sessione": "Ref07_le_sss_shoes32",
+   "soggetto": "Ref07",
+   "superficie": "piano",
+   "direzione": "salita",
+   "alert": {
+    "critical": 1,
+    "warning": 1,
+    "info": 0,
+    "data_quality": 0
+   }
+  },
+  {
+   "sessione": "Ref07_le_sss_shoes36",
+   "soggetto": "Ref07",
+   "superficie": "piano",
+   "direzione": "salita",
+   "alert": {
+    "critical": 0,
+    "warning": 1,
+    "info": 0,
+    "data_quality": 0
+   }
+  },
+  {
+   "sessione": "Ref07_ramp10_shoes12",
+   "soggetto": "Ref07",
+   "superficie": "rampa10",
+   "direzione": "discesa",
+   "alert": {
+    "critical": 0,
+    "warning": 3,
+    "info": 1,
+    "data_quality": 0
+   }
+  },
+  {
+   "sessione": "Ref07_ramp10_shoes20",
+   "soggetto": "Ref07",
+   "superficie": "rampa10",
+   "direzione": "discesa",
+   "alert": {
+    "critical": 0,
+    "warning": 3,
+    "info": 0,
+    "data_quality": 0
+   }
+  },
+  {
+   "sessione": "Ref07_ramp10_shoes26",
+   "soggetto": "Ref07",
+   "superficie": "rampa10",
+   "direzione": "discesa",
+   "alert": {
+    "critical": 0,
+    "warning": 5,
+    "info": 0,
+    "data_quality": 0
+   }
+  },
+  {
+   "sessione": "Ref07_ramp10_shoes04",
+   "soggetto": "Ref07",
+   "superficie": "rampa10",
+   "direzione": "salita",
+   "alert": {
+    "critical": 0,
+    "warning": 6,
+    "info": 0,
+    "data_quality": 0
+   }
+  },
+  {
+   "sessione": "Ref07_ramp10_shoes11",
+   "soggetto": "Ref07",
+   "superficie": "rampa10",
+   "direzione": "salita",
+   "alert": {
+    "critical": 0,
+    "warning": 5,
+    "info": 2,
+    "data_quality": 0
+   }
+  },
+  {
+   "sessione": "Ref07_ramp10_shoes13",
+   "soggetto": "Ref07",
+   "superficie": "rampa10",
+   "direzione": "salita",
+   "alert": {
+    "critical": 2,
+    "warning": 6,
+    "info": 1,
+    "data_quality": 0
+   }
+  },
+  {
+   "sessione": "Ref07_ramp75_shoes12",
+   "soggetto": "Ref07",
+   "superficie": "rampa75",
+   "direzione": "discesa",
+   "alert": {
+    "critical": 1,
+    "warning": 1,
+    "info": 1,
+    "data_quality": 0
+   }
+  },
+  {
+   "sessione": "Ref07_ramp75_shoes23",
+   "soggetto": "Ref07",
+   "superficie": "rampa75",
+   "direzione": "discesa",
+   "alert": {
+    "critical": 0,
+    "warning": 1,
+    "info": 0,
+    "data_quality": 0
+   }
+  },
+  {
+   "sessione": "Ref07_ramp75_shoes27",
+   "soggetto": "Ref07",
+   "superficie": "rampa75",
+   "direzione": "discesa",
+   "alert": {
+    "critical": 0,
+    "warning": 0,
+    "info": 0,
+    "data_quality": 0
+   }
+  },
+  {
+   "sessione": "Ref07_ramp75_shoes06",
+   "soggetto": "Ref07",
+   "superficie": "rampa75",
+   "direzione": "salita",
+   "alert": {
+    "critical": 0,
+    "warning": 5,
+    "info": 1,
+    "data_quality": 0
+   }
+  },
+  {
+   "sessione": "Ref07_ramp75_shoes09",
+   "soggetto": "Ref07",
+   "superficie": "rampa75",
+   "direzione": "salita",
+   "alert": {
+    "critical": 0,
+    "warning": 3,
+    "info": 0,
+    "data_quality": 0
+   }
+  },
+  {
+   "sessione": "Ref07_ramp75_shoes11",
+   "soggetto": "Ref07",
+   "superficie": "rampa75",
+   "direzione": "salita",
+   "alert": {
+    "critical": 0,
+    "warning": 4,
+    "info": 0,
+    "data_quality": 0
+   }
+  },
+  {
+   "sessione": "Ref08_le_sss_shoes12",
+   "soggetto": "Ref08",
+   "superficie": "piano",
+   "direzione": "discesa",
+   "alert": {
+    "critical": 0,
+    "warning": 0,
+    "info": 0,
+    "data_quality": 0
+   }
+  },
+  {
+   "sessione": "Ref08_le_sss_shoes14",
+   "soggetto": "Ref08",
+   "superficie": "piano",
+   "direzione": "discesa",
+   "alert": {
+    "critical": 0,
+    "warning": 0,
+    "info": 0,
+    "data_quality": 0
+   }
+  },
+  {
+   "sessione": "Ref08_le_sss_shoes16",
+   "soggetto": "Ref08",
+   "superficie": "piano",
+   "direzione": "discesa",
+   "alert": {
+    "critical": 0,
+    "warning": 0,
+    "info": 0,
+    "data_quality": 0
+   }
+  },
+  {
+   "sessione": "Ref08_le_sss_shoes09",
+   "soggetto": "Ref08",
+   "superficie": "piano",
+   "direzione": "salita",
+   "alert": {
+    "critical": 0,
+    "warning": 0,
+    "info": 0,
+    "data_quality": 0
+   }
+  },
+  {
+   "sessione": "Ref08_le_sss_shoes11",
+   "soggetto": "Ref08",
+   "superficie": "piano",
+   "direzione": "salita",
+   "alert": {
+    "critical": 0,
+    "warning": 0,
+    "info": 0,
+    "data_quality": 0
+   }
+  },
+  {
+   "sessione": "Ref08_le_sss_shoes13",
+   "soggetto": "Ref08",
+   "superficie": "piano",
+   "direzione": "salita",
+   "alert": {
+    "critical": 0,
+    "warning": 0,
+    "info": 0,
+    "data_quality": 0
+   }
+  },
+  {
+   "sessione": "Ref08_ramp10_shoes02",
+   "soggetto": "Ref08",
+   "superficie": "rampa10",
+   "direzione": "discesa",
+   "alert": {
+    "critical": 0,
+    "warning": 5,
+    "info": 0,
+    "data_quality": 0
+   }
+  },
+  {
+   "sessione": "Ref08_ramp10_shoes04",
+   "soggetto": "Ref08",
+   "superficie": "rampa10",
+   "direzione": "discesa",
+   "alert": {
+    "critical": 0,
+    "warning": 2,
+    "info": 0,
+    "data_quality": 0
+   }
+  },
+  {
+   "sessione": "Ref08_ramp10_shoes08",
+   "soggetto": "Ref08",
+   "superficie": "rampa10",
+   "direzione": "discesa",
+   "alert": {
+    "critical": 0,
+    "warning": 6,
+    "info": 1,
+    "data_quality": 0
+   }
+  },
+  {
+   "sessione": "Ref08_ramp10_shoes03",
+   "soggetto": "Ref08",
+   "superficie": "rampa10",
+   "direzione": "salita",
+   "alert": {
+    "critical": 0,
+    "warning": 4,
+    "info": 1,
+    "data_quality": 0
+   }
+  },
+  {
+   "sessione": "Ref08_ramp10_shoes05",
+   "soggetto": "Ref08",
+   "superficie": "rampa10",
+   "direzione": "salita",
+   "alert": {
+    "critical": 0,
+    "warning": 4,
+    "info": 1,
+    "data_quality": 0
+   }
+  },
+  {
+   "sessione": "Ref08_ramp10_shoes13",
+   "soggetto": "Ref08",
+   "superficie": "rampa10",
+   "direzione": "salita",
+   "alert": {
+    "critical": 0,
+    "warning": 4,
+    "info": 1,
+    "data_quality": 0
+   }
+  },
+  {
+   "sessione": "Ref08_ramp75_shoes16",
+   "soggetto": "Ref08",
+   "superficie": "rampa75",
+   "direzione": "discesa",
+   "alert": {
+    "critical": 0,
+    "warning": 4,
+    "info": 1,
+    "data_quality": 0
+   }
+  },
+  {
+   "sessione": "Ref08_ramp75_shoes18",
+   "soggetto": "Ref08",
+   "superficie": "rampa75",
+   "direzione": "discesa",
+   "alert": {
+    "critical": 0,
+    "warning": 2,
+    "info": 0,
+    "data_quality": 0
+   }
+  },
+  {
+   "sessione": "Ref08_ramp75_shoes20",
+   "soggetto": "Ref08",
+   "superficie": "rampa75",
+   "direzione": "discesa",
+   "alert": {
+    "critical": 0,
+    "warning": 2,
+    "info": 1,
+    "data_quality": 0
+   }
+  },
+  {
+   "sessione": "Ref08_ramp75_shoes25",
+   "soggetto": "Ref08",
+   "superficie": "rampa75",
+   "direzione": "salita",
+   "alert": {
+    "critical": 0,
+    "warning": 2,
+    "info": 1,
+    "data_quality": 0
+   }
+  },
+  {
+   "sessione": "Ref08_ramp75_shoes27",
+   "soggetto": "Ref08",
+   "superficie": "rampa75",
+   "direzione": "salita",
+   "alert": {
+    "critical": 0,
+    "warning": 2,
+    "info": 1,
+    "data_quality": 0
+   }
+  },
+  {
+   "sessione": "Ref08_ramp75_shoes29",
+   "soggetto": "Ref08",
+   "superficie": "rampa75",
+   "direzione": "salita",
+   "alert": {
+    "critical": 0,
+    "warning": 2,
+    "info": 1,
+    "data_quality": 0
+   }
+  },
+  {
+   "sessione": "Ref09_le_sss_shoes12",
+   "soggetto": "Ref09",
+   "superficie": "piano",
+   "direzione": "discesa",
+   "alert": {
+    "critical": 0,
+    "warning": 0,
+    "info": 0,
+    "data_quality": 0
+   }
+  },
+  {
+   "sessione": "Ref09_le_sss_shoes16",
+   "soggetto": "Ref09",
+   "superficie": "piano",
+   "direzione": "discesa",
+   "alert": {
+    "critical": 0,
+    "warning": 0,
+    "info": 0,
+    "data_quality": 0
+   }
+  },
+  {
+   "sessione": "Ref09_le_sss_shoes18",
+   "soggetto": "Ref09",
+   "superficie": "piano",
+   "direzione": "discesa",
+   "alert": {
+    "critical": 0,
+    "warning": 0,
+    "info": 0,
+    "data_quality": 0
+   }
+  },
+  {
+   "sessione": "Ref09_le_sss_shoes03",
+   "soggetto": "Ref09",
+   "superficie": "piano",
+   "direzione": "salita",
+   "alert": {
+    "critical": 0,
+    "warning": 0,
+    "info": 0,
+    "data_quality": 0
+   }
+  },
+  {
+   "sessione": "Ref09_le_sss_shoes09",
+   "soggetto": "Ref09",
+   "superficie": "piano",
+   "direzione": "salita",
+   "alert": {
+    "critical": 0,
+    "warning": 0,
+    "info": 0,
+    "data_quality": 0
+   }
+  },
+  {
+   "sessione": "Ref09_le_sss_shoes13",
+   "soggetto": "Ref09",
+   "superficie": "piano",
+   "direzione": "salita",
+   "alert": {
+    "critical": 0,
+    "warning": 0,
+    "info": 0,
+    "data_quality": 0
+   }
+  },
+  {
+   "sessione": "Ref09_ramp10_shoes04",
+   "soggetto": "Ref09",
+   "superficie": "rampa10",
+   "direzione": "discesa",
+   "alert": {
+    "critical": 0,
+    "warning": 3,
+    "info": 0,
+    "data_quality": 0
+   }
+  },
+  {
+   "sessione": "Ref09_ramp10_shoes06",
+   "soggetto": "Ref09",
+   "superficie": "rampa10",
+   "direzione": "discesa",
+   "alert": {
+    "critical": 0,
+    "warning": 3,
+    "info": 0,
+    "data_quality": 0
+   }
+  },
+  {
+   "sessione": "Ref09_ramp10_shoes08",
+   "soggetto": "Ref09",
+   "superficie": "rampa10",
+   "direzione": "discesa",
+   "alert": {
+    "critical": 0,
+    "warning": 4,
+    "info": 0,
+    "data_quality": 0
+   }
+  },
+  {
+   "sessione": "Ref09_ramp10_shoes05",
+   "soggetto": "Ref09",
+   "superficie": "rampa10",
+   "direzione": "salita",
+   "alert": {
+    "critical": 0,
+    "warning": 6,
+    "info": 0,
+    "data_quality": 0
+   }
+  },
+  {
+   "sessione": "Ref09_ramp10_shoes07",
+   "soggetto": "Ref09",
+   "superficie": "rampa10",
+   "direzione": "salita",
+   "alert": {
+    "critical": 0,
+    "warning": 6,
+    "info": 0,
+    "data_quality": 0
+   }
+  },
+  {
+   "sessione": "Ref09_ramp10_shoes09",
+   "soggetto": "Ref09",
+   "superficie": "rampa10",
+   "direzione": "salita",
+   "alert": {
+    "critical": 0,
+    "warning": 6,
+    "info": 0,
+    "data_quality": 0
+   }
+  },
+  {
+   "sessione": "Ref09_ramp75_shoes07",
+   "soggetto": "Ref09",
+   "superficie": "rampa75",
+   "direzione": "discesa",
+   "alert": {
+    "critical": 0,
+    "warning": 2,
+    "info": 0,
+    "data_quality": 0
+   }
+  },
+  {
+   "sessione": "Ref09_ramp75_shoes09",
+   "soggetto": "Ref09",
+   "superficie": "rampa75",
+   "direzione": "discesa",
+   "alert": {
+    "critical": 0,
+    "warning": 2,
+    "info": 0,
+    "data_quality": 0
+   }
+  },
+  {
+   "sessione": "Ref09_ramp75_shoes11",
+   "soggetto": "Ref09",
+   "superficie": "rampa75",
+   "direzione": "discesa",
+   "alert": {
+    "critical": 0,
+    "warning": 2,
+    "info": 0,
+    "data_quality": 0
+   }
+  },
+  {
+   "sessione": "Ref09_ramp75_shoes08",
+   "soggetto": "Ref09",
+   "superficie": "rampa75",
+   "direzione": "salita",
+   "alert": {
+    "critical": 0,
+    "warning": 5,
+    "info": 0,
+    "data_quality": 0
+   }
+  },
+  {
+   "sessione": "Ref09_ramp75_shoes10",
+   "soggetto": "Ref09",
+   "superficie": "rampa75",
+   "direzione": "salita",
+   "alert": {
+    "critical": 0,
+    "warning": 5,
+    "info": 0,
+    "data_quality": 0
+   }
+  },
+  {
+   "sessione": "Ref09_ramp75_shoes12",
+   "soggetto": "Ref09",
+   "superficie": "rampa75",
+   "direzione": "salita",
+   "alert": {
+    "critical": 0,
+    "warning": 5,
+    "info": 0,
+    "data_quality": 0
+   }
+  },
+  {
+   "sessione": "Ref10_le_sss_shoes09",
+   "soggetto": "Ref10",
+   "superficie": "piano",
+   "direzione": "discesa",
+   "alert": {
+    "critical": 1,
+    "warning": 4,
+    "info": 1,
+    "data_quality": 0
+   }
+  },
+  {
+   "sessione": "Ref10_le_sss_shoes11",
+   "soggetto": "Ref10",
+   "superficie": "piano",
+   "direzione": "discesa",
+   "alert": {
+    "critical": 1,
+    "warning": 3,
+    "info": 0,
+    "data_quality": 0
+   }
+  },
+  {
+   "sessione": "Ref10_le_sss_shoes18",
+   "soggetto": "Ref10",
+   "superficie": "piano",
+   "direzione": "discesa",
+   "alert": {
+    "critical": 1,
+    "warning": 2,
+    "info": 0,
+    "data_quality": 0
+   }
+  },
+  {
+   "sessione": "Ref10_le_sss_shoes02",
+   "soggetto": "Ref10",
+   "superficie": "piano",
+   "direzione": "salita",
+   "alert": {
+    "critical": 1,
+    "warning": 2,
+    "info": 0,
+    "data_quality": 0
+   }
+  },
+  {
+   "sessione": "Ref10_le_sss_shoes06",
+   "soggetto": "Ref10",
+   "superficie": "piano",
+   "direzione": "salita",
+   "alert": {
+    "critical": 1,
+    "warning": 2,
+    "info": 0,
+    "data_quality": 0
+   }
+  },
+  {
+   "sessione": "Ref10_le_sss_shoes08",
+   "soggetto": "Ref10",
+   "superficie": "piano",
+   "direzione": "salita",
+   "alert": {
+    "critical": 1,
+    "warning": 3,
+    "info": 0,
+    "data_quality": 0
+   }
+  },
+  {
+   "sessione": "Ref10_ramp10_shoes06",
+   "soggetto": "Ref10",
+   "superficie": "rampa10",
+   "direzione": "discesa",
+   "alert": {
+    "critical": 0,
+    "warning": 6,
+    "info": 0,
+    "data_quality": 0
+   }
+  },
+  {
+   "sessione": "Ref10_ramp10_shoes12",
+   "soggetto": "Ref10",
+   "superficie": "rampa10",
+   "direzione": "discesa",
+   "alert": {
+    "critical": 1,
+    "warning": 4,
+    "info": 0,
+    "data_quality": 0
+   }
+  },
+  {
+   "sessione": "Ref10_ramp10_shoes14",
+   "soggetto": "Ref10",
+   "superficie": "rampa10",
+   "direzione": "discesa",
+   "alert": {
+    "critical": 1,
+    "warning": 5,
+    "info": 0,
+    "data_quality": 0
+   }
+  },
+  {
+   "sessione": "Ref10_ramp10_shoes05",
+   "soggetto": "Ref10",
+   "superficie": "rampa10",
+   "direzione": "salita",
+   "alert": {
+    "critical": 2,
+    "warning": 8,
+    "info": 2,
+    "data_quality": 0
+   }
+  },
+  {
+   "sessione": "Ref10_ramp10_shoes09",
+   "soggetto": "Ref10",
+   "superficie": "rampa10",
+   "direzione": "salita",
+   "alert": {
+    "critical": 2,
+    "warning": 8,
+    "info": 3,
+    "data_quality": 0
+   }
+  },
+  {
+   "sessione": "Ref10_ramp10_shoes11",
+   "soggetto": "Ref10",
+   "superficie": "rampa10",
+   "direzione": "salita",
+   "alert": {
+    "critical": 2,
+    "warning": 8,
+    "info": 1,
+    "data_quality": 0
+   }
+  },
+  {
+   "sessione": "Ref10_ramp75_shoes14",
+   "soggetto": "Ref10",
+   "superficie": "rampa75",
+   "direzione": "discesa",
+   "alert": {
+    "critical": 1,
+    "warning": 2,
+    "info": 0,
+    "data_quality": 0
+   }
+  },
+  {
+   "sessione": "Ref10_ramp75_shoes18",
+   "soggetto": "Ref10",
+   "superficie": "rampa75",
+   "direzione": "discesa",
+   "alert": {
+    "critical": 2,
+    "warning": 3,
+    "info": 0,
+    "data_quality": 0
+   }
+  },
+  {
+   "sessione": "Ref10_ramp75_shoes24",
+   "soggetto": "Ref10",
+   "superficie": "rampa75",
+   "direzione": "discesa",
+   "alert": {
+    "critical": 1,
+    "warning": 3,
+    "info": 0,
+    "data_quality": 0
+   }
+  },
+  {
+   "sessione": "Ref10_ramp75_shoes05",
+   "soggetto": "Ref10",
+   "superficie": "rampa75",
+   "direzione": "salita",
+   "alert": {
+    "critical": 2,
+    "warning": 6,
+    "info": 1,
+    "data_quality": 0
+   }
+  },
+  {
+   "sessione": "Ref10_ramp75_shoes07",
+   "soggetto": "Ref10",
+   "superficie": "rampa75",
+   "direzione": "salita",
+   "alert": {
+    "critical": 2,
+    "warning": 5,
+    "info": 0,
+    "data_quality": 0
+   }
+  },
+  {
+   "sessione": "Ref10_ramp75_shoes09",
+   "soggetto": "Ref10",
+   "superficie": "rampa75",
+   "direzione": "salita",
+   "alert": {
+    "critical": 2,
+    "warning": 5,
+    "info": 0,
+    "data_quality": 0
+   }
+  },
+  {
+   "sessione": "Ref11_le_sss_shoes21",
+   "soggetto": "Ref11",
+   "superficie": "piano",
+   "direzione": "discesa",
+   "alert": {
+    "critical": 0,
+    "warning": 0,
+    "info": 0,
+    "data_quality": 0
+   }
+  },
+  {
+   "sessione": "Ref11_le_sss_shoes23",
+   "soggetto": "Ref11",
+   "superficie": "piano",
+   "direzione": "discesa",
+   "alert": {
+    "critical": 0,
+    "warning": 0,
+    "info": 0,
+    "data_quality": 0
+   }
+  },
+  {
+   "sessione": "Ref11_le_sss_shoes25",
+   "soggetto": "Ref11",
+   "superficie": "piano",
+   "direzione": "discesa",
+   "alert": {
+    "critical": 0,
+    "warning": 0,
+    "info": 0,
+    "data_quality": 0
+   }
+  },
+  {
+   "sessione": "Ref11_le_sss_shoes11",
+   "soggetto": "Ref11",
+   "superficie": "piano",
+   "direzione": "salita",
+   "alert": {
+    "critical": 0,
+    "warning": 0,
+    "info": 0,
+    "data_quality": 0
+   }
+  },
+  {
+   "sessione": "Ref11_le_sss_shoes16",
+   "soggetto": "Ref11",
+   "superficie": "piano",
+   "direzione": "salita",
+   "alert": {
+    "critical": 0,
+    "warning": 0,
+    "info": 0,
+    "data_quality": 0
+   }
+  },
+  {
+   "sessione": "Ref11_le_sss_shoes22",
+   "soggetto": "Ref11",
+   "superficie": "piano",
+   "direzione": "salita",
+   "alert": {
+    "critical": 0,
+    "warning": 0,
+    "info": 0,
+    "data_quality": 0
+   }
+  },
+  {
+   "sessione": "Ref11_ramp10_shoes05",
+   "soggetto": "Ref11",
+   "superficie": "rampa10",
+   "direzione": "discesa",
+   "alert": {
+    "critical": 0,
+    "warning": 4,
+    "info": 0,
+    "data_quality": 0
+   }
+  },
+  {
+   "sessione": "Ref11_ramp10_shoes08",
+   "soggetto": "Ref11",
+   "superficie": "rampa10",
+   "direzione": "discesa",
+   "alert": {
+    "critical": 0,
+    "warning": 4,
+    "info": 0,
+    "data_quality": 0
+   }
+  },
+  {
+   "sessione": "Ref11_ramp10_shoes12",
+   "soggetto": "Ref11",
+   "superficie": "rampa10",
+   "direzione": "discesa",
+   "alert": {
+    "critical": 0,
+    "warning": 5,
+    "info": 0,
+    "data_quality": 0
+   }
+  },
+  {
+   "sessione": "Ref11_ramp10_shoes04",
+   "soggetto": "Ref11",
+   "superficie": "rampa10",
+   "direzione": "salita",
+   "alert": {
+    "critical": 0,
+    "warning": 5,
+    "info": 0,
+    "data_quality": 0
+   }
+  },
+  {
+   "sessione": "Ref11_ramp10_shoes07",
+   "soggetto": "Ref11",
+   "superficie": "rampa10",
+   "direzione": "salita",
+   "alert": {
+    "critical": 0,
+    "warning": 4,
+    "info": 0,
+    "data_quality": 0
+   }
+  },
+  {
+   "sessione": "Ref11_ramp10_shoes09",
+   "soggetto": "Ref11",
+   "superficie": "rampa10",
+   "direzione": "salita",
+   "alert": {
+    "critical": 0,
+    "warning": 5,
+    "info": 0,
+    "data_quality": 0
+   }
+  },
+  {
+   "sessione": "Ref11_ramp75_shoes06",
+   "soggetto": "Ref11",
+   "superficie": "rampa75",
+   "direzione": "discesa",
+   "alert": {
+    "critical": 0,
+    "warning": 2,
+    "info": 0,
+    "data_quality": 0
+   }
+  },
+  {
+   "sessione": "Ref11_ramp75_shoes08",
+   "soggetto": "Ref11",
+   "superficie": "rampa75",
+   "direzione": "discesa",
+   "alert": {
+    "critical": 0,
+    "warning": 0,
+    "info": 0,
+    "data_quality": 0
+   }
+  },
+  {
+   "sessione": "Ref11_ramp75_shoes10",
+   "soggetto": "Ref11",
+   "superficie": "rampa75",
+   "direzione": "discesa",
+   "alert": {
+    "critical": 0,
+    "warning": 3,
+    "info": 0,
+    "data_quality": 0
+   }
+  },
+  {
+   "sessione": "Ref11_ramp75_shoes03",
+   "soggetto": "Ref11",
+   "superficie": "rampa75",
+   "direzione": "salita",
+   "alert": {
+    "critical": 0,
+    "warning": 4,
+    "info": 0,
+    "data_quality": 0
+   }
+  },
+  {
+   "sessione": "Ref11_ramp75_shoes05",
+   "soggetto": "Ref11",
+   "superficie": "rampa75",
+   "direzione": "salita",
+   "alert": {
+    "critical": 0,
+    "warning": 4,
+    "info": 0,
+    "data_quality": 0
+   }
+  },
+  {
+   "sessione": "Ref11_ramp75_shoes07",
+   "soggetto": "Ref11",
+   "superficie": "rampa75",
+   "direzione": "salita",
+   "alert": {
+    "critical": 0,
+    "warning": 4,
+    "info": 0,
+    "data_quality": 0
+   }
+  },
+  {
+   "sessione": "Ref12_le_sss_shoes03",
+   "soggetto": "Ref12",
+   "superficie": "piano",
+   "direzione": "discesa",
+   "alert": {
+    "critical": 0,
+    "warning": 1,
+    "info": 0,
+    "data_quality": 0
+   }
+  },
+  {
+   "sessione": "Ref12_le_sss_shoes14",
+   "soggetto": "Ref12",
+   "superficie": "piano",
+   "direzione": "discesa",
+   "alert": {
+    "critical": 0,
+    "warning": 1,
+    "info": 0,
+    "data_quality": 0
+   }
+  },
+  {
+   "sessione": "Ref12_le_sss_shoes18",
+   "soggetto": "Ref12",
+   "superficie": "piano",
+   "direzione": "discesa",
+   "alert": {
+    "critical": 0,
+    "warning": 1,
+    "info": 0,
+    "data_quality": 0
+   }
+  },
+  {
+   "sessione": "Ref12_le_sss_shoes02",
+   "soggetto": "Ref12",
+   "superficie": "piano",
+   "direzione": "salita",
+   "alert": {
+    "critical": 0,
+    "warning": 2,
+    "info": 0,
+    "data_quality": 0
+   }
+  },
+  {
+   "sessione": "Ref12_le_sss_shoes07",
+   "soggetto": "Ref12",
+   "superficie": "piano",
+   "direzione": "salita",
+   "alert": {
+    "critical": 0,
+    "warning": 2,
+    "info": 0,
+    "data_quality": 0
+   }
+  },
+  {
+   "sessione": "Ref12_le_sss_shoes11",
+   "soggetto": "Ref12",
+   "superficie": "piano",
+   "direzione": "salita",
+   "alert": {
+    "critical": 0,
+    "warning": 2,
+    "info": 0,
+    "data_quality": 0
+   }
+  },
+  {
+   "sessione": "Ref12_ramp10_shoes05",
+   "soggetto": "Ref12",
+   "superficie": "rampa10",
+   "direzione": "discesa",
+   "alert": {
+    "critical": 0,
+    "warning": 6,
+    "info": 0,
+    "data_quality": 0
+   }
+  },
+  {
+   "sessione": "Ref12_ramp10_shoes08",
+   "soggetto": "Ref12",
+   "superficie": "rampa10",
+   "direzione": "discesa",
+   "alert": {
+    "critical": 0,
+    "warning": 3,
+    "info": 0,
+    "data_quality": 0
+   }
+  },
+  {
+   "sessione": "Ref12_ramp10_shoes13",
+   "soggetto": "Ref12",
+   "superficie": "rampa10",
+   "direzione": "discesa",
+   "alert": {
+    "critical": 0,
+    "warning": 4,
+    "info": 0,
+    "data_quality": 0
+   }
+  },
+  {
+   "sessione": "Ref12_ramp10_shoes07",
+   "soggetto": "Ref12",
+   "superficie": "rampa10",
+   "direzione": "salita",
+   "alert": {
+    "critical": 0,
+    "warning": 5,
+    "info": 0,
+    "data_quality": 0
+   }
+  },
+  {
+   "sessione": "Ref12_ramp10_shoes11",
+   "soggetto": "Ref12",
+   "superficie": "rampa10",
+   "direzione": "salita",
+   "alert": {
+    "critical": 0,
+    "warning": 5,
+    "info": 0,
+    "data_quality": 0
+   }
+  },
+  {
+   "sessione": "Ref12_ramp10_shoes16",
+   "soggetto": "Ref12",
+   "superficie": "rampa10",
+   "direzione": "salita",
+   "alert": {
+    "critical": 0,
+    "warning": 5,
+    "info": 1,
+    "data_quality": 0
+   }
+  },
+  {
+   "sessione": "Ref12_ramp75_shoes05",
+   "soggetto": "Ref12",
+   "superficie": "rampa75",
+   "direzione": "discesa",
+   "alert": {
+    "critical": 0,
+    "warning": 2,
+    "info": 0,
+    "data_quality": 0
+   }
+  },
+  {
+   "sessione": "Ref12_ramp75_shoes08",
+   "soggetto": "Ref12",
+   "superficie": "rampa75",
+   "direzione": "discesa",
+   "alert": {
+    "critical": 0,
+    "warning": 3,
+    "info": 0,
+    "data_quality": 0
+   }
+  },
+  {
+   "sessione": "Ref12_ramp75_shoes10",
+   "soggetto": "Ref12",
+   "superficie": "rampa75",
+   "direzione": "discesa",
+   "alert": {
+    "critical": 0,
+    "warning": 3,
+    "info": 0,
+    "data_quality": 0
+   }
+  },
+  {
+   "sessione": "Ref12_ramp75_shoes03",
+   "soggetto": "Ref12",
+   "superficie": "rampa75",
+   "direzione": "salita",
+   "alert": {
+    "critical": 0,
+    "warning": 6,
+    "info": 0,
+    "data_quality": 0
+   }
+  },
+  {
+   "sessione": "Ref12_ramp75_shoes07",
+   "soggetto": "Ref12",
+   "superficie": "rampa75",
+   "direzione": "salita",
+   "alert": {
+    "critical": 0,
+    "warning": 5,
+    "info": 1,
+    "data_quality": 0
+   }
+  },
+  {
+   "sessione": "Ref12_ramp75_shoes09",
+   "soggetto": "Ref12",
+   "superficie": "rampa75",
+   "direzione": "salita",
+   "alert": {
+    "critical": 0,
+    "warning": 6,
+    "info": 1,
+    "data_quality": 0
+   }
+  },
+  {
+   "sessione": "Ref13_le_sss_shoes09",
+   "soggetto": "Ref13",
+   "superficie": "piano",
+   "direzione": "discesa",
+   "alert": {
+    "critical": 0,
+    "warning": 1,
+    "info": 3,
+    "data_quality": 0
+   }
+  },
+  {
+   "sessione": "Ref13_le_sss_shoes15",
+   "soggetto": "Ref13",
+   "superficie": "piano",
+   "direzione": "discesa",
+   "alert": {
+    "critical": 0,
+    "warning": 1,
+    "info": 3,
+    "data_quality": 0
+   }
+  },
+  {
+   "sessione": "Ref13_le_sss_shoes17",
+   "soggetto": "Ref13",
+   "superficie": "piano",
+   "direzione": "discesa",
+   "alert": {
+    "critical": 1,
+    "warning": 1,
+    "info": 3,
+    "data_quality": 0
+   }
+  },
+  {
+   "sessione": "Ref13_le_sss_shoes02",
+   "soggetto": "Ref13",
+   "superficie": "piano",
+   "direzione": "salita",
+   "alert": {
+    "critical": 1,
+    "warning": 2,
+    "info": 3,
+    "data_quality": 0
+   }
+  },
+  {
+   "sessione": "Ref13_le_sss_shoes04",
+   "soggetto": "Ref13",
+   "superficie": "piano",
+   "direzione": "salita",
+   "alert": {
+    "critical": 0,
+    "warning": 3,
+    "info": 3,
+    "data_quality": 0
+   }
+  },
+  {
+   "sessione": "Ref13_le_sss_shoes06",
+   "soggetto": "Ref13",
+   "superficie": "piano",
+   "direzione": "salita",
+   "alert": {
+    "critical": 0,
+    "warning": 2,
+    "info": 3,
+    "data_quality": 0
+   }
+  },
+  {
+   "sessione": "Ref13_ramp10_shoes08",
+   "soggetto": "Ref13",
+   "superficie": "rampa10",
+   "direzione": "discesa",
+   "alert": {
+    "critical": 0,
+    "warning": 0,
+    "info": 3,
+    "data_quality": 0
+   }
+  },
+  {
+   "sessione": "Ref13_ramp10_shoes10",
+   "soggetto": "Ref13",
+   "superficie": "rampa10",
+   "direzione": "discesa",
+   "alert": {
+    "critical": 0,
+    "warning": 3,
+    "info": 3,
+    "data_quality": 0
+   }
+  },
+  {
+   "sessione": "Ref13_ramp10_shoes14",
+   "soggetto": "Ref13",
+   "superficie": "rampa10",
+   "direzione": "discesa",
+   "alert": {
+    "critical": 0,
+    "warning": 4,
+    "info": 3,
+    "data_quality": 0
+   }
+  },
+  {
+   "sessione": "Ref13_ramp10_shoes03",
+   "soggetto": "Ref13",
+   "superficie": "rampa10",
+   "direzione": "salita",
+   "alert": {
+    "critical": 2,
+    "warning": 9,
+    "info": 3,
+    "data_quality": 0
+   }
+  },
+  {
+   "sessione": "Ref13_ramp10_shoes05",
+   "soggetto": "Ref13",
+   "superficie": "rampa10",
+   "direzione": "salita",
+   "alert": {
+    "critical": 2,
+    "warning": 9,
+    "info": 3,
+    "data_quality": 0
+   }
+  },
+  {
+   "sessione": "Ref13_ramp10_shoes09",
+   "soggetto": "Ref13",
+   "superficie": "rampa10",
+   "direzione": "salita",
+   "alert": {
+    "critical": 2,
+    "warning": 12,
+    "info": 2,
+    "data_quality": 0
+   }
+  },
+  {
+   "sessione": "Ref13_ramp75_shoes21",
+   "soggetto": "Ref13",
+   "superficie": "rampa75",
+   "direzione": "discesa",
+   "alert": {
+    "critical": 1,
+    "warning": 2,
+    "info": 3,
+    "data_quality": 0
+   }
+  },
+  {
+   "sessione": "Ref13_ramp75_shoes23",
+   "soggetto": "Ref13",
+   "superficie": "rampa75",
+   "direzione": "discesa",
+   "alert": {
+    "critical": 2,
+    "warning": 2,
+    "info": 2,
+    "data_quality": 0
+   }
+  },
+  {
+   "sessione": "Ref13_ramp75_shoes25",
+   "soggetto": "Ref13",
+   "superficie": "rampa75",
+   "direzione": "discesa",
+   "alert": {
+    "critical": 0,
+    "warning": 2,
+    "info": 2,
+    "data_quality": 0
+   }
+  },
+  {
+   "sessione": "Ref13_ramp75_shoes14",
+   "soggetto": "Ref13",
+   "superficie": "rampa75",
+   "direzione": "salita",
+   "alert": {
+    "critical": 2,
+    "warning": 8,
+    "info": 2,
+    "data_quality": 0
+   }
+  },
+  {
+   "sessione": "Ref13_ramp75_shoes16",
+   "soggetto": "Ref13",
+   "superficie": "rampa75",
+   "direzione": "salita",
+   "alert": {
+    "critical": 2,
+    "warning": 6,
+    "info": 2,
+    "data_quality": 0
+   }
+  },
+  {
+   "sessione": "Ref13_ramp75_shoes18",
+   "soggetto": "Ref13",
+   "superficie": "rampa75",
+   "direzione": "salita",
+   "alert": {
+    "critical": 2,
+    "warning": 6,
+    "info": 2,
+    "data_quality": 0
+   }
+  }
+ ],
+ "nota": "Campione di 198 sessioni di cammino (11 soggetti x 3 superfici x 6 prove: le prime tre per numero in salita e in discesa). Conteggi per gravita letti con list_alerts dal server MCP biomech il 2 ottobre 2026; dettaglio per tipo dalle stesse righe."
+}

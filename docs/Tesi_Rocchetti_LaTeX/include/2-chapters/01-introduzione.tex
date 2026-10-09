@@ -1,2 +1,62 @@
 \chapter{Introduzione}
 \label{chap:introduzione}
+
+\section{Il dato da solo non può rispondere alle domande}
+\label{sec:ch1:contesto}
+
+Possiamo distinguere due diversi tipi di metodo di acquisizione dei dati di posa umana. 
+I sistemi di laboratorio che misurano decine di marker con metodi matematici accurati tramite sensori ad-hoc, ed i 
+sistemi di cattura del movimento tramite videocamere che stimano la posizione dei punti di posa in uno spazio tridimensionale.
+
+Entrambi però da soli non possono rispondere a domande semplici come \emph{``quanto flette il
+ginocchio destro in questa sessione?''}. In questo caso, ad esempio, per poter rispondere bisognerebbe 
+prima definire quali siano le coordinate del ginocchio, cosa si intenda per flessione, in quale intervallo di tempo e se i dati 
+bastino a poter dare realmente una risposta. Niente di tutto ciò è scritto nel file, inoltre sistemi diversi possono avere 
+nomenclature diverse. Il significato dei numeri è confinato quindi nell'infrastruttura dove il dato viene prodotto, sorge 
+quindi un problema quando il destinatario della risposta è esterno.
+
+\section{Gli agenti conversazionali ed il cambio di paradigma}
+\label{sec:ch1:agenti}
+
+Un agente conversazionale, diversamente da un umano, proverà sempre a rispondere alla domanda 
+cercando di interpretare i dati, è qui che il paradigma cambia radicalmente. Prima il problema era non 
+poter dare una risposta, ora è ricevere una risposta sbagliata posta in modo che sembri plausibile.
+
+Chiedere al modello di essere prudente non basta, la garanzia va collocata nel
+software che il modello interroga. È il software stesso a trasformare il dato grezzo, 
+conservarlo in modo riproducibile, giudicarlo rispetto a riferimenti citabili e
+a dichiarare ciò che si possa o meno affermare. Questo progetto prova a creare questo strato 
+intermedio per metterlo a disposizione degli agenti.
+
+\section{Obiettivi progettuali}
+\label{sec:ch1:obiettivi}
+
+Il lavoro si pone cinque obiettivi, a cui il resto della tesi si riferisce.
+
+\begin{enumerate}[label=\textbf{O\arabic*.},leftmargin=*]
+  \item Una pipeline che trasforma sorgenti eterogenee, cioè file di laboratorio
+    e riprese da videocamera , in un unico formato 
+    canonico che porta con sé provenienza, copertura ed eventuali assenze.
+  \item Un archivio interrogabile composto da punti di posa scalari e cicli di movimento vettoriali, così da poter cercare gesti simili e misurare
+    ripetibilità e simmetria.
+  \item Un sistema di alert dichiarativo, in cui ogni soglia ha una fonte di
+    letteratura e ogni avviso la riporta.
+  \item Un server conforme al Model Context Protocol~\cite{mcpspec} che espone queste capacità a
+    qualunque agente, con risposte che dichiarano segnale e copertura.
+  \item Una visualizzazione tridimensionale per le intere sessioni che mostri, oltre al movimento del soggetto, gli scostamenti dai valori di letteratura.
+\end{enumerate}
+
+Gli angoli seguono convenzioni riconosciute e sono verificati da un confronto diretto con un modello clinico; 
+il contributo del lavoro riguarda ciò che il software permette di fare
+con quei dati. Non sono trattati invece il miglioramento dell'accuratezza di cattura e la validazione clinica dei valori di riferimento.
+
+\section{Struttura della tesi}
+\label{sec:ch1:struttura}
+
+Il Capitolo~\ref{chap:background} descrive le idee ed i problemi durante la creazione della pipeline.
+Il Capitolo~\ref{chap:architettura} presenta, nello stesso ordine, le soluzioni
+adottate. Il Capitolo~\ref{chap:casi-uso} mostra il sistema a lavoro, con alcune
+dimostrazioni e tre casi d'uso eseguiti da due agenti diversi. Il
+Capitolo~\ref{chap:comparazione} descrive la differenza di questo progetto rispetto agli
+strumenti esistenti. Il Capitolo~\ref{chap:discussione} raccoglie limiti e
+sviluppi futuri, infine il Capitolo~\ref{chap:conclusioni} i risultati.
