@@ -367,15 +367,3 @@ richieste, e il visualizzatore disattivato.
 
 ---
 
-## Limiti dichiarati
-
-Sono misurati, e stanno per esteso nel capitolo 6 di [`docs/Tesi.md`](docs/Tesi.md).
-
-I riferimenti di letteratura valgono per il **cammino in piano**: applicati a prove
-in pendenza segnalano l'adattamento normale alla salita come anomalia (4.5-5.5
-scostamenti per sessione contro 1.7 in piano).
-
-Una ripresa da telefono che taglia le gambe fuori dal fotogramma non produce cicli
-dal contatto al suolo, e nessuno strato di elaborazione recupera un dato che non è
-stato registrato. Il ripiego sull'oscillazione del braccio funziona ma resta un
-surrogato con dispersione elevata, e la risposta lo dichiara.
